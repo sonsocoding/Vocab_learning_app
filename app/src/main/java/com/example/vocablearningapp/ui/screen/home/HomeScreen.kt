@@ -35,7 +35,6 @@ import com.example.vocablearningapp.ui.component.MainTab
 import com.example.vocablearningapp.ui.component.SecondaryButton
 import com.example.vocablearningapp.ui.component.SectionHeader
 import com.example.vocablearningapp.ui.component.VocabDimens
-import com.example.vocablearningapp.ui.component.VocabProgressBar
 import com.example.vocablearningapp.ui.component.VocabularySetCard
 import com.example.vocablearningapp.ui.theme.Accent
 import com.example.vocablearningapp.ui.theme.AccentDark
@@ -68,7 +67,6 @@ fun HomeScreen(
         ) {
             Header()
             DailyWordsCard(dailyWords = dailyWords, onOpenDailyWords = onOpenDailyWords)
-            WeeklyProgressCard()
 
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 SectionHeader(
@@ -157,32 +155,6 @@ private fun DailyWordsCard(
                 Spacer(modifier = Modifier.width(7.dp))
                 Text(text = "Study daily words", fontWeight = FontWeight.SemiBold)
             }
-        }
-    }
-}
-
-@Composable
-private fun WeeklyProgressCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(VocabDimens.CardRadius),
-        colors = CardDefaults.cardColors(containerColor = Surface)
-    ) {
-        Column(modifier = Modifier.padding(18.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(text = "This week's progress", style = MaterialTheme.typography.titleMedium, color = Ink)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = "42 / 60 words reviewed", style = MaterialTheme.typography.bodyMedium, color = Muted)
-                }
-                Text(text = "70%", style = MaterialTheme.typography.titleMedium, color = Accent)
-            }
-            Spacer(modifier = Modifier.height(15.dp))
-            VocabProgressBar(progress = 0.7f)
         }
     }
 }

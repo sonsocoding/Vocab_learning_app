@@ -8,6 +8,7 @@ import com.example.vocablearningapp.data.MockData
 import com.example.vocablearningapp.domain.model.MemoryLevel
 import com.example.vocablearningapp.domain.model.VocabularyItem
 import com.example.vocablearningapp.domain.model.VocabularySet
+import com.example.vocablearningapp.domain.srs.SpacedRepetition
 
 data class AppUiState(
     val vocabularySets: List<VocabularySet> = MockData.vocabularySets,
@@ -18,6 +19,7 @@ data class AppUiState(
 class AppViewModel : ViewModel() {
     companion object {
         const val DAILY_WORDS_SET_ID = "daily-words"
+        const val TODAY_REVIEW_SET_ID = "today-review"
     }
 
     var uiState by mutableStateOf(AppUiState())
@@ -28,6 +30,9 @@ class AppViewModel : ViewModel() {
 
     val allItems: List<VocabularyItem>
         get() = sets.flatMap { it.words }
+
+    val reviewItems: List<VocabularyItem>
+        get() = allItems + dailyWordsSet.words
 
     val dailyWordsSet: VocabularySet
         get() {
@@ -41,12 +46,32 @@ class AppViewModel : ViewModel() {
             )
         }
 
+    val todayReviewSet: VocabularySet
+        get() {
+            val nowMillis = System.currentTimeMillis()
+            return VocabularySet(
+                id = TODAY_REVIEW_SET_ID,
+                title = "Today's Review",
+                description = "Words scheduled by your spaced repetition review plan.",
+                category = "Review",
+                level = uiState.lastStudiedLevel,
+                words = reviewItems.filter { SpacedRepetition.isDue(it, nowMillis) }
+            )
+        }
+
     fun setById(id: String): VocabularySet? = when (id) {
         DAILY_WORDS_SET_ID -> dailyWordsSet
+        TODAY_REVIEW_SET_ID -> todayReviewSet
         else -> sets.firstOrNull { it.id == id }
     }
 
-    fun rateItem(itemId: String, memoryLevel: MemoryLevel) {
+    fun rateItem(
+        itemId: String,
+        memoryLevel: MemoryLevel,
+        nowMillis: Long = System.currentTimeMillis()
+    ) {
+        val currentItem = reviewItems.firstOrNull { it.id == itemId } ?: return
+        val schedule = SpacedRepetition.schedule(currentItem, memoryLevel, nowMillis)
         val studiedSetLevel = sets.firstOrNull { set ->
             set.words.any { item -> item.id == itemId }
         }?.level
@@ -54,13 +79,25 @@ class AppViewModel : ViewModel() {
             vocabularySets = sets.map { set ->
                 set.copy(
                     words = set.words.map { item ->
-                        if (item.id == itemId) item.copy(memoryLevel = memoryLevel) else item
+                        if (item.id == itemId) {
+                            item.copy(
+                                memoryLevel = memoryLevel,
+                                nextReviewAtMillis = schedule.nextReviewAtMillis,
+                                reviewIntervalDays = schedule.intervalDays
+                            )
+                        } else item
                     }
                 )
             },
             dailyWordsByLevel = uiState.dailyWordsByLevel.mapValues { (_, items) ->
                 items.map { item ->
-                    if (item.id == itemId) item.copy(memoryLevel = memoryLevel) else item
+                    if (item.id == itemId) {
+                        item.copy(
+                            memoryLevel = memoryLevel,
+                            nextReviewAtMillis = schedule.nextReviewAtMillis,
+                            reviewIntervalDays = schedule.intervalDays
+                        )
+                    } else item
                 }
             },
             lastStudiedLevel = studiedSetLevel ?: uiState.lastStudiedLevel

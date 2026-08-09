@@ -65,11 +65,11 @@ fun NavGraph(
             ReviewScreen(
                 onTabSelected = ::navigateToTab,
                 sets = appViewModel.sets,
-                items = appViewModel.allItems,
+                items = appViewModel.reviewItems,
                 onStartReview = {
-                    appViewModel.sets.firstOrNull()?.let {
-                        navController.navigate(Screen.Flashcards.createRoute(it.id))
-                    }
+                    navController.navigate(
+                        Screen.Flashcards.createRoute(AppViewModel.TODAY_REVIEW_SET_ID)
+                    )
                 },
                 onOpenSet = { id -> navController.navigate(Screen.SetDetail.createRoute(id)) }
             )

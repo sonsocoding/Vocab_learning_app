@@ -222,15 +222,21 @@ object MockData {
         _seedLevel: MemoryLevel
     ): VocabularyItem {
         val id = "$setId-${word.lowercase().replace(" ", "-")}"
-        val seededMemoryLevel = if (id in initialLearningWordIds) MemoryLevel.LEARNING else MemoryLevel.FORGOT
+        val seededMemoryLevel = if (id in initialLearningWordIds) MemoryLevel.LEARNING else _seedLevel
+        val nowMillis = System.currentTimeMillis()
         return VocabularyItem(
-        id = id,
-        word = word,
-        meaning = meaning,
-        pronunciation = pronunciation,
-        exampleSentence = example,
-        memoryLevel = seededMemoryLevel,
-        nextReviewDate = if (seededMemoryLevel == MemoryLevel.FORGOT) "Today" else "Tomorrow"
+            id = id,
+            word = word,
+            meaning = meaning,
+            pronunciation = pronunciation,
+            exampleSentence = example,
+            memoryLevel = seededMemoryLevel,
+            nextReviewAtMillis = if (seededMemoryLevel == MemoryLevel.FORGOT) {
+                0L
+            } else {
+                nowMillis + 24 * 60 * 60 * 1_000L
+            },
+            reviewIntervalDays = if (seededMemoryLevel == MemoryLevel.LEARNING) 1 else 0
         )
     }
 

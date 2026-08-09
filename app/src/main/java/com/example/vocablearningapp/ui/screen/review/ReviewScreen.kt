@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.example.vocablearningapp.domain.model.MemoryLevel
 import com.example.vocablearningapp.domain.model.VocabularyItem
 import com.example.vocablearningapp.domain.model.VocabularySet
+import com.example.vocablearningapp.domain.srs.SpacedRepetition
 import com.example.vocablearningapp.ui.component.AppScaffold
 import com.example.vocablearningapp.ui.component.MainTab
 import com.example.vocablearningapp.ui.component.PrimaryButton
@@ -51,7 +52,9 @@ fun ReviewScreen(
     onOpenSet: (String) -> Unit
 ) {
     var selectedFilter by remember { mutableStateOf<MemoryLevel?>(null) }
+    val nowMillis = remember { System.currentTimeMillis() }
     val filteredItems = selectedFilter?.let { level -> items.filter { it.memoryLevel == level } } ?: items
+    val dueItems = filteredItems.filter { SpacedRepetition.isDue(it, nowMillis) }
 
     AppScaffold(selectedTab = MainTab.REVIEW, onTabSelected = onTabSelected) { innerPadding ->
         Column(
@@ -72,7 +75,7 @@ fun ReviewScreen(
                 )
             }
 
-            ReviewHero(onStartReview = onStartReview)
+            ReviewHero(dueCount = dueItems.size, onStartReview = onStartReview)
 
             RecommendedReview(sets = sets, onOpenSet = onOpenSet)
 
@@ -98,8 +101,8 @@ fun ReviewScreen(
 
             ReviewSection(
                 title = "Due today",
-                subtitle = "${filteredItems.count { it.nextReviewDate == "Today" }} words are ready",
-                items = filteredItems.filter { it.nextReviewDate == "Today" }.take(4)
+                subtitle = "${dueItems.size} words are ready",
+                items = dueItems.take(4)
             )
             ReviewSection(
                 title = "Weak words",
@@ -147,7 +150,11 @@ private fun RecommendedReview(
 }
 
 @Composable
-private fun ReviewHero(onStartReview: () -> Unit) {
+private fun ReviewHero(
+    dueCount: Int,
+    onStartReview: () -> Unit
+) {
+    val estimatedMinutes = maxOf(1, (dueCount + 2) / 3)
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
@@ -159,9 +166,9 @@ private fun ReviewHero(onStartReview: () -> Unit) {
                 Text(text = "TODAY'S REVIEW", style = MaterialTheme.typography.labelMedium, color = Accent)
             }
             Spacer(modifier = Modifier.height(9.dp))
-            Text(text = "12 words due today", style = MaterialTheme.typography.titleLarge, color = Ink)
+            Text(text = "$dueCount words due today", style = MaterialTheme.typography.titleLarge, color = Ink)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "Estimated 8 minutes", style = MaterialTheme.typography.bodyMedium, color = Muted)
+            Text(text = "Estimated $estimatedMinutes minutes", style = MaterialTheme.typography.bodyMedium, color = Muted)
             Spacer(modifier = Modifier.height(16.dp))
             PrimaryButton(
                 text = "Start review",

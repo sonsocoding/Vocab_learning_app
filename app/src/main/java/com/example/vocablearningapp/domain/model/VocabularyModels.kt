@@ -13,7 +13,8 @@ data class VocabularyItem(
     val pronunciation: String,
     val exampleSentence: String,
     val memoryLevel: MemoryLevel = MemoryLevel.FORGOT,
-    val nextReviewDate: String = "Today"
+    val nextReviewAtMillis: Long = 0L,
+    val reviewIntervalDays: Int = 0
 )
 
 data class VocabularySet(

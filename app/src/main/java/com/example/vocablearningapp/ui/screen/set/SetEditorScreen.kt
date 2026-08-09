@@ -227,7 +227,8 @@ private data class DraftWord(
     val pronunciation: String = "",
     val exampleSentence: String = "",
     val memoryLevel: MemoryLevel = MemoryLevel.FORGOT,
-    val nextReviewDate: String = "Today"
+    val nextReviewAtMillis: Long = 0L,
+    val reviewIntervalDays: Int = 0
 ) {
     fun toVocabularyItem(setTitle: String, index: Int): VocabularyItem? {
         if (word.isBlank() && meaning.isBlank()) return null
@@ -238,7 +239,8 @@ private data class DraftWord(
             pronunciation = pronunciation.trim(),
             exampleSentence = exampleSentence.trim(),
             memoryLevel = memoryLevel,
-            nextReviewDate = nextReviewDate
+            nextReviewAtMillis = nextReviewAtMillis,
+            reviewIntervalDays = reviewIntervalDays
         )
     }
 
@@ -250,7 +252,8 @@ private data class DraftWord(
             pronunciation = item.pronunciation,
             exampleSentence = item.exampleSentence,
             memoryLevel = item.memoryLevel,
-            nextReviewDate = item.nextReviewDate
+            nextReviewAtMillis = item.nextReviewAtMillis,
+            reviewIntervalDays = item.reviewIntervalDays
         )
     }
 }

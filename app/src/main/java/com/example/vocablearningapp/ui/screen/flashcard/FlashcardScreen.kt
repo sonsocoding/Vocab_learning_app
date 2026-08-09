@@ -50,6 +50,7 @@ fun FlashcardScreen(
 ) {
     var currentIndex by remember(set?.id) { mutableStateOf(0) }
     var isFlipped by remember(set?.id) { mutableStateOf(false) }
+    val sessionWords = remember(set?.id) { set?.words.orEmpty() }
 
     Scaffold(
         containerColor = Canvas,
@@ -62,9 +63,9 @@ fun FlashcardScreen(
                     }
                 },
                 actions = {
-                    if (set != null && set.words.isNotEmpty()) {
+                    if (sessionWords.isNotEmpty()) {
                         Text(
-                            text = "${(currentIndex + 1).coerceAtMost(set.words.size)} / ${set.words.size}",
+                            text = "${(currentIndex + 1).coerceAtMost(sessionWords.size)} / ${sessionWords.size}",
                             modifier = Modifier.padding(end = 20.dp),
                             style = MaterialTheme.typography.labelLarge,
                             color = Muted
@@ -75,17 +76,17 @@ fun FlashcardScreen(
             )
         }
     ) { innerPadding ->
-        if (set == null || set.words.isEmpty()) {
+        if (sessionWords.isEmpty()) {
             EmptyState(
                 title = "No cards yet",
                 description = "Add a few words to start a study session.",
                 modifier = Modifier.padding(innerPadding).padding(24.dp)
             )
-        } else if (currentIndex >= set.words.size) {
+        } else if (currentIndex >= sessionWords.size) {
             onFinished()
         } else {
-            val item = set.words[currentIndex]
-            val progress = (currentIndex + 1).toFloat() / set.words.size
+            val item = sessionWords[currentIndex]
+            val progress = (currentIndex + 1).toFloat() / sessionWords.size
 
             Column(
                 modifier = Modifier
@@ -124,7 +125,7 @@ fun FlashcardScreen(
                                 enabled = isFlipped,
                                 onClick = {
                                     onRate(item.id, level)
-                                    if (currentIndex == set.words.lastIndex) {
+                                    if (currentIndex == sessionWords.lastIndex) {
                                         onFinished()
                                     } else {
                                         currentIndex += 1
