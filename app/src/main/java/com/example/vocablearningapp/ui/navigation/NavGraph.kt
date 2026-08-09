@@ -10,6 +10,7 @@ import com.example.vocablearningapp.domain.model.StudyMode
 import com.example.vocablearningapp.ui.screen.flashcard.FlashcardScreen
 import com.example.vocablearningapp.ui.screen.home.HomeScreen
 import com.example.vocablearningapp.ui.screen.learn.LearnScreen
+import com.example.vocablearningapp.ui.screen.learn.LearnModeScreen
 import com.example.vocablearningapp.ui.screen.progress.ProgressScreen
 import com.example.vocablearningapp.ui.screen.review.ReviewScreen
 import com.example.vocablearningapp.ui.screen.set.AllSetsScreen
@@ -106,7 +107,7 @@ fun NavGraph(
                     if (mode == StudyMode.FLASHCARDS) {
                         navController.navigate(Screen.Flashcards.createRoute(setId))
                     } else {
-                        navController.navigate(Screen.Practice.createRoute(mode.name))
+                        navController.navigate(Screen.Practice.createRoute(mode.name, setId))
                     }
                 },
                 onEditSet = { navController.navigate(Screen.SetEditor.createRoute(setId)) }
@@ -130,14 +131,26 @@ fun NavGraph(
 
         composable(
             route = Screen.Practice.route,
-            arguments = listOf(navArgument("mode") { type = NavType.StringType })
+            arguments = listOf(
+                navArgument("mode") { type = NavType.StringType },
+                navArgument("setId") { type = NavType.StringType }
+            )
         ) { backStackEntry ->
             val modeName = backStackEntry.arguments?.getString("mode").orEmpty()
+            val setId = backStackEntry.arguments?.getString("setId").orEmpty()
             val mode = StudyMode.entries.firstOrNull { it.name == modeName } ?: StudyMode.QUIZ
-            PracticePlaceholderScreen(
-                mode = mode,
-                onBack = { navController.popBackStack() }
-            )
+            if (mode == StudyMode.LEARN) {
+                LearnModeScreen(
+                    set = appViewModel.setById(setId),
+                    onBack = { navController.popBackStack() },
+                    onRate = appViewModel::rateItem
+                )
+            } else {
+                PracticePlaceholderScreen(
+                    mode = mode,
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
 
         composable(
