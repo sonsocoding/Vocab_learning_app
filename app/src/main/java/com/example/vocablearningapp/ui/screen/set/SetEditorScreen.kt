@@ -226,7 +226,7 @@ private data class DraftWord(
     val meaning: String = "",
     val pronunciation: String = "",
     val exampleSentence: String = "",
-    val memoryLevel: MemoryLevel = MemoryLevel.NOT_REMEMBERED,
+    val memoryLevel: MemoryLevel = MemoryLevel.FORGOT,
     val nextReviewDate: String = "Today"
 ) {
     fun toVocabularyItem(setTitle: String, index: Int): VocabularyItem? {

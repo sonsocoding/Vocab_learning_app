@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Edit
@@ -53,12 +53,12 @@ import com.example.vocablearningapp.ui.theme.Canvas
 import com.example.vocablearningapp.ui.theme.Ink
 import com.example.vocablearningapp.ui.theme.InkSoft
 import com.example.vocablearningapp.ui.theme.Muted
-import com.example.vocablearningapp.ui.theme.NotRemembered
-import com.example.vocablearningapp.ui.theme.NotRememberedSoft
-import com.example.vocablearningapp.ui.theme.Remembered
-import com.example.vocablearningapp.ui.theme.RememberedSoft
-import com.example.vocablearningapp.ui.theme.SomewhatRemembered
-import com.example.vocablearningapp.ui.theme.SomewhatRememberedSoft
+import com.example.vocablearningapp.ui.theme.Forgot
+import com.example.vocablearningapp.ui.theme.ForgotSoft
+import com.example.vocablearningapp.ui.theme.Learning
+import com.example.vocablearningapp.ui.theme.LearningSoft
+import com.example.vocablearningapp.ui.theme.Mastered
+import com.example.vocablearningapp.ui.theme.MasteredSoft
 import com.example.vocablearningapp.ui.theme.Surface
 import com.example.vocablearningapp.ui.theme.SurfaceMuted
 
@@ -343,7 +343,7 @@ fun VocabTopBar(
         title = { Text(text = title, color = Ink) },
         navigationIcon = {
             IconButton(onClick = onBack) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back", tint = Ink)
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Ink)
             }
         },
         actions = actions,
@@ -369,7 +369,7 @@ fun AvatarButton(
 }
 
 fun memoryColors(level: MemoryLevel): Pair<Color, Color> = when (level) {
-    MemoryLevel.NOT_REMEMBERED -> NotRememberedSoft to NotRemembered
-    MemoryLevel.SOMEWHAT_REMEMBERED -> SomewhatRememberedSoft to SomewhatRemembered
-    MemoryLevel.REMEMBERED -> RememberedSoft to Remembered
+    MemoryLevel.FORGOT -> ForgotSoft to Forgot
+    MemoryLevel.LEARNING -> LearningSoft to Learning
+    MemoryLevel.MASTERED -> MasteredSoft to Mastered
 }

@@ -1,9 +1,9 @@
 package com.example.vocablearningapp.domain.model
 
 enum class MemoryLevel(val label: String) {
-    NOT_REMEMBERED("Not remembered"),
-    SOMEWHAT_REMEMBERED("Somewhat remembered"),
-    REMEMBERED("Remembered")
+    FORGOT("Forgot"),
+    LEARNING("Learning"),
+    MASTERED("Mastered")
 }
 
 data class VocabularyItem(
@@ -12,7 +12,7 @@ data class VocabularyItem(
     val meaning: String,
     val pronunciation: String,
     val exampleSentence: String,
-    val memoryLevel: MemoryLevel = MemoryLevel.NOT_REMEMBERED,
+    val memoryLevel: MemoryLevel = MemoryLevel.FORGOT,
     val nextReviewDate: String = "Today"
 )
 
@@ -26,7 +26,7 @@ data class VocabularySet(
 ) {
     val progress: Int
         get() = if (words.isEmpty()) 0 else {
-            (words.count { it.memoryLevel == MemoryLevel.REMEMBERED } * 100) / words.size
+            (words.count { it.memoryLevel == MemoryLevel.MASTERED } * 100) / words.size
         }
 }
 

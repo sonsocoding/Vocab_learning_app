@@ -29,12 +29,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.vocablearningapp.domain.model.MemoryLevel
 import com.example.vocablearningapp.domain.model.VocabularyItem
+import com.example.vocablearningapp.domain.model.VocabularySet
 import com.example.vocablearningapp.ui.component.AppScaffold
 import com.example.vocablearningapp.ui.component.MainTab
 import com.example.vocablearningapp.ui.component.PrimaryButton
 import com.example.vocablearningapp.ui.component.SectionHeader
 import com.example.vocablearningapp.ui.component.VocabDimens
 import com.example.vocablearningapp.ui.component.VocabularyRow
+import com.example.vocablearningapp.ui.component.VocabularySetCard
 import com.example.vocablearningapp.ui.theme.Accent
 import com.example.vocablearningapp.ui.theme.Ink
 import com.example.vocablearningapp.ui.theme.Muted
@@ -43,8 +45,10 @@ import com.example.vocablearningapp.ui.theme.Surface
 @Composable
 fun ReviewScreen(
     onTabSelected: (MainTab) -> Unit,
+    sets: List<VocabularySet>,
     items: List<VocabularyItem>,
-    onStartReview: () -> Unit
+    onStartReview: () -> Unit,
+    onOpenSet: (String) -> Unit
 ) {
     var selectedFilter by remember { mutableStateOf<MemoryLevel?>(null) }
     val filteredItems = selectedFilter?.let { level -> items.filter { it.memoryLevel == level } } ?: items
@@ -69,6 +73,8 @@ fun ReviewScreen(
             }
 
             ReviewHero(onStartReview = onStartReview)
+
+            RecommendedReview(sets = sets, onOpenSet = onOpenSet)
 
             Row(
                 modifier = Modifier
@@ -97,19 +103,45 @@ fun ReviewScreen(
             )
             ReviewSection(
                 title = "Weak words",
-                subtitle = "Rated Not remembered",
-                items = filteredItems.filter { it.memoryLevel == MemoryLevel.NOT_REMEMBERED }.take(4)
+                subtitle = "Rated Forgot",
+                items = filteredItems.filter { it.memoryLevel == MemoryLevel.FORGOT }.take(4)
             )
             ReviewSection(
                 title = "Learning",
-                subtitle = "Rated Somewhat remembered",
-                items = filteredItems.filter { it.memoryLevel == MemoryLevel.SOMEWHAT_REMEMBERED }.take(4)
+                subtitle = "Rated Learning",
+                items = filteredItems.filter { it.memoryLevel == MemoryLevel.LEARNING }.take(4)
             )
             ReviewSection(
                 title = "Mastered",
-                subtitle = "Rated Remembered",
-                items = filteredItems.filter { it.memoryLevel == MemoryLevel.REMEMBERED }.take(4)
+                subtitle = "Rated Mastered",
+                items = filteredItems.filter { it.memoryLevel == MemoryLevel.MASTERED }.take(4)
             )
+        }
+    }
+}
+
+@Composable
+private fun RecommendedReview(
+    sets: List<VocabularySet>,
+    onOpenSet: (String) -> Unit
+) {
+    val recommendedSets = sets
+        .sortedWith(
+            compareByDescending<VocabularySet> { set ->
+                set.words.count { it.memoryLevel == MemoryLevel.FORGOT }
+            }.thenBy { it.progress }
+        )
+        .take(3)
+
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        SectionHeader(title = "Recommended review")
+        Text(
+            text = "Sets with the most Forgot words and the lowest mastery.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Muted
+        )
+        recommendedSets.forEach { set ->
+            VocabularySetCard(set = set, onClick = { onOpenSet(set.id) }, compact = true)
         }
     }
 }

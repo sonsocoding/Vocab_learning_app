@@ -5,6 +5,12 @@ import com.example.vocablearningapp.domain.model.VocabularyItem
 import com.example.vocablearningapp.domain.model.VocabularySet
 
 object MockData {
+    private val initialLearningWordIds = setOf(
+        "daily-life-ambitious",
+        "school-assignment",
+        "advanced-nuance-meticulous"
+    )
+
     val vocabularySets = listOf(
         VocabularySet(
             id = "everyday-basics",
@@ -13,12 +19,12 @@ object MockData {
             category = "Everyday",
             level = "A1",
             words = listOf(
-                word("everyday-basics", "hello", "a greeting used when meeting someone", "/həˈləʊ/", "Hello, it is nice to meet you.", MemoryLevel.REMEMBERED),
-                word("everyday-basics", "family", "people who are related to you", "/ˈfæməli/", "My family lives near the city.", MemoryLevel.REMEMBERED),
-                word("everyday-basics", "friend", "a person you know and like", "/frend/", "My best friend studies with me.", MemoryLevel.SOMEWHAT_REMEMBERED),
-                word("everyday-basics", "morning", "the first part of the day", "/ˈmɔːnɪŋ/", "I read the news in the morning.", MemoryLevel.REMEMBERED),
-                word("everyday-basics", "near", "a short distance away", "/nɪə/", "The library is near my home.", MemoryLevel.NOT_REMEMBERED),
-                word("everyday-basics", "usually", "in most situations or at most times", "/ˈjuːʒuəli/", "I usually walk to class.", MemoryLevel.SOMEWHAT_REMEMBERED)
+                word("everyday-basics", "hello", "xin chào", "/həˈləʊ/", "Hello, it is nice to meet you.", MemoryLevel.FORGOT),
+                word("everyday-basics", "family", "gia đình", "/ˈfæməli/", "My family lives near the city.", MemoryLevel.FORGOT),
+                word("everyday-basics", "friend", "người bạn", "/frend/", "My best friend studies with me.", MemoryLevel.FORGOT),
+                word("everyday-basics", "morning", "buổi sáng", "/ˈmɔːnɪŋ/", "I read the news in the morning.", MemoryLevel.FORGOT),
+                word("everyday-basics", "near", "gần", "/nɪə/", "The library is near my home.", MemoryLevel.FORGOT),
+                word("everyday-basics", "usually", "thường xuyên", "/ˈjuːʒuəli/", "I usually walk to class.", MemoryLevel.FORGOT)
             )
         ),
         VocabularySet(
@@ -28,12 +34,12 @@ object MockData {
             category = "Everyday",
             level = "A1",
             words = listOf(
-                word("home-family", "kitchen", "a room where food is prepared", "/ˈkɪtʃən/", "The kitchen is next to the dining room.", MemoryLevel.REMEMBERED),
-                word("home-family", "bedroom", "a room used for sleeping", "/ˈbedruːm/", "My bedroom has a large window.", MemoryLevel.SOMEWHAT_REMEMBERED),
-                word("home-family", "parent", "a mother or father", "/ˈpeərənt/", "One parent came to the school meeting.", MemoryLevel.NOT_REMEMBERED),
-                word("home-family", "garden", "an area where plants are grown", "/ˈɡɑːdən/", "We grow herbs in the garden.", MemoryLevel.SOMEWHAT_REMEMBERED),
-                word("home-family", "quiet", "making very little sound", "/ˈkwaɪət/", "This is a quiet place to read.", MemoryLevel.REMEMBERED),
-                word("home-family", "borrow", "to take and use something before returning it", "/ˈbɒrəʊ/", "Can I borrow your umbrella?", MemoryLevel.NOT_REMEMBERED)
+                word("home-family", "kitchen", "nhà bếp", "/ˈkɪtʃən/", "The kitchen is next to the dining room.", MemoryLevel.FORGOT),
+                word("home-family", "bedroom", "phòng ngủ", "/ˈbedruːm/", "My bedroom has a large window.", MemoryLevel.FORGOT),
+                word("home-family", "parent", "cha mẹ; phụ huynh", "/ˈpeərənt/", "One parent came to the school meeting.", MemoryLevel.FORGOT),
+                word("home-family", "garden", "khu vườn", "/ˈɡɑːdən/", "We grow herbs in the garden.", MemoryLevel.FORGOT),
+                word("home-family", "quiet", "yên tĩnh", "/ˈkwaɪət/", "This is a quiet place to read.", MemoryLevel.FORGOT),
+                word("home-family", "borrow", "mượn", "/ˈbɒrəʊ/", "Can I borrow your umbrella?", MemoryLevel.FORGOT)
             )
         ),
         VocabularySet(
@@ -43,14 +49,14 @@ object MockData {
             category = "Everyday",
             level = "A2",
             words = listOf(
-                word("daily-life", "daily", "happening every day", "/ˈdeɪli/", "I take a short walk daily.", MemoryLevel.REMEMBERED),
-                word("daily-life", "ambitious", "having a strong desire to succeed", "/æmˈbɪʃəs/", "She is ambitious and works hard for her goals.", MemoryLevel.SOMEWHAT_REMEMBERED),
-                word("daily-life", "commute", "to travel regularly between home and work or school", "/kəˈmjuːt/", "My commute takes about thirty minutes.", MemoryLevel.SOMEWHAT_REMEMBERED),
-                word("daily-life", "grocery", "food and other goods sold by a grocery store", "/ˈɡrəʊsəri/", "I need to buy some groceries after work.", MemoryLevel.NOT_REMEMBERED),
-                word("daily-life", "habit", "something you do regularly", "/ˈhæbɪt/", "Reading before bed is a healthy habit.", MemoryLevel.REMEMBERED),
-                word("daily-life", "schedule", "a plan that shows when things will happen", "/ˈʃedjuːl/", "Let me check my schedule first.", MemoryLevel.SOMEWHAT_REMEMBERED),
-                word("daily-life", "errand", "a short trip to do a small task", "/ˈerənd/", "I have a few errands to run this afternoon.", MemoryLevel.NOT_REMEMBERED),
-                word("daily-life", "exhausted", "extremely tired", "/ɪɡˈzɔːstɪd/", "I felt exhausted after the long trip.", MemoryLevel.REMEMBERED)
+                word("daily-life", "daily", "hằng ngày", "/ˈdeɪli/", "I take a short walk daily.", MemoryLevel.FORGOT),
+                word("daily-life", "ambitious", "tham vọng", "/æmˈbɪʃəs/", "She is ambitious and works hard for her goals.", MemoryLevel.FORGOT),
+                word("daily-life", "commute", "đi lại giữa nhà và nơi làm việc hoặc trường học", "/kəˈmjuːt/", "My commute takes about thirty minutes.", MemoryLevel.FORGOT),
+                word("daily-life", "grocery", "thực phẩm; hàng tạp hóa", "/ˈɡrəʊsəri/", "I need to buy some groceries after work.", MemoryLevel.FORGOT),
+                word("daily-life", "habit", "thói quen", "/ˈhæbɪt/", "Reading before bed is a healthy habit.", MemoryLevel.FORGOT),
+                word("daily-life", "schedule", "lịch trình", "/ˈʃedjuːl/", "Let me check my schedule first.", MemoryLevel.FORGOT),
+                word("daily-life", "errand", "việc vặt cần làm", "/ˈerənd/", "I have a few errands to run this afternoon.", MemoryLevel.FORGOT),
+                word("daily-life", "exhausted", "kiệt sức", "/ɪɡˈzɔːstɪd/", "I felt exhausted after the long trip.", MemoryLevel.FORGOT)
             )
         ),
         VocabularySet(
@@ -60,12 +66,12 @@ object MockData {
             category = "Travel",
             level = "A2",
             words = listOf(
-                word("travel-basics", "journey", "an act of travelling from one place to another", "/ˈdʒɜːni/", "The journey took three hours by train.", MemoryLevel.SOMEWHAT_REMEMBERED),
-                word("travel-basics", "luggage", "bags and cases used when travelling", "/ˈlʌɡɪdʒ/", "Please keep your luggage with you.", MemoryLevel.NOT_REMEMBERED),
-                word("travel-basics", "ticket", "a document that allows you to travel or enter a place", "/ˈtɪkɪt/", "I booked my train ticket online.", MemoryLevel.REMEMBERED),
-                word("travel-basics", "platform", "the raised area beside a railway track", "/ˈplætfɔːm/", "The train leaves from platform four.", MemoryLevel.SOMEWHAT_REMEMBERED),
-                word("travel-basics", "local", "belonging to or connected with a particular area", "/ˈləʊkəl/", "We asked a local for restaurant advice.", MemoryLevel.REMEMBERED),
-                word("travel-basics", "crowded", "full of people", "/ˈkraʊdɪd/", "The market is crowded at weekends.", MemoryLevel.NOT_REMEMBERED)
+                word("travel-basics", "journey", "hành trình", "/ˈdʒɜːni/", "The journey took three hours by train.", MemoryLevel.FORGOT),
+                word("travel-basics", "luggage", "hành lý", "/ˈlʌɡɪdʒ/", "Please keep your luggage with you.", MemoryLevel.FORGOT),
+                word("travel-basics", "ticket", "vé", "/ˈtɪkɪt/", "I booked my train ticket online.", MemoryLevel.FORGOT),
+                word("travel-basics", "platform", "sân ga", "/ˈplætfɔːm/", "The train leaves from platform four.", MemoryLevel.FORGOT),
+                word("travel-basics", "local", "địa phương; người địa phương", "/ˈləʊkəl/", "We asked a local for restaurant advice.", MemoryLevel.FORGOT),
+                word("travel-basics", "crowded", "đông đúc", "/ˈkraʊdɪd/", "The market is crowded at weekends.", MemoryLevel.FORGOT)
             )
         ),
         VocabularySet(
@@ -75,13 +81,13 @@ object MockData {
             category = "Education",
             level = "B1",
             words = listOf(
-                word("school", "assignment", "a piece of work given to a student", "/əˈsaɪnmənt/", "The assignment is due on Friday.", MemoryLevel.SOMEWHAT_REMEMBERED),
-                word("school", "curriculum", "the subjects taught in a school or course", "/kəˈrɪkjələm/", "The new curriculum includes more practical lessons.", MemoryLevel.NOT_REMEMBERED),
-                word("school", "deadline", "the latest time by which something must be done", "/ˈdedlaɪn/", "We must finish the project before the deadline.", MemoryLevel.REMEMBERED),
-                word("school", "concentrate", "to give all your attention to something", "/ˈkɒnsəntreɪt/", "It is easier to concentrate in a quiet room.", MemoryLevel.SOMEWHAT_REMEMBERED),
-                word("school", "lecture", "a talk given to teach people about a subject", "/ˈlektʃə/", "Today's lecture was about climate change.", MemoryLevel.REMEMBERED),
-                word("school", "scholarship", "money given to support a student's education", "/ˈskɒləʃɪp/", "She received a scholarship to study abroad.", MemoryLevel.NOT_REMEMBERED),
-                word("school", "revise", "to study again for an examination", "/rɪˈvaɪz/", "I need to revise for tomorrow's exam.", MemoryLevel.REMEMBERED)
+                word("school", "assignment", "bài tập được giao", "/əˈsaɪnmənt/", "The assignment is due on Friday.", MemoryLevel.FORGOT),
+                word("school", "curriculum", "chương trình học", "/kəˈrɪkjələm/", "The new curriculum includes more practical lessons.", MemoryLevel.FORGOT),
+                word("school", "deadline", "hạn chót", "/ˈdedlaɪn/", "We must finish the project before the deadline.", MemoryLevel.FORGOT),
+                word("school", "concentrate", "tập trung", "/ˈkɒnsəntreɪt/", "It is easier to concentrate in a quiet room.", MemoryLevel.FORGOT),
+                word("school", "lecture", "bài giảng", "/ˈlektʃə/", "Today's lecture was about climate change.", MemoryLevel.FORGOT),
+                word("school", "scholarship", "học bổng", "/ˈskɒləʃɪp/", "She received a scholarship to study abroad.", MemoryLevel.FORGOT),
+                word("school", "revise", "ôn tập; chỉnh sửa", "/rɪˈvaɪz/", "I need to revise for tomorrow's exam.", MemoryLevel.FORGOT)
             )
         ),
         VocabularySet(
@@ -91,12 +97,12 @@ object MockData {
             category = "Interests",
             level = "B1",
             words = listOf(
-                word("music-kpop", "melody", "a sequence of musical notes that forms a tune", "/ˈmelədi/", "The melody stayed in my head all day.", MemoryLevel.REMEMBERED),
-                word("music-kpop", "choreography", "the planned movements in a dance or performance", "/ˌkɒriˈɒɡrəfi/", "The choreography for this song is difficult.", MemoryLevel.REMEMBERED),
-                word("music-kpop", "lyrics", "the words of a song", "/ˈlɪrɪks/", "I looked up the lyrics after hearing the song.", MemoryLevel.SOMEWHAT_REMEMBERED),
-                word("music-kpop", "catchy", "pleasant and easy to remember", "/ˈkætʃi/", "That chorus is incredibly catchy.", MemoryLevel.REMEMBERED),
-                word("music-kpop", "rehearsal", "a practice for a performance", "/rɪˈhɜːsəl/", "The dancers have rehearsal every evening.", MemoryLevel.SOMEWHAT_REMEMBERED),
-                word("music-kpop", "performance", "an act of presenting music, dance or drama", "/pəˈfɔːməns/", "Their live performance was unforgettable.", MemoryLevel.REMEMBERED)
+                word("music-kpop", "melody", "giai điệu", "/ˈmelədi/", "The melody stayed in my head all day.", MemoryLevel.FORGOT),
+                word("music-kpop", "choreography", "vũ đạo", "/ˌkɒriˈɒɡrəfi/", "The choreography for this song is difficult.", MemoryLevel.FORGOT),
+                word("music-kpop", "lyrics", "lời bài hát", "/ˈlɪrɪks/", "I looked up the lyrics after hearing the song.", MemoryLevel.FORGOT),
+                word("music-kpop", "catchy", "bắt tai; dễ nhớ", "/ˈkætʃi/", "That chorus is incredibly catchy.", MemoryLevel.FORGOT),
+                word("music-kpop", "rehearsal", "buổi tập dượt", "/rɪˈhɜːsəl/", "The dancers have rehearsal every evening.", MemoryLevel.FORGOT),
+                word("music-kpop", "performance", "màn trình diễn", "/pəˈfɔːməns/", "Their live performance was unforgettable.", MemoryLevel.FORGOT)
             )
         ),
         VocabularySet(
@@ -106,12 +112,12 @@ object MockData {
             category = "Professional",
             level = "B2",
             words = listOf(
-                word("work-career", "negotiate", "to discuss something in order to reach an agreement", "/nɪˈɡəʊʃieɪt/", "We need to negotiate a fair contract.", MemoryLevel.SOMEWHAT_REMEMBERED),
-                word("work-career", "deadline", "the final time allowed to complete something", "/ˈdedlaɪn/", "The team met the deadline despite the changes.", MemoryLevel.REMEMBERED),
-                word("work-career", "promotion", "a move to a more important job", "/prəˈməʊʃən/", "She earned a promotion after leading the project.", MemoryLevel.NOT_REMEMBERED),
-                word("work-career", "efficient", "working well without wasting time or resources", "/ɪˈfɪʃənt/", "The new process is much more efficient.", MemoryLevel.SOMEWHAT_REMEMBERED),
-                word("work-career", "initiative", "the ability to make decisions and act independently", "/ɪˈnɪʃətɪv/", "He showed initiative by solving the issue early.", MemoryLevel.NOT_REMEMBERED),
-                word("work-career", "collaborate", "to work with others on a shared task", "/kəˈlæbəreɪt/", "Our teams collaborate across three offices.", MemoryLevel.REMEMBERED)
+                word("work-career", "negotiate", "đàm phán; thương lượng", "/nɪˈɡəʊʃieɪt/", "We need to negotiate a fair contract.", MemoryLevel.FORGOT),
+                word("work-career", "deadline", "hạn chót", "/ˈdedlaɪn/", "The team met the deadline despite the changes.", MemoryLevel.FORGOT),
+                word("work-career", "promotion", "sự thăng chức", "/prəˈməʊʃən/", "She earned a promotion after leading the project.", MemoryLevel.FORGOT),
+                word("work-career", "efficient", "hiệu quả", "/ɪˈfɪʃənt/", "The new process is much more efficient.", MemoryLevel.FORGOT),
+                word("work-career", "initiative", "tính chủ động", "/ɪˈnɪʃətɪv/", "He showed initiative by solving the issue early.", MemoryLevel.FORGOT),
+                word("work-career", "collaborate", "hợp tác", "/kəˈlæbəreɪt/", "Our teams collaborate across three offices.", MemoryLevel.FORGOT)
             )
         ),
         VocabularySet(
@@ -121,12 +127,12 @@ object MockData {
             category = "Society",
             level = "B2",
             words = listOf(
-                word("science-society", "evidence", "facts or information that show something is true", "/ˈevɪdəns/", "The report provides evidence of a wider trend.", MemoryLevel.REMEMBERED),
-                word("science-society", "impact", "a strong effect on someone or something", "/ˈɪmpækt/", "The policy could have a major impact on families.", MemoryLevel.SOMEWHAT_REMEMBERED),
-                word("science-society", "sustainable", "able to continue without harming the future", "/səˈsteɪnəbəl/", "The city is investing in sustainable transport.", MemoryLevel.NOT_REMEMBERED),
-                word("science-society", "innovation", "a new idea, method or product", "/ˌɪnəˈveɪʃən/", "Innovation can change how people communicate.", MemoryLevel.SOMEWHAT_REMEMBERED),
-                word("science-society", "bias", "an unfair preference for or against someone or something", "/ˈbaɪəs/", "The researchers checked the study for bias.", MemoryLevel.NOT_REMEMBERED),
-                word("science-society", "regulate", "to control an activity with rules", "/ˈreɡjəleɪt/", "Governments regulate the use of public data.", MemoryLevel.REMEMBERED)
+                word("science-society", "evidence", "bằng chứng", "/ˈevɪdəns/", "The report provides evidence of a wider trend.", MemoryLevel.FORGOT),
+                word("science-society", "impact", "tác động", "/ˈɪmpækt/", "The policy could have a major impact on families.", MemoryLevel.FORGOT),
+                word("science-society", "sustainable", "bền vững", "/səˈsteɪnəbəl/", "The city is investing in sustainable transport.", MemoryLevel.FORGOT),
+                word("science-society", "innovation", "sự đổi mới", "/ˌɪnəˈveɪʃən/", "Innovation can change how people communicate.", MemoryLevel.FORGOT),
+                word("science-society", "bias", "thiên kiến", "/ˈbaɪəs/", "The researchers checked the study for bias.", MemoryLevel.FORGOT),
+                word("science-society", "regulate", "điều chỉnh; quản lý bằng quy định", "/ˈreɡjəleɪt/", "Governments regulate the use of public data.", MemoryLevel.FORGOT)
             )
         ),
         VocabularySet(
@@ -136,12 +142,12 @@ object MockData {
             category = "Academic",
             level = "C1",
             words = listOf(
-                word("academic-writing", "coherent", "logical and well organised", "/kəʊˈhɪərənt/", "The essay presents a coherent argument.", MemoryLevel.SOMEWHAT_REMEMBERED),
-                word("academic-writing", "substantial", "large in amount or important in value", "/səbˈstænʃəl/", "The study found a substantial difference between groups.", MemoryLevel.NOT_REMEMBERED),
-                word("academic-writing", "hypothesis", "an idea that can be tested by research", "/haɪˈpɒθəsɪs/", "The experiment was designed to test the hypothesis.", MemoryLevel.SOMEWHAT_REMEMBERED),
-                word("academic-writing", "implication", "a possible result or consequence", "/ˌɪmplɪˈkeɪʃən/", "The findings have important implications for teachers.", MemoryLevel.NOT_REMEMBERED),
-                word("academic-writing", "synthesize", "to combine ideas into a connected whole", "/ˈsɪnθəsaɪz/", "The final section synthesizes the main findings.", MemoryLevel.REMEMBERED),
-                word("academic-writing", "ambiguous", "having more than one possible meaning", "/æmˈbɪɡjuəs/", "The wording is ambiguous and needs clarification.", MemoryLevel.SOMEWHAT_REMEMBERED)
+                word("academic-writing", "coherent", "mạch lạc", "/kəʊˈhɪərənt/", "The essay presents a coherent argument.", MemoryLevel.FORGOT),
+                word("academic-writing", "substantial", "đáng kể; lớn", "/səbˈstænʃəl/", "The study found a substantial difference between groups.", MemoryLevel.FORGOT),
+                word("academic-writing", "hypothesis", "giả thuyết", "/haɪˈpɒθəsɪs/", "The experiment was designed to test the hypothesis.", MemoryLevel.FORGOT),
+                word("academic-writing", "implication", "hệ quả; hàm ý", "/ˌɪmplɪˈkeɪʃən/", "The findings have important implications for teachers.", MemoryLevel.FORGOT),
+                word("academic-writing", "synthesize", "tổng hợp", "/ˈsɪnθəsaɪz/", "The final section synthesizes the main findings.", MemoryLevel.FORGOT),
+                word("academic-writing", "ambiguous", "mơ hồ; có nhiều nghĩa", "/æmˈbɪɡjuəs/", "The wording is ambiguous and needs clarification.", MemoryLevel.FORGOT)
             )
         ),
         VocabularySet(
@@ -151,13 +157,59 @@ object MockData {
             category = "Advanced",
             level = "C2",
             words = listOf(
-                word("advanced-nuance", "meticulous", "very careful and precise", "/məˈtɪkjələs/", "She kept meticulous records of every decision.", MemoryLevel.SOMEWHAT_REMEMBERED),
-                word("advanced-nuance", "conundrum", "a confusing and difficult problem", "/kəˈnʌndrəm/", "The committee faced a difficult ethical conundrum.", MemoryLevel.NOT_REMEMBERED),
-                word("advanced-nuance", "pragmatic", "solving problems in a practical way", "/præɡˈmætɪk/", "They took a pragmatic approach to the negotiations.", MemoryLevel.SOMEWHAT_REMEMBERED),
-                word("advanced-nuance", "unequivocal", "clear and leaving no doubt", "/ˌʌnɪˈkwɪvəkəl/", "The statement was an unequivocal rejection of the proposal.", MemoryLevel.NOT_REMEMBERED),
-                word("advanced-nuance", "discerning", "able to judge quality and differences well", "/dɪˈsɜːnɪŋ/", "The discerning reader will notice the subtle contrast.", MemoryLevel.REMEMBERED),
-                word("advanced-nuance", "pervasive", "present throughout a place or group", "/pəˈveɪsɪv/", "Digital media has a pervasive influence on public debate.", MemoryLevel.SOMEWHAT_REMEMBERED)
+                word("advanced-nuance", "meticulous", "tỉ mỉ; cẩn thận", "/məˈtɪkjələs/", "She kept meticulous records of every decision.", MemoryLevel.FORGOT),
+                word("advanced-nuance", "conundrum", "vấn đề nan giải", "/kəˈnʌndrəm/", "The committee faced a difficult ethical conundrum.", MemoryLevel.FORGOT),
+                word("advanced-nuance", "pragmatic", "thực tế; thực dụng", "/præɡˈmætɪk/", "They took a pragmatic approach to the negotiations.", MemoryLevel.FORGOT),
+                word("advanced-nuance", "unequivocal", "rõ ràng; dứt khoát", "/ˌʌnɪˈkwɪvəkəl/", "The statement was an unequivocal rejection of the proposal.", MemoryLevel.FORGOT),
+                word("advanced-nuance", "discerning", "sành sỏi; tinh tường", "/dɪˈsɜːnɪŋ/", "The discerning reader will notice the subtle contrast.", MemoryLevel.FORGOT),
+                word("advanced-nuance", "pervasive", "phổ biến rộng khắp", "/pəˈveɪsɪv/", "Digital media has a pervasive influence on public debate.", MemoryLevel.FORGOT)
             )
+        )
+    )
+
+    // These words are generated separately from study sets for the Daily Words feature.
+    val dailyWordsByLevel = mapOf(
+        "A1" to listOf(
+            word("daily-a1", "clock", "đồng hồ", "/klɒk/", "The clock is on the wall.", MemoryLevel.FORGOT),
+            word("daily-a1", "smile", "mỉm cười", "/smaɪl/", "She smiled at the child.", MemoryLevel.FORGOT),
+            word("daily-a1", "early", "sớm", "/ˈɜːli/", "I woke up early today.", MemoryLevel.FORGOT),
+            word("daily-a1", "street", "đường phố", "/striːt/", "The cafe is on the next street.", MemoryLevel.FORGOT),
+            word("daily-a1", "carry", "mang; xách", "/ˈkæri/", "Can you carry this bag?", MemoryLevel.FORGOT)
+        ),
+        "A2" to listOf(
+            word("daily-a2", "curious", "tò mò", "/ˈkjʊəriəs/", "The curious student asked another question.", MemoryLevel.FORGOT),
+            word("daily-a2", "repair", "sửa chữa", "/rɪˈpeə/", "The shop can repair your phone.", MemoryLevel.FORGOT),
+            word("daily-a2", "reliable", "đáng tin cậy", "/rɪˈlaɪəbəl/", "We need a reliable internet connection.", MemoryLevel.FORGOT),
+            word("daily-a2", "recently", "gần đây", "/ˈriːsəntli/", "Have you seen any good films recently?", MemoryLevel.FORGOT),
+            word("daily-a2", "improve", "cải thiện", "/ɪmˈpruːv/", "Practice will improve your speaking.", MemoryLevel.FORGOT)
+        ),
+        "B1" to listOf(
+            word("daily-b1", "adapt", "thích nghi", "/əˈdæpt/", "Animals adapt to changes in their environment.", MemoryLevel.FORGOT),
+            word("daily-b1", "feature", "đặc điểm; tính năng", "/ˈfiːtʃə/", "The app has a useful search feature.", MemoryLevel.FORGOT),
+            word("daily-b1", "outcome", "kết quả", "/ˈaʊtkʌm/", "The outcome was better than expected.", MemoryLevel.FORGOT),
+            word("daily-b1", "influence", "ảnh hưởng", "/ˈɪnfluəns/", "Music can influence our mood.", MemoryLevel.FORGOT),
+            word("daily-b1", "approach", "cách tiếp cận", "/əˈprəʊtʃ/", "We need a different approach to the problem.", MemoryLevel.FORGOT)
+        ),
+        "B2" to listOf(
+            word("daily-b2", "compelling", "thuyết phục; hấp dẫn", "/kəmˈpelɪŋ/", "The speaker made a compelling argument.", MemoryLevel.FORGOT),
+            word("daily-b2", "allocate", "phân bổ", "/ˈæləkeɪt/", "The manager allocated more time to training.", MemoryLevel.FORGOT),
+            word("daily-b2", "perspective", "góc nhìn; quan điểm", "/pəˈspektɪv/", "Travel gave her a new perspective.", MemoryLevel.FORGOT),
+            word("daily-b2", "contribute", "đóng góp", "/kənˈtrɪbjuːt/", "Several factors contributed to the success.", MemoryLevel.FORGOT),
+            word("daily-b2", "justify", "biện minh; chứng minh là hợp lý", "/ˈdʒʌstɪfaɪ/", "The data does not justify that conclusion.", MemoryLevel.FORGOT)
+        ),
+        "C1" to listOf(
+            word("daily-c1", "alleviate", "làm giảm; xoa dịu", "/əˈliːvieɪt/", "The new policy may alleviate pressure on families.", MemoryLevel.FORGOT),
+            word("daily-c1", "articulate", "diễn đạt rõ ràng", "/ɑːˈtɪkjələt/", "She gave an articulate response to the question.", MemoryLevel.FORGOT),
+            word("daily-c1", "discern", "nhận ra; phân biệt", "/dɪˈsɜːn/", "It is difficult to discern the pattern at first.", MemoryLevel.FORGOT),
+            word("daily-c1", "criterion", "tiêu chí", "/kraɪˈtɪəriən/", "Cost was the main criterion for the decision.", MemoryLevel.FORGOT),
+            word("daily-c1", "resilient", "kiên cường; có khả năng phục hồi", "/rɪˈzɪliənt/", "The resilient community rebuilt after the storm.", MemoryLevel.FORGOT)
+        ),
+        "C2" to listOf(
+            word("daily-c2", "inexorable", "không thể ngăn cản", "/ɪnˈeksərəbəl/", "The inexorable advance of technology changed the industry.", MemoryLevel.FORGOT),
+            word("daily-c2", "juxtapose", "đặt cạnh nhau để so sánh", "/ˌdʒʌkstəˈpəʊz/", "The article juxtaposes two opposing viewpoints.", MemoryLevel.FORGOT),
+            word("daily-c2", "tenuous", "mong manh; không chắc chắn", "/ˈtenjuəs/", "The connection between the events remains tenuous.", MemoryLevel.FORGOT),
+            word("daily-c2", "perfunctory", "qua loa; chiếu lệ", "/pəˈfʌŋktəri/", "He offered a perfunctory apology and left.", MemoryLevel.FORGOT),
+            word("daily-c2", "ubiquitous", "phổ biến ở khắp nơi", "/juːˈbɪkwɪtəs/", "Smartphones are ubiquitous in modern cities.", MemoryLevel.FORGOT)
         )
     )
 
@@ -167,14 +219,19 @@ object MockData {
         meaning: String,
         pronunciation: String,
         example: String,
-        memoryLevel: MemoryLevel
-    ) = VocabularyItem(
-        id = "$setId-${word.lowercase().replace(" ", "-")}",
+        _seedLevel: MemoryLevel
+    ): VocabularyItem {
+        val id = "$setId-${word.lowercase().replace(" ", "-")}"
+        val seededMemoryLevel = if (id in initialLearningWordIds) MemoryLevel.LEARNING else MemoryLevel.FORGOT
+        return VocabularyItem(
+        id = id,
         word = word,
         meaning = meaning,
         pronunciation = pronunciation,
         exampleSentence = example,
-        memoryLevel = memoryLevel,
-        nextReviewDate = if (memoryLevel == MemoryLevel.NOT_REMEMBERED) "Today" else "Tomorrow"
-    )
+        memoryLevel = seededMemoryLevel,
+        nextReviewDate = if (seededMemoryLevel == MemoryLevel.FORGOT) "Today" else "Tomorrow"
+        )
+    }
+
 }

@@ -14,7 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ShowChart
+import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -38,9 +38,9 @@ import com.example.vocablearningapp.ui.component.VocabularySetCard
 import com.example.vocablearningapp.ui.theme.Accent
 import com.example.vocablearningapp.ui.theme.Ink
 import com.example.vocablearningapp.ui.theme.Muted
-import com.example.vocablearningapp.ui.theme.NotRemembered
-import com.example.vocablearningapp.ui.theme.Remembered
-import com.example.vocablearningapp.ui.theme.SomewhatRemembered
+import com.example.vocablearningapp.ui.theme.Forgot
+import com.example.vocablearningapp.ui.theme.Learning
+import com.example.vocablearningapp.ui.theme.Mastered
 import com.example.vocablearningapp.ui.theme.Surface
 
 @Composable
@@ -51,7 +51,7 @@ fun ProgressScreen(
     onOpenSet: (String) -> Unit
 ) {
     val totalWords = items.size
-    val masteredWords = items.count { it.memoryLevel == MemoryLevel.REMEMBERED }
+    val masteredWords = items.count { it.memoryLevel == MemoryLevel.MASTERED }
 
     AppScaffold(selectedTab = MainTab.PROGRESS, onTabSelected = onTabSelected) { innerPadding ->
         Column(
@@ -88,7 +88,7 @@ fun ProgressScreen(
             StatCard(
                 value = "78%",
                 label = "Review accuracy",
-                icon = Icons.Default.ShowChart,
+                icon = Icons.AutoMirrored.Filled.ShowChart,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -115,22 +115,22 @@ private fun MasteryBreakdown(items: List<VocabularyItem>) {
         ) {
             Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(17.dp)) {
                 MasteryLine(
-                    level = MemoryLevel.NOT_REMEMBERED,
-                    count = items.count { it.memoryLevel == MemoryLevel.NOT_REMEMBERED },
+                    level = MemoryLevel.FORGOT,
+                    count = items.count { it.memoryLevel == MemoryLevel.FORGOT },
                     total = items.size,
-                    color = NotRemembered
+                    color = Forgot
                 )
                 MasteryLine(
-                    level = MemoryLevel.SOMEWHAT_REMEMBERED,
-                    count = items.count { it.memoryLevel == MemoryLevel.SOMEWHAT_REMEMBERED },
+                    level = MemoryLevel.LEARNING,
+                    count = items.count { it.memoryLevel == MemoryLevel.LEARNING },
                     total = items.size,
-                    color = SomewhatRemembered
+                    color = Learning
                 )
                 MasteryLine(
-                    level = MemoryLevel.REMEMBERED,
-                    count = items.count { it.memoryLevel == MemoryLevel.REMEMBERED },
+                    level = MemoryLevel.MASTERED,
+                    count = items.count { it.memoryLevel == MemoryLevel.MASTERED },
                     total = items.size,
-                    color = Remembered
+                    color = Mastered
                 )
             }
         }

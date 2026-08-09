@@ -1,6 +1,5 @@
 package com.example.vocablearningapp.ui.screen.home
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,8 +13,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
@@ -30,16 +27,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.vocablearningapp.domain.model.StudyMode
 import com.example.vocablearningapp.domain.model.VocabularySet
 import com.example.vocablearningapp.ui.component.AppScaffold
 import com.example.vocablearningapp.ui.component.MainTab
 import com.example.vocablearningapp.ui.component.SecondaryButton
 import com.example.vocablearningapp.ui.component.SectionHeader
-import com.example.vocablearningapp.ui.component.StudyModeCard
 import com.example.vocablearningapp.ui.component.VocabDimens
 import com.example.vocablearningapp.ui.component.VocabProgressBar
 import com.example.vocablearningapp.ui.component.VocabularySetCard
@@ -57,8 +51,8 @@ fun HomeScreen(
     onOpenSet: (String) -> Unit,
     onSeeAllSets: () -> Unit,
     onCreateSet: () -> Unit,
-    onOpenPractice: (StudyMode) -> Unit,
-    onContinueReview: () -> Unit
+    dailyWords: VocabularySet,
+    onOpenDailyWords: () -> Unit
 ) {
     AppScaffold(
         selectedTab = MainTab.HOME,
@@ -73,7 +67,7 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(VocabDimens.SectionGap)
         ) {
             Header()
-            DueTodayCard(onContinueReview = onContinueReview)
+            DailyWordsCard(dailyWords = dailyWords, onOpenDailyWords = onOpenDailyWords)
             WeeklyProgressCard()
 
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -94,40 +88,6 @@ fun HomeScreen(
                 )
             }
 
-            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                SectionHeader(title = "Quick practice")
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    QuickMode(
-                        title = "Flashcards",
-                        subtitle = "Review cards",
-                        icon = Icons.Default.BookmarkBorder,
-                        onClick = { onOpenPractice(StudyMode.FLASHCARDS) }
-                    )
-                    QuickMode(
-                        title = "Quiz",
-                        subtitle = "Test yourself",
-                        icon = Icons.Default.Check,
-                        onClick = { onOpenPractice(StudyMode.QUIZ) }
-                    )
-                    QuickMode(
-                        title = "Fill blank",
-                        subtitle = "Complete words",
-                        icon = Icons.Default.Edit,
-                        onClick = { onOpenPractice(StudyMode.FILL_IN_BLANK) }
-                    )
-                    QuickMode(
-                        title = "Match",
-                        subtitle = "Pair meanings",
-                        icon = Icons.Default.PlayArrow,
-                        onClick = { onOpenPractice(StudyMode.MATCH) }
-                    )
-                }
-            }
         }
     }
 }
@@ -155,7 +115,10 @@ private fun Header() {
 }
 
 @Composable
-private fun DueTodayCard(onContinueReview: () -> Unit) {
+private fun DailyWordsCard(
+    dailyWords: VocabularySet,
+    onOpenDailyWords: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
@@ -163,26 +126,26 @@ private fun DueTodayCard(onContinueReview: () -> Unit) {
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Text(
-                text = "TODAY'S FOCUS",
+                text = "DAILY WORDS",
                 style = MaterialTheme.typography.labelMedium,
                 color = Color(0xFFBBDACC),
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "12 words due today",
+                text = "${dailyWords.words.size} fresh words for level ${dailyWords.level}",
                 style = MaterialTheme.typography.headlineSmall,
                 color = White
             )
             Spacer(modifier = Modifier.height(5.dp))
             Text(
-                text = "A short review keeps your memory moving forward.",
+                text = "Generated from the level you have been learning recently.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color(0xFFD2E5DB)
             )
             Spacer(modifier = Modifier.height(18.dp))
             Button(
-                onClick = onContinueReview,
+                onClick = onOpenDailyWords,
                 modifier = Modifier.height(48.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -192,7 +155,7 @@ private fun DueTodayCard(onContinueReview: () -> Unit) {
             ) {
                 Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null)
                 Spacer(modifier = Modifier.width(7.dp))
-                Text(text = "Continue review", fontWeight = FontWeight.SemiBold)
+                Text(text = "Study daily words", fontWeight = FontWeight.SemiBold)
             }
         }
     }
@@ -236,20 +199,4 @@ private fun MockSetPreview(
             compact = true
         )
     }
-}
-
-@Composable
-private fun QuickMode(
-    title: String,
-    subtitle: String,
-    icon: ImageVector,
-    onClick: () -> Unit
-) {
-    StudyModeCard(
-        title = title,
-        subtitle = subtitle,
-        icon = icon,
-        onClick = onClick,
-        modifier = Modifier.width(154.dp)
-    )
 }

@@ -10,10 +10,16 @@ import com.example.vocablearningapp.domain.model.VocabularyItem
 import com.example.vocablearningapp.domain.model.VocabularySet
 
 data class AppUiState(
-    val vocabularySets: List<VocabularySet> = MockData.vocabularySets
+    val vocabularySets: List<VocabularySet> = MockData.vocabularySets,
+    val dailyWordsByLevel: Map<String, List<VocabularyItem>> = MockData.dailyWordsByLevel,
+    val lastStudiedLevel: String = "A2"
 )
 
 class AppViewModel : ViewModel() {
+    companion object {
+        const val DAILY_WORDS_SET_ID = "daily-words"
+    }
+
     var uiState by mutableStateOf(AppUiState())
         private set
 
@@ -23,9 +29,27 @@ class AppViewModel : ViewModel() {
     val allItems: List<VocabularyItem>
         get() = sets.flatMap { it.words }
 
-    fun setById(id: String): VocabularySet? = sets.firstOrNull { it.id == id }
+    val dailyWordsSet: VocabularySet
+        get() {
+            return VocabularySet(
+                id = DAILY_WORDS_SET_ID,
+                title = "Daily Words",
+                description = "Fresh words generated from your recent learning level.",
+                category = "Daily practice",
+                level = uiState.lastStudiedLevel,
+                words = uiState.dailyWordsByLevel[uiState.lastStudiedLevel].orEmpty()
+            )
+        }
+
+    fun setById(id: String): VocabularySet? = when (id) {
+        DAILY_WORDS_SET_ID -> dailyWordsSet
+        else -> sets.firstOrNull { it.id == id }
+    }
 
     fun rateItem(itemId: String, memoryLevel: MemoryLevel) {
+        val studiedSetLevel = sets.firstOrNull { set ->
+            set.words.any { item -> item.id == itemId }
+        }?.level
         uiState = uiState.copy(
             vocabularySets = sets.map { set ->
                 set.copy(
@@ -33,7 +57,13 @@ class AppViewModel : ViewModel() {
                         if (item.id == itemId) item.copy(memoryLevel = memoryLevel) else item
                     }
                 )
-            }
+            },
+            dailyWordsByLevel = uiState.dailyWordsByLevel.mapValues { (_, items) ->
+                items.map { item ->
+                    if (item.id == itemId) item.copy(memoryLevel = memoryLevel) else item
+                }
+            },
+            lastStudiedLevel = studiedSetLevel ?: uiState.lastStudiedLevel
         )
     }
 

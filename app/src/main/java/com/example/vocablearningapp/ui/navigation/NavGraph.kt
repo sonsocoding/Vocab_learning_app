@@ -43,19 +43,11 @@ fun NavGraph(
                 onOpenSet = { id -> navController.navigate(Screen.SetDetail.createRoute(id)) },
                 onSeeAllSets = { navController.navigate(Screen.AllSets.route) },
                 onCreateSet = { navController.navigate(Screen.SetEditor.createRoute("new")) },
-                onOpenPractice = { mode ->
-                    if (mode == StudyMode.FLASHCARDS) {
-                        appViewModel.sets.firstOrNull()?.let {
-                            navController.navigate(Screen.Flashcards.createRoute(it.id))
-                        }
-                    } else {
-                        navController.navigate(Screen.Practice.createRoute(mode.name))
-                    }
-                },
-                onContinueReview = {
-                    appViewModel.sets.firstOrNull()?.let {
-                        navController.navigate(Screen.Flashcards.createRoute(it.id))
-                    }
+                dailyWords = appViewModel.dailyWordsSet,
+                onOpenDailyWords = {
+                    navController.navigate(
+                        Screen.Flashcards.createRoute(AppViewModel.DAILY_WORDS_SET_ID)
+                    )
                 }
             )
         }
@@ -65,20 +57,21 @@ fun NavGraph(
                 onTabSelected = ::navigateToTab,
                 sets = appViewModel.sets,
                 onOpenSet = { id -> navController.navigate(Screen.SetDetail.createRoute(id)) },
-                onOpenFlashcards = { id -> navController.navigate(Screen.Flashcards.createRoute(id)) },
-                onOpenMode = { mode -> navController.navigate(Screen.Practice.createRoute(mode.name)) }
+                onCreateSet = { navController.navigate(Screen.SetEditor.createRoute("new")) }
             )
         }
 
         composable(Screen.Review.route) {
             ReviewScreen(
                 onTabSelected = ::navigateToTab,
+                sets = appViewModel.sets,
                 items = appViewModel.allItems,
                 onStartReview = {
                     appViewModel.sets.firstOrNull()?.let {
                         navController.navigate(Screen.Flashcards.createRoute(it.id))
                     }
-                }
+                },
+                onOpenSet = { id -> navController.navigate(Screen.SetDetail.createRoute(id)) }
             )
         }
 

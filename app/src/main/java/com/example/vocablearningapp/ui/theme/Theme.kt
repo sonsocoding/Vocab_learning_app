@@ -23,7 +23,7 @@ private val LightColors = lightColorScheme(
     surfaceVariant = SurfaceMuted,
     onSurfaceVariant = Muted,
     outline = Border,
-    error = NotRemembered,
+    error = Forgot,
     onError = White
 )
 
