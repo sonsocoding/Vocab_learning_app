@@ -1,197 +1,163 @@
 package com.example.vocablearningapp.ui.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.vocablearningapp.AppContainer
-import com.example.vocablearningapp.ui.screen.deck.DeckListScreen
-import com.example.vocablearningapp.ui.screen.deck.DeckViewModel
+import com.example.vocablearningapp.domain.model.StudyMode
 import com.example.vocablearningapp.ui.screen.flashcard.FlashcardScreen
-import com.example.vocablearningapp.ui.screen.flashcard.FlashcardViewModel
 import com.example.vocablearningapp.ui.screen.home.HomeScreen
-import com.example.vocablearningapp.ui.screen.home.HomeViewModel
-import com.example.vocablearningapp.ui.screen.level.LevelListScreen
-import com.example.vocablearningapp.ui.screen.level.LevelViewModel
-import com.example.vocablearningapp.ui.screen.login.LoginScreen
-import com.example.vocablearningapp.ui.screen.login.LoginViewModel
-import com.example.vocablearningapp.ui.screen.result.StudyResultScreen
-import com.example.vocablearningapp.ui.screen.result.StudyResultViewModel
-import com.example.vocablearningapp.ui.screen.topic.TopicListScreen
-import com.example.vocablearningapp.ui.screen.topic.TopicViewModel
+import com.example.vocablearningapp.ui.screen.learn.LearnScreen
+import com.example.vocablearningapp.ui.screen.progress.ProgressScreen
+import com.example.vocablearningapp.ui.screen.review.ReviewScreen
+import com.example.vocablearningapp.ui.screen.set.AllSetsScreen
+import com.example.vocablearningapp.ui.screen.set.PracticePlaceholderScreen
+import com.example.vocablearningapp.ui.screen.set.SetDetailScreen
+import com.example.vocablearningapp.ui.screen.set.SetEditorScreen
+import com.example.vocablearningapp.ui.state.AppViewModel
+import com.example.vocablearningapp.ui.component.MainTab
 
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    container: AppContainer
+    appViewModel: AppViewModel
 ) {
-    val currentUserId by container.userRepository.currentUserId.collectAsState(initial = null)
-    val startDestination = if (currentUserId != null) Screen.Home.route else Screen.Login.route
+    fun navigateToTab(tab: MainTab) {
+        navController.navigate(tab.route) {
+            popUpTo(Screen.Home.route) { saveState = true }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
 
     NavHost(
         navController = navController,
-        startDestination = startDestination
+        startDestination = Screen.Home.route
     ) {
-        // Login Screen
-        composable(Screen.Login.route) {
-            val viewModel: LoginViewModel = viewModel(
-                factory = LoginViewModel.Factory(container.userRepository)
-            )
-            LoginScreen(
-                viewModel = viewModel,
-                onLoginSuccess = {
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        // Home Screen
         composable(Screen.Home.route) {
-            val viewModel: HomeViewModel = viewModel(
-                factory = HomeViewModel.Factory(container.userRepository, container.vocabRepository)
-            )
             HomeScreen(
-                viewModel = viewModel,
-                onNavigateToLevels = { navController.navigate(Screen.LevelList.route) },
-                onNavigateToTopic = { levelId -> navController.navigate(Screen.TopicList.createRoute(levelId)) },
-                onNavigateToFlashcard = { deckId -> navController.navigate(Screen.Flashcard.createRoute(deckId)) },
-                onLogout = {
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(Screen.Home.route) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        // Level List Screen
-        composable(Screen.LevelList.route) {
-            val viewModel: LevelViewModel = viewModel(
-                factory = LevelViewModel.Factory(container.vocabRepository)
-            )
-            LevelListScreen(
-                viewModel = viewModel,
-                onNavigateBack = { navController.popBackStack() },
-                onLevelSelected = { levelId ->
-                    navController.navigate(Screen.TopicList.createRoute(levelId))
-                }
-            )
-        }
-
-        // Topic List Screen
-        composable(
-            route = Screen.TopicList.route,
-            arguments = listOf(navArgument("levelId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val levelId = backStackEntry.arguments?.getString("levelId") ?: ""
-            val viewModel: TopicViewModel = viewModel(
-                factory = TopicViewModel.Factory(container.vocabRepository)
-            )
-            TopicListScreen(
-                levelId = levelId,
-                viewModel = viewModel,
-                onNavigateBack = { navController.popBackStack() },
-                onTopicSelected = { topicId ->
-                    navController.navigate(Screen.DeckList.createRoute(topicId))
-                }
-            )
-        }
-
-        // Deck List Screen
-        composable(
-            route = Screen.DeckList.route,
-            arguments = listOf(navArgument("topicId") { type = NavType.LongType })
-        ) { backStackEntry ->
-            val topicId = backStackEntry.arguments?.getLong("topicId") ?: 0L
-            val viewModel: DeckViewModel = viewModel(
-                factory = DeckViewModel.Factory(container.userRepository, container.vocabRepository)
-            )
-            DeckListScreen(
-                topicId = topicId,
-                viewModel = viewModel,
-                onNavigateBack = { navController.popBackStack() },
-                onDeckSelected = { deckId ->
-                    navController.navigate(Screen.Flashcard.createRoute(deckId))
-                }
-            )
-        }
-
-        // Flashcard Screen
-        composable(
-            route = Screen.Flashcard.route,
-            arguments = listOf(navArgument("deckId") { type = NavType.LongType })
-        ) { backStackEntry ->
-            val deckId = backStackEntry.arguments?.getLong("deckId") ?: 0L
-            val viewModel: FlashcardViewModel = viewModel(
-                factory = FlashcardViewModel.Factory(container.userRepository, container.vocabRepository)
-            )
-            FlashcardScreen(
-                deckId = deckId,
-                viewModel = viewModel,
-                onNavigateBack = { navController.popBackStack() },
-                onFinishSession = { id, totalWords, hard, somewhat, remembered, veryWell ->
-                    navController.navigate(
-                        Screen.StudyResult.createRoute(
-                            deckId = id,
-                            totalWords = totalWords,
-                            hardCount = hard,
-                            somewhatCount = somewhat,
-                            rememberedCount = remembered,
-                            veryWellCount = veryWell
-                        )
-                    ) {
-                        popUpTo(Screen.Flashcard.route) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        // Study Result Screen
-        composable(
-            route = Screen.StudyResult.route,
-            arguments = listOf(
-                navArgument("deckId") { type = NavType.LongType },
-                navArgument("totalWords") { type = NavType.IntType },
-                navArgument("hardCount") { type = NavType.IntType },
-                navArgument("somewhatCount") { type = NavType.IntType },
-                navArgument("rememberedCount") { type = NavType.IntType },
-                navArgument("veryWellCount") { type = NavType.IntType }
-            )
-        ) { backStackEntry ->
-            val deckId = backStackEntry.arguments?.getLong("deckId") ?: 0L
-            val totalWords = backStackEntry.arguments?.getInt("totalWords") ?: 0
-            val hardCount = backStackEntry.arguments?.getInt("hardCount") ?: 0
-            val somewhatCount = backStackEntry.arguments?.getInt("somewhatCount") ?: 0
-            val rememberedCount = backStackEntry.arguments?.getInt("rememberedCount") ?: 0
-            val veryWellCount = backStackEntry.arguments?.getInt("veryWellCount") ?: 0
-
-            val viewModel: StudyResultViewModel = viewModel(
-                factory = StudyResultViewModel.Factory(container.vocabRepository)
-            )
-
-            StudyResultScreen(
-                deckId = deckId,
-                totalWords = totalWords,
-                hardCount = hardCount,
-                somewhatCount = somewhatCount,
-                rememberedCount = rememberedCount,
-                veryWellCount = veryWellCount,
-                viewModel = viewModel,
-                onRelearnDeck = { id ->
-                    navController.navigate(Screen.Flashcard.createRoute(id)) {
-                        popUpTo(Screen.StudyResult.route) { inclusive = true }
+                onTabSelected = ::navigateToTab,
+                sets = appViewModel.sets,
+                onOpenSet = { id -> navController.navigate(Screen.SetDetail.createRoute(id)) },
+                onSeeAllSets = { navController.navigate(Screen.AllSets.route) },
+                onCreateSet = { navController.navigate(Screen.SetEditor.createRoute("new")) },
+                onOpenPractice = { mode ->
+                    if (mode == StudyMode.FLASHCARDS) {
+                        appViewModel.sets.firstOrNull()?.let {
+                            navController.navigate(Screen.Flashcards.createRoute(it.id))
+                        }
+                    } else {
+                        navController.navigate(Screen.Practice.createRoute(mode.name))
                     }
                 },
-                onBackToHome = {
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Home.route) { inclusive = true }
+                onContinueReview = {
+                    appViewModel.sets.firstOrNull()?.let {
+                        navController.navigate(Screen.Flashcards.createRoute(it.id))
                     }
+                }
+            )
+        }
+
+        composable(Screen.Learn.route) {
+            LearnScreen(
+                onTabSelected = ::navigateToTab,
+                sets = appViewModel.sets,
+                onOpenSet = { id -> navController.navigate(Screen.SetDetail.createRoute(id)) },
+                onOpenFlashcards = { id -> navController.navigate(Screen.Flashcards.createRoute(id)) },
+                onOpenMode = { mode -> navController.navigate(Screen.Practice.createRoute(mode.name)) }
+            )
+        }
+
+        composable(Screen.Review.route) {
+            ReviewScreen(
+                onTabSelected = ::navigateToTab,
+                items = appViewModel.allItems,
+                onStartReview = {
+                    appViewModel.sets.firstOrNull()?.let {
+                        navController.navigate(Screen.Flashcards.createRoute(it.id))
+                    }
+                }
+            )
+        }
+
+        composable(Screen.Progress.route) {
+            ProgressScreen(
+                onTabSelected = ::navigateToTab,
+                sets = appViewModel.sets,
+                items = appViewModel.allItems,
+                onOpenSet = { id -> navController.navigate(Screen.SetDetail.createRoute(id)) }
+            )
+        }
+
+        composable(Screen.AllSets.route) {
+            AllSetsScreen(
+                sets = appViewModel.sets,
+                onBack = { navController.popBackStack() },
+                onOpenSet = { id -> navController.navigate(Screen.SetDetail.createRoute(id)) },
+                onCreateSet = { navController.navigate(Screen.SetEditor.createRoute("new")) }
+            )
+        }
+
+        composable(
+            route = Screen.SetDetail.route,
+            arguments = listOf(navArgument("setId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val setId = backStackEntry.arguments?.getString("setId").orEmpty()
+            SetDetailScreen(
+                set = appViewModel.setById(setId),
+                onBack = { navController.popBackStack() },
+                onStartLearning = { navController.navigate(Screen.Flashcards.createRoute(setId)) },
+                onOpenMode = { mode ->
+                    if (mode == StudyMode.FLASHCARDS) {
+                        navController.navigate(Screen.Flashcards.createRoute(setId))
+                    } else {
+                        navController.navigate(Screen.Practice.createRoute(mode.name))
+                    }
+                },
+                onEditSet = { navController.navigate(Screen.SetEditor.createRoute(setId)) }
+            )
+        }
+
+        composable(
+            route = Screen.Flashcards.route,
+            arguments = listOf(navArgument("setId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val setId = backStackEntry.arguments?.getString("setId").orEmpty()
+            FlashcardScreen(
+                set = appViewModel.setById(setId),
+                onBack = { navController.popBackStack() },
+                onRate = appViewModel::rateItem,
+                onFinished = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(
+            route = Screen.Practice.route,
+            arguments = listOf(navArgument("mode") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val modeName = backStackEntry.arguments?.getString("mode").orEmpty()
+            val mode = StudyMode.entries.firstOrNull { it.name == modeName } ?: StudyMode.QUIZ
+            PracticePlaceholderScreen(
+                mode = mode,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Screen.SetEditor.route,
+            arguments = listOf(navArgument("setId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val setId = backStackEntry.arguments?.getString("setId") ?: "new"
+            SetEditorScreen(
+                set = appViewModel.setById(setId),
+                onBack = { navController.popBackStack() },
+                onSave = { title, description, level, category, words ->
+                    appViewModel.saveSet(setId, title, description, level, category, words)
+                    navController.popBackStack()
                 }
             )
         }

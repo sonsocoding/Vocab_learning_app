@@ -4,32 +4,25 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.vocablearningapp.ui.navigation.NavGraph
-import com.example.vocablearningapp.ui.theme.VocabLearningAppTheme
+import com.example.vocablearningapp.ui.state.AppViewModel
+import com.example.vocablearningapp.ui.theme.VocabTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val app = application as VocabApplication
 
         setContent {
-            VocabLearningAppTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    val navController = rememberNavController()
-                    NavGraph(
-                        navController = navController,
-                        container = app.container
-                    )
-                }
+            VocabTheme {
+                val navController = rememberNavController()
+                val appViewModel: AppViewModel = viewModel()
+                NavGraph(
+                    navController = navController,
+                    appViewModel = appViewModel
+                )
             }
         }
     }

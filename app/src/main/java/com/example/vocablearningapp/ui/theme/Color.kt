@@ -2,20 +2,24 @@ package com.example.vocablearningapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Quizlet Brand Colors
-val QuizletBlue = Color(0xFF4255FF)          // Quizlet Primary Electric Royal Blue
-val QuizletBlueDark = Color(0xFF3047EC)      // Quizlet Pressed / Darker Blue
-val QuizletNavy = Color(0xFF0A092D)          // Quizlet Dark Text & Navy Accent
-val QuizletBackground = Color(0xFFF6F7FB)    // Quizlet Crisp Soft Light Grey/Blue
-val QuizletCardBg = Color(0xFFFFFFFF)        // Quizlet Card White
-val QuizletSurfaceDark = Color(0xFF1E2438)   // Quizlet Dark Mode Surface
-val QuizletBgDark = Color(0xFF0A092D)        // Quizlet Dark Mode Background
+// A restrained warm-neutral palette with one deep sage accent.
+val Canvas = Color(0xFFF7F8F6)
+val Surface = Color(0xFFFFFFFF)
+val SurfaceMuted = Color(0xFFF0F3F0)
+val Ink = Color(0xFF1D2723)
+val InkSoft = Color(0xFF43514B)
+val Muted = Color(0xFF718078)
+val Border = Color(0xFFE0E7E2)
 
-// Progress & Status Colors
-val QuizletGreen = Color(0xFF18AE79)         // Quizlet Mastered / Know Mint Green
-val QuizletGreenLight = Color(0xFFE8F8F3)    // Quizlet Green Badge Background
-val QuizletCoral = Color(0xFFFF725B)         // Quizlet Still Learning Coral Red
-val QuizletCoralLight = Color(0xFFFFEEEB)    // Quizlet Coral Badge Background
-val QuizletYellow = Color(0xFFFFCD1F)        // Quizlet Star Yellow Accent
-val QuizletPurple = Color(0xFF7E57C2)        // Quizlet Secondary Accent
-val QuizletBorder = Color(0xFFE3E7F3)        // Subtle Border Color
+val Accent = Color(0xFF3F6B5E)
+val AccentDark = Color(0xFF2F5147)
+val AccentSoft = Color(0xFFE5F0EB)
+
+val NotRemembered = Color(0xFFD66F5C)
+val NotRememberedSoft = Color(0xFFFBEDEA)
+val SomewhatRemembered = Color(0xFFC08A32)
+val SomewhatRememberedSoft = Color(0xFFFBF3E1)
+val Remembered = Color(0xFF4C9276)
+val RememberedSoft = Color(0xFFE8F4EE)
+
+val White = Color(0xFFFFFFFF)

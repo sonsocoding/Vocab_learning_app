@@ -1,26 +1,21 @@
 package com.example.vocablearningapp.ui.navigation
 
 sealed class Screen(val route: String) {
-    object Login : Screen("login")
     object Home : Screen("home")
-    object LevelList : Screen("level")
-    object TopicList : Screen("topic/{levelId}") {
-        fun createRoute(levelId: String) = "topic/$levelId"
+    object Learn : Screen("learn")
+    object Review : Screen("review")
+    object Progress : Screen("progress")
+    object AllSets : Screen("all-sets")
+    object SetDetail : Screen("set-detail/{setId}") {
+        fun createRoute(setId: String) = "set-detail/$setId"
     }
-    object DeckList : Screen("deck/{topicId}") {
-        fun createRoute(topicId: Long) = "deck/$topicId"
+    object Flashcards : Screen("flashcards/{setId}") {
+        fun createRoute(setId: String) = "flashcards/$setId"
     }
-    object Flashcard : Screen("flashcard/{deckId}") {
-        fun createRoute(deckId: Long) = "flashcard/$deckId"
+    object Practice : Screen("practice/{mode}") {
+        fun createRoute(mode: String) = "practice/$mode"
     }
-    object StudyResult : Screen("study_result/{deckId}/{totalWords}/{hardCount}/{somewhatCount}/{rememberedCount}/{veryWellCount}") {
-        fun createRoute(
-            deckId: Long,
-            totalWords: Int,
-            hardCount: Int,
-            somewhatCount: Int,
-            rememberedCount: Int,
-            veryWellCount: Int
-        ) = "study_result/$deckId/$totalWords/$hardCount/$somewhatCount/$rememberedCount/$veryWellCount"
+    object SetEditor : Screen("set-editor/{setId}") {
+        fun createRoute(setId: String) = "set-editor/$setId"
     }
 }
