@@ -11,6 +11,7 @@ import com.example.vocablearningapp.ui.screen.flashcard.FlashcardScreen
 import com.example.vocablearningapp.ui.screen.home.HomeScreen
 import com.example.vocablearningapp.ui.screen.learn.LearnScreen
 import com.example.vocablearningapp.ui.screen.learn.LearnModeScreen
+import com.example.vocablearningapp.ui.screen.match.MatchModeScreen
 import com.example.vocablearningapp.ui.screen.progress.ProgressScreen
 import com.example.vocablearningapp.ui.screen.quiz.QuizModeScreen
 import com.example.vocablearningapp.ui.screen.review.ReviewScreen
@@ -148,6 +149,12 @@ fun NavGraph(
                 )
 
                 StudyMode.QUIZ -> QuizModeScreen(
+                    set = appViewModel.setById(setId),
+                    onBack = { navController.popBackStack() },
+                    onRate = appViewModel::rateItem
+                )
+
+                StudyMode.MATCH -> MatchModeScreen(
                     set = appViewModel.setById(setId),
                     onBack = { navController.popBackStack() },
                     onRate = appViewModel::rateItem
