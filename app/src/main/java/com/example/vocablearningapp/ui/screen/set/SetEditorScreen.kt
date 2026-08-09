@@ -213,7 +213,7 @@ private fun WordEditorCard(
                 }
             }
             EditorField(value = draft.word, onValueChange = { onChange(draft.copy(word = it)) }, label = "Word", placeholder = "ambitious")
-            EditorField(value = draft.meaning, onValueChange = { onChange(draft.copy(meaning = it)) }, label = "Meaning", placeholder = "having strong goals")
+            EditorField(value = draft.meaning, onValueChange = { onChange(draft.copy(meaning = it)) }, label = "Meaning", placeholder = "tham vọng")
             EditorField(value = draft.pronunciation, onValueChange = { onChange(draft.copy(pronunciation = it)) }, label = "Pronunciation", placeholder = "/æmˈbɪʃ.əs/")
             EditorField(value = draft.exampleSentence, onValueChange = { onChange(draft.copy(exampleSentence = it)) }, label = "Example sentence", placeholder = "Use the word in context")
         }

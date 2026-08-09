@@ -21,7 +21,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -40,7 +39,6 @@ import com.example.vocablearningapp.ui.theme.Accent
 import com.example.vocablearningapp.ui.theme.AccentDark
 import com.example.vocablearningapp.ui.theme.Ink
 import com.example.vocablearningapp.ui.theme.Muted
-import com.example.vocablearningapp.ui.theme.Surface
 import com.example.vocablearningapp.ui.theme.White
 
 @Composable
