@@ -16,5 +16,5 @@ interface TopicDao {
     suspend fun getTopicById(id: Long): TopicEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTopics(topics: List<TopicEntity>)
+    suspend fun insertTopics(topics: List<TopicEntity>): LongArray
 }

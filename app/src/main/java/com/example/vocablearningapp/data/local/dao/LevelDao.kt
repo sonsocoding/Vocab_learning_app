@@ -16,5 +16,5 @@ interface LevelDao {
     suspend fun getLevelById(id: String): LevelEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertLevels(levels: List<LevelEntity>)
+    suspend fun insertLevels(levels: List<LevelEntity>): LongArray
 }

@@ -21,10 +21,9 @@ data class FlashcardUiState(
     val isFlipped: Boolean = false,
     val isLoading: Boolean = true,
     val isFinished: Boolean = false,
-    val hardCount: Int = 0,
-    val somewhatCount: Int = 0,
-    val rememberedCount: Int = 0,
-    val veryWellCount: Int = 0
+    val hardCount: Int = 0,     // Chưa nhớ (Level 0)
+    val somewhatCount: Int = 0, // Hơi nhớ (Level 1)
+    val rememberedCount: Int = 0 // Đã nhớ (Level 2)
 )
 
 class FlashcardViewModel(
@@ -50,7 +49,11 @@ class FlashcardViewModel(
                     items = items,
                     currentIndex = 0,
                     isFlipped = false,
-                    isLoading = false
+                    isLoading = false,
+                    isFinished = false,
+                    hardCount = 0,
+                    somewhatCount = 0,
+                    rememberedCount = 0
                 )
             }
         }
@@ -98,8 +101,7 @@ class FlashcardViewModel(
 
             val newHard = if (level == 0) state.hardCount + 1 else state.hardCount
             val newSomewhat = if (level == 1) state.somewhatCount + 1 else state.somewhatCount
-            val newRemembered = if (level == 2) state.rememberedCount + 1 else state.rememberedCount
-            val newVeryWell = if (level == 3) state.veryWellCount + 1 else state.veryWellCount
+            val newRemembered = if (level >= 2) state.rememberedCount + 1 else state.rememberedCount
 
             if (state.currentIndex < state.items.size - 1) {
                 _uiState.update {
@@ -108,19 +110,17 @@ class FlashcardViewModel(
                         isFlipped = false,
                         hardCount = newHard,
                         somewhatCount = newSomewhat,
-                        rememberedCount = newRemembered,
-                        veryWellCount = newVeryWell
+                        rememberedCount = newRemembered
                     )
                 }
             } else {
-                // All cards rated
+                // All cards rated - finish session safely
                 _uiState.update {
                     it.copy(
                         isFinished = true,
                         hardCount = newHard,
                         somewhatCount = newSomewhat,
-                        rememberedCount = newRemembered,
-                        veryWellCount = newVeryWell
+                        rememberedCount = newRemembered
                     )
                 }
             }

@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface FlashcardProgressDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsertProgress(progress: FlashcardProgressEntity)
+    suspend fun upsertProgress(progress: FlashcardProgressEntity): Long
 
     @Query("""
         SELECT fp.* FROM flashcard_progress fp

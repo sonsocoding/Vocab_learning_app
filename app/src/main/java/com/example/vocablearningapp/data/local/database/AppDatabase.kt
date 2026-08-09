@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
         VocabularyEntity::class,
         FlashcardProgressEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -53,9 +53,24 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "vocab_learning_db"
                 )
+                .fallbackToDestructiveMigration()
                 .addCallback(object : Callback() {
                     override fun onCreate(db: SupportSQLiteDatabase) {
                         super.onCreate(db)
+                        INSTANCE?.let { database ->
+                            CoroutineScope(Dispatchers.IO).launch {
+                                DatabaseSeeder.seedDatabase(
+                                    database.levelDao(),
+                                    database.topicDao(),
+                                    database.deckDao(),
+                                    database.vocabularyDao()
+                                )
+                            }
+                        }
+                    }
+
+                    override fun onOpen(db: SupportSQLiteDatabase) {
+                        super.onOpen(db)
                         INSTANCE?.let { database ->
                             CoroutineScope(Dispatchers.IO).launch {
                                 DatabaseSeeder.seedDatabase(

@@ -16,5 +16,5 @@ interface DeckDao {
     suspend fun getDeckById(id: Long): DeckEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertDecks(decks: List<DeckEntity>)
+    suspend fun insertDecks(decks: List<DeckEntity>): LongArray
 }

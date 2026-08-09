@@ -19,5 +19,5 @@ interface VocabularyDao {
     fun getVocabularyCountByDeck(deckId: Long): Flow<Int>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertVocabularies(vocabularies: List<VocabularyEntity>)
+    suspend fun insertVocabularies(vocabularies: List<VocabularyEntity>): LongArray
 }
