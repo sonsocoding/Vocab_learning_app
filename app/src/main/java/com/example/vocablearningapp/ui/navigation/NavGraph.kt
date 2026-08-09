@@ -12,6 +12,7 @@ import com.example.vocablearningapp.ui.screen.home.HomeScreen
 import com.example.vocablearningapp.ui.screen.learn.LearnScreen
 import com.example.vocablearningapp.ui.screen.learn.LearnModeScreen
 import com.example.vocablearningapp.ui.screen.progress.ProgressScreen
+import com.example.vocablearningapp.ui.screen.quiz.QuizModeScreen
 import com.example.vocablearningapp.ui.screen.review.ReviewScreen
 import com.example.vocablearningapp.ui.screen.set.AllSetsScreen
 import com.example.vocablearningapp.ui.screen.set.PracticePlaceholderScreen
@@ -139,14 +140,20 @@ fun NavGraph(
             val modeName = backStackEntry.arguments?.getString("mode").orEmpty()
             val setId = backStackEntry.arguments?.getString("setId").orEmpty()
             val mode = StudyMode.entries.firstOrNull { it.name == modeName } ?: StudyMode.QUIZ
-            if (mode == StudyMode.LEARN) {
-                LearnModeScreen(
+            when (mode) {
+                StudyMode.LEARN -> LearnModeScreen(
                     set = appViewModel.setById(setId),
                     onBack = { navController.popBackStack() },
                     onRate = appViewModel::rateItem
                 )
-            } else {
-                PracticePlaceholderScreen(
+
+                StudyMode.QUIZ -> QuizModeScreen(
+                    set = appViewModel.setById(setId),
+                    onBack = { navController.popBackStack() },
+                    onRate = appViewModel::rateItem
+                )
+
+                else -> PracticePlaceholderScreen(
                     mode = mode,
                     onBack = { navController.popBackStack() }
                 )
