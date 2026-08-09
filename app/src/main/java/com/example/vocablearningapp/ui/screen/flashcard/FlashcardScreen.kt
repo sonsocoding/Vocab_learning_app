@@ -25,14 +25,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.vocablearningapp.domain.model.MemoryLevel
 import com.example.vocablearningapp.domain.model.VocabularySet
 import com.example.vocablearningapp.ui.component.EmptyState
 import com.example.vocablearningapp.ui.component.Flashcard
 import com.example.vocablearningapp.ui.component.MemoryLevelButton
+import com.example.vocablearningapp.ui.component.PrimaryButton
 import com.example.vocablearningapp.ui.component.VocabDimens
 import com.example.vocablearningapp.ui.component.VocabProgressBar
 import com.example.vocablearningapp.ui.theme.Canvas
@@ -50,6 +49,7 @@ fun FlashcardScreen(
 ) {
     var currentIndex by remember(set?.id) { mutableStateOf(0) }
     var isFlipped by remember(set?.id) { mutableStateOf(false) }
+    var isComplete by remember(set?.id) { mutableStateOf(false) }
     val sessionWords = remember(set?.id) { set?.words.orEmpty() }
 
     Scaffold(
@@ -82,8 +82,29 @@ fun FlashcardScreen(
                 description = "Add a few words to start a study session.",
                 modifier = Modifier.padding(innerPadding).padding(24.dp)
             )
-        } else if (currentIndex >= sessionWords.size) {
-            onFinished()
+        } else if (isComplete || currentIndex >= sessionWords.size) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = VocabDimens.ScreenPadding),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(text = "Session complete", style = MaterialTheme.typography.headlineSmall, color = Ink)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "You reviewed ${sessionWords.size} cards.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Muted
+                )
+                Spacer(modifier = Modifier.height(22.dp))
+                PrimaryButton(
+                    text = "Back to set",
+                    onClick = onFinished,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         } else {
             val item = sessionWords[currentIndex]
             val progress = (currentIndex + 1).toFloat() / sessionWords.size
@@ -126,7 +147,7 @@ fun FlashcardScreen(
                                 onClick = {
                                     onRate(item.id, level)
                                     if (currentIndex == sessionWords.lastIndex) {
-                                        onFinished()
+                                        isComplete = true
                                     } else {
                                         currentIndex += 1
                                         isFlipped = false
