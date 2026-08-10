@@ -42,6 +42,14 @@ import com.example.vocablearningapp.ui.theme.MasteredSoft
 import com.example.vocablearningapp.ui.theme.Muted
 import com.example.vocablearningapp.ui.theme.Surface
 
+private data class TrueFalseQuestion(
+    val wordItem: VocabularyItem,
+    val meaningItem: VocabularyItem
+) {
+    val answer: Boolean
+        get() = wordItem.id == meaningItem.id
+}
+
 @Composable
 fun QuizModeScreen(
     set: VocabularySet?,
@@ -49,38 +57,44 @@ fun QuizModeScreen(
     onRate: (String, MemoryLevel) -> Unit
 ) {
     var currentIndex by remember(set?.id) { mutableStateOf(0) }
-    var selectedAnswerId by remember(set?.id) { mutableStateOf<String?>(null) }
+    var selectedAnswer by remember(set?.id) { mutableStateOf<Boolean?>(null) }
     var score by remember(set?.id) { mutableStateOf(0) }
     var isComplete by remember(set?.id) { mutableStateOf(false) }
-    val sessionWords = remember(set?.id) { set?.words.orEmpty().shuffled().take(10) }
-    val currentItem = sessionWords.getOrNull(currentIndex)
-    val options = remember(currentItem?.id) {
-        currentItem?.let { item ->
-            (sessionWords.filterNot { it.id == item.id }.shuffled().take(3) + item).shuffled()
-        }.orEmpty()
+    val questions = remember(set?.id) {
+        val words = set?.words.orEmpty().shuffled().take(10)
+        words.map { wordItem ->
+            val showCorrectMeaning = words.size < 2 || kotlin.random.Random.nextBoolean()
+            val meaningItem = if (showCorrectMeaning) {
+                wordItem
+            } else {
+                words.filterNot { it.id == wordItem.id }.random()
+            }
+            TrueFalseQuestion(wordItem = wordItem, meaningItem = meaningItem)
+        }
     }
+    val currentQuestion = questions.getOrNull(currentIndex)
 
     Scaffold(
         containerColor = Canvas,
         topBar = { VocabTopBar(title = "Quiz", onBack = onBack) }
     ) { innerPadding ->
         when {
-            set == null || sessionWords.isEmpty() -> EmptyState(
+            set == null || questions.isEmpty() -> EmptyState(
                 title = "No words to quiz",
                 description = "Add a few words to this set before starting a quiz.",
                 modifier = Modifier.padding(innerPadding).padding(24.dp)
             )
 
             isComplete -> QuizComplete(
-                total = sessionWords.size,
+                total = questions.size,
                 score = score,
                 onBack = onBack,
                 modifier = Modifier.padding(innerPadding)
             )
 
-            currentItem != null -> {
-                val hasAnswer = selectedAnswerId != null
-                val isCorrect = selectedAnswerId == currentItem.id
+            currentQuestion != null -> {
+                val hasAnswer = selectedAnswer != null
+                val isCorrect = selectedAnswer == currentQuestion.answer
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -93,13 +107,13 @@ fun QuizModeScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "Question ${currentIndex + 1} of ${sessionWords.size}",
+                            text = "Question ${currentIndex + 1} of ${questions.size}",
                             style = MaterialTheme.typography.labelLarge,
                             color = Muted
                         )
                         Text(text = "Score $score", style = MaterialTheme.typography.labelLarge, color = Accent)
                     }
-                    VocabProgressBar(progress = (currentIndex + 1f) / sessionWords.size)
+                    VocabProgressBar(progress = (currentIndex + 1f) / questions.size)
 
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -108,48 +122,70 @@ fun QuizModeScreen(
                         border = BorderStroke(1.dp, Border)
                     ) {
                         Column(modifier = Modifier.padding(20.dp)) {
-                            Text(text = "What does this word mean?", style = MaterialTheme.typography.labelMedium, color = Accent)
+                            Text(text = "Does this meaning match the word?", style = MaterialTheme.typography.labelMedium, color = Accent)
                             Spacer(modifier = Modifier.height(10.dp))
-                            Text(text = currentItem.word, style = MaterialTheme.typography.headlineSmall, color = Ink)
+                            Text(text = currentQuestion.wordItem.word, style = MaterialTheme.typography.headlineSmall, color = Ink)
                             Spacer(modifier = Modifier.height(5.dp))
-                            Text(text = currentItem.pronunciation, style = MaterialTheme.typography.bodyMedium, color = Muted)
+                            Text(text = currentQuestion.wordItem.pronunciation, style = MaterialTheme.typography.bodyMedium, color = Muted)
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(text = currentQuestion.meaningItem.meaning, style = MaterialTheme.typography.titleLarge, color = Ink)
                         }
                     }
 
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        options.forEach { option ->
-                            QuizAnswerOption(
-                                item = option,
-                                selectedAnswerId = selectedAnswerId,
-                                correctAnswerId = currentItem.id,
-                                enabled = !hasAnswer,
-                                onClick = {
-                                    selectedAnswerId = option.id
-                                    if (option.id == currentItem.id) {
-                                        score += 1
-                                        onRate(currentItem.id, MemoryLevel.MASTERED)
-                                    } else {
-                                        onRate(currentItem.id, MemoryLevel.FORGOT)
-                                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        TrueFalseOption(
+                            label = "True",
+                            value = true,
+                            selectedAnswer = selectedAnswer,
+                            correctAnswer = currentQuestion.answer,
+                            enabled = !hasAnswer,
+                            modifier = Modifier.weight(1f),
+                            onClick = {
+                                selectedAnswer = true
+                                if (currentQuestion.answer) {
+                                    score += 1
+                                    onRate(currentQuestion.wordItem.id, MemoryLevel.MASTERED)
+                                } else {
+                                    onRate(currentQuestion.wordItem.id, MemoryLevel.FORGOT)
                                 }
-                            )
-                        }
+                            }
+                        )
+                        TrueFalseOption(
+                            label = "False",
+                            value = false,
+                            selectedAnswer = selectedAnswer,
+                            correctAnswer = currentQuestion.answer,
+                            enabled = !hasAnswer,
+                            modifier = Modifier.weight(1f),
+                            onClick = {
+                                selectedAnswer = false
+                                if (!currentQuestion.answer) {
+                                    score += 1
+                                    onRate(currentQuestion.wordItem.id, MemoryLevel.MASTERED)
+                                } else {
+                                    onRate(currentQuestion.wordItem.id, MemoryLevel.FORGOT)
+                                }
+                            }
+                        )
                     }
 
                     if (hasAnswer) {
                         Text(
-                            text = if (isCorrect) "Correct" else "The correct answer is ${currentItem.meaning}",
+                            text = if (isCorrect) "Correct" else "Not quite. The correct answer is ${if (currentQuestion.answer) "True" else "False"}.",
                             style = MaterialTheme.typography.bodyLarge,
                             color = if (isCorrect) Mastered else Forgot
                         )
                         PrimaryButton(
-                            text = if (currentIndex == sessionWords.lastIndex) "See results" else "Next question",
+                            text = if (currentIndex == questions.lastIndex) "See results" else "Next question",
                             onClick = {
-                                if (currentIndex == sessionWords.lastIndex) {
+                                if (currentIndex == questions.lastIndex) {
                                     isComplete = true
                                 } else {
                                     currentIndex += 1
-                                    selectedAnswerId = null
+                                    selectedAnswer = null
                                 }
                             },
                             modifier = Modifier.fillMaxWidth()
@@ -162,38 +198,41 @@ fun QuizModeScreen(
 }
 
 @Composable
-private fun QuizAnswerOption(
-    item: VocabularyItem,
-    selectedAnswerId: String?,
-    correctAnswerId: String,
+private fun TrueFalseOption(
+    label: String,
+    value: Boolean,
+    selectedAnswer: Boolean?,
+    correctAnswer: Boolean,
     enabled: Boolean,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     val containerColor = when {
-        selectedAnswerId == null -> Surface
-        item.id == correctAnswerId -> MasteredSoft
-        item.id == selectedAnswerId -> ForgotSoft
+        selectedAnswer == null -> Surface
+        value == correctAnswer -> MasteredSoft
+        value == selectedAnswer -> ForgotSoft
         else -> Surface
     }
     val contentColor = when {
-        selectedAnswerId == null -> Ink
-        item.id == correctAnswerId -> Mastered
-        item.id == selectedAnswerId -> Forgot
+        selectedAnswer == null -> Ink
+        value == correctAnswer -> Mastered
+        value == selectedAnswer -> Forgot
         else -> Muted
     }
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(enabled = enabled, onClick = onClick),
+        modifier = modifier.clickable(enabled = enabled, onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = containerColor),
-        border = BorderStroke(1.dp, if (selectedAnswerId == null) Border else containerColor)
+        border = BorderStroke(1.dp, if (selectedAnswer == null) Border else containerColor)
     ) {
         Text(
-            text = item.meaning,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 17.dp),
-            style = MaterialTheme.typography.bodyLarge,
-            color = contentColor
+            text = label,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 18.dp),
+            style = MaterialTheme.typography.titleMedium,
+            color = contentColor,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
     }
 }
