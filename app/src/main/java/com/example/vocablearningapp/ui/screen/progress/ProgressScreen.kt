@@ -12,12 +12,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,7 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.vocablearningapp.domain.model.MemoryLevel
+import com.example.vocablearningapp.domain.model.FsrsState
 import com.example.vocablearningapp.domain.model.VocabularyItem
 import com.example.vocablearningapp.domain.model.VocabularySet
 import com.example.vocablearningapp.ui.component.AppScaffold
@@ -35,12 +34,10 @@ import com.example.vocablearningapp.ui.component.StatCard
 import com.example.vocablearningapp.ui.component.VocabDimens
 import com.example.vocablearningapp.ui.component.VocabProgressBar
 import com.example.vocablearningapp.ui.component.VocabularySetCard
+import com.example.vocablearningapp.ui.component.fsrsColors
 import com.example.vocablearningapp.ui.theme.Accent
 import com.example.vocablearningapp.ui.theme.Ink
 import com.example.vocablearningapp.ui.theme.Muted
-import com.example.vocablearningapp.ui.theme.Forgot
-import com.example.vocablearningapp.ui.theme.Learning
-import com.example.vocablearningapp.ui.theme.Mastered
 import com.example.vocablearningapp.ui.theme.Surface
 
 @Composable
@@ -51,7 +48,7 @@ fun ProgressScreen(
     onOpenSet: (String) -> Unit
 ) {
     val totalWords = items.size
-    val masteredWords = items.count { it.memoryLevel == MemoryLevel.MASTERED }
+    val reviewWords = items.count { it.fsrsState == FsrsState.REVIEW }
 
     AppScaffold(selectedTab = MainTab.PROGRESS, onTabSelected = onTabSelected) { innerPadding ->
         Column(
@@ -65,7 +62,11 @@ fun ProgressScreen(
             Column {
                 Text(text = "Progress", style = MaterialTheme.typography.headlineSmall, color = Ink)
                 Spacer(modifier = Modifier.height(5.dp))
-                Text(text = "A quiet look at the work you have put in.", style = MaterialTheme.typography.bodyMedium, color = Muted)
+                Text(
+                    text = "A clear view of your FSRS learning journey.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Muted
+                )
             }
 
             Row(
@@ -74,13 +75,13 @@ fun ProgressScreen(
             ) {
                 StatCard(
                     value = totalWords.toString(),
-                    label = "Words learned",
+                    label = "Total words",
                     icon = Icons.Default.BookmarkBorder,
                     modifier = Modifier.weight(1f)
                 )
                 StatCard(
-                    value = masteredWords.toString(),
-                    label = "Words mastered",
+                    value = reviewWords.toString(),
+                    label = "In review",
                     icon = Icons.Default.Check,
                     modifier = Modifier.weight(1f)
                 )
@@ -92,7 +93,7 @@ fun ProgressScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            MasteryBreakdown(items = items)
+            StateBreakdown(items = items)
 
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 SectionHeader(title = "Recent sets")
@@ -105,43 +106,33 @@ fun ProgressScreen(
 }
 
 @Composable
-private fun MasteryBreakdown(items: List<VocabularyItem>) {
+private fun StateBreakdown(items: List<VocabularyItem>) {
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        SectionHeader(title = "Mastery")
+        SectionHeader(title = "Card states")
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(VocabDimens.CardRadius),
             colors = CardDefaults.cardColors(containerColor = Surface)
         ) {
             Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(17.dp)) {
-                MasteryLine(
-                    level = MemoryLevel.FORGOT,
-                    count = items.count { it.memoryLevel == MemoryLevel.FORGOT },
-                    total = items.size,
-                    color = Forgot
-                )
-                MasteryLine(
-                    level = MemoryLevel.LEARNING,
-                    count = items.count { it.memoryLevel == MemoryLevel.LEARNING },
-                    total = items.size,
-                    color = Learning
-                )
-                MasteryLine(
-                    level = MemoryLevel.MASTERED,
-                    count = items.count { it.memoryLevel == MemoryLevel.MASTERED },
-                    total = items.size,
-                    color = Mastered
-                )
+                FsrsState.entries.forEach { state ->
+                    StateLine(
+                        state = state,
+                        count = items.count { it.fsrsState == state },
+                        total = items.size,
+                        color = fsrsColors(state).second
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun MasteryLine(level: MemoryLevel, count: Int, total: Int, color: Color) {
+private fun StateLine(state: FsrsState, count: Int, total: Int, color: Color) {
     Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = level.label, style = MaterialTheme.typography.bodyMedium, color = Ink)
+            Text(text = state.label, style = MaterialTheme.typography.bodyMedium, color = Ink)
             Text(text = "$count words", style = MaterialTheme.typography.bodyMedium, color = Muted)
         }
         VocabProgressBar(

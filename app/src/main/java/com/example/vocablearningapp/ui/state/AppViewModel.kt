@@ -5,10 +5,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.example.vocablearningapp.data.MockData
-import com.example.vocablearningapp.domain.model.MemoryLevel
+import com.example.vocablearningapp.domain.model.FsrsRating
+import com.example.vocablearningapp.domain.model.FsrsState
 import com.example.vocablearningapp.domain.model.VocabularyItem
 import com.example.vocablearningapp.domain.model.VocabularySet
-import com.example.vocablearningapp.domain.srs.SpacedRepetition
+import com.example.vocablearningapp.domain.srs.FsrsScheduler
 
 data class AppUiState(
     val vocabularySets: List<VocabularySet> = MockData.vocabularySets,
@@ -19,11 +20,13 @@ data class AppUiState(
 class AppViewModel : ViewModel() {
     companion object {
         const val DAILY_WORDS_SET_ID = "daily-words"
-        const val TODAY_REVIEW_SET_ID = "today-review"
+        const val DAILY_REVIEW_SET_ID = "daily-review"
     }
 
     var uiState by mutableStateOf(AppUiState())
         private set
+
+    private val fsrsScheduler = FsrsScheduler()
 
     val sets: List<VocabularySet>
         get() = uiState.vocabularySets
@@ -50,28 +53,40 @@ class AppViewModel : ViewModel() {
         get() {
             val nowMillis = System.currentTimeMillis()
             return VocabularySet(
-                id = TODAY_REVIEW_SET_ID,
-                title = "Today's Review",
+                id = DAILY_REVIEW_SET_ID,
+                title = "Daily Review",
                 description = "Words scheduled by your spaced repetition review plan.",
                 category = "Review",
                 level = uiState.lastStudiedLevel,
-                words = reviewItems.filter { SpacedRepetition.isDue(it, nowMillis) }
+                words = reviewItems.filter { fsrsScheduler.isDue(it, nowMillis) }
             )
         }
 
     fun setById(id: String): VocabularySet? = when (id) {
         DAILY_WORDS_SET_ID -> dailyWordsSet
-        TODAY_REVIEW_SET_ID -> todayReviewSet
+        DAILY_REVIEW_SET_ID -> todayReviewSet
         else -> sets.firstOrNull { it.id == id }
     }
 
     fun rateItem(
         itemId: String,
-        memoryLevel: MemoryLevel,
+        rating: FsrsRating,
         nowMillis: Long = System.currentTimeMillis()
     ) {
         val currentItem = reviewItems.firstOrNull { it.id == itemId } ?: return
-        val schedule = SpacedRepetition.schedule(currentItem, memoryLevel, nowMillis)
+        val schedule = fsrsScheduler.review(currentItem, rating, nowMillis)
+        val updatedItem = currentItem.copy(
+            fsrsState = schedule.state,
+            fsrsStep = schedule.step,
+            stability = schedule.stability,
+            difficulty = schedule.difficulty,
+            dueAtMillis = schedule.dueAtMillis,
+            lastReviewAtMillis = nowMillis,
+            scheduledDays = schedule.scheduledDays,
+            reviewCount = currentItem.reviewCount + 1,
+            lapseCount = currentItem.lapseCount +
+                if (currentItem.fsrsState == FsrsState.REVIEW && rating == FsrsRating.AGAIN) 1 else 0
+        )
         val studiedSetLevel = sets.firstOrNull { set ->
             set.words.any { item -> item.id == itemId }
         }?.level
@@ -80,11 +95,7 @@ class AppViewModel : ViewModel() {
                 set.copy(
                     words = set.words.map { item ->
                         if (item.id == itemId) {
-                            item.copy(
-                                memoryLevel = memoryLevel,
-                                nextReviewAtMillis = schedule.nextReviewAtMillis,
-                                reviewIntervalDays = schedule.intervalDays
-                            )
+                            updatedItem
                         } else item
                     }
                 )
@@ -92,11 +103,7 @@ class AppViewModel : ViewModel() {
             dailyWordsByLevel = uiState.dailyWordsByLevel.mapValues { (_, items) ->
                 items.map { item ->
                     if (item.id == itemId) {
-                        item.copy(
-                            memoryLevel = memoryLevel,
-                            nextReviewAtMillis = schedule.nextReviewAtMillis,
-                            reviewIntervalDays = schedule.intervalDays
-                        )
+                        updatedItem
                     } else item
                 }
             },

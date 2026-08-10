@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,12 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -63,19 +60,22 @@ fun Flashcard(
 @Composable
 private fun FrontOfCard(item: VocabularyItem) {
     Box(modifier = Modifier.fillMaxSize().padding(24.dp)) {
-        IconButton(
-            onClick = { /* Audio playback will be connected later. */ },
+        SpeechButton(
+            text = item.word,
+            contentDescription = "Play word pronunciation",
             modifier = Modifier.align(Alignment.TopEnd)
-        ) {
-            Icon(imageVector = Icons.Default.VolumeUp, contentDescription = "Play pronunciation", tint = Accent)
-        }
+        )
         Column(
             modifier = Modifier.align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = item.word, style = MaterialTheme.typography.displaySmall, color = Ink, textAlign = TextAlign.Center)
             Spacer(modifier = Modifier.height(10.dp))
-            Text(text = item.pronunciation, style = MaterialTheme.typography.bodyMedium, color = Muted)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = item.pronunciation, style = MaterialTheme.typography.bodyMedium, color = Muted)
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(text = item.partOfSpeech.label, style = MaterialTheme.typography.labelMedium, color = Accent)
+            }
         }
     }
 }
@@ -89,7 +89,14 @@ private fun BackOfCard(item: VocabularyItem) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = item.word, style = MaterialTheme.typography.titleMedium, color = Accent)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = item.word, style = MaterialTheme.typography.titleMedium, color = Accent)
+            SpeechButton(
+                text = item.word,
+                contentDescription = "Play word pronunciation",
+                tint = Accent
+            )
+        }
         Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = item.meaning,
@@ -98,14 +105,28 @@ private fun BackOfCard(item: VocabularyItem) {
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(20.dp))
-        Surface(color = SurfaceMuted, shape = RoundedCornerShape(15.dp)) {
-            Text(
-                text = "“${item.exampleSentence}”",
-                modifier = Modifier.padding(15.dp),
-                style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic),
-                color = Ink,
-                textAlign = TextAlign.Center
-            )
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = SurfaceMuted,
+            shape = RoundedCornerShape(15.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(start = 15.dp, top = 10.dp, end = 8.dp, bottom = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "“${item.exampleSentence}”",
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic),
+                    color = Ink,
+                    textAlign = TextAlign.Center
+                )
+                SpeechButton(
+                    text = item.exampleSentence,
+                    contentDescription = "Play example sentence",
+                    tint = Accent
+                )
+            }
         }
     }
 }

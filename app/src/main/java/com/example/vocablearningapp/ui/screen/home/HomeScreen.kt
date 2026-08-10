@@ -151,7 +151,7 @@ private fun DailyWordsCard(
             ) {
                 Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null)
                 Spacer(modifier = Modifier.width(7.dp))
-                Text(text = "Study daily words", fontWeight = FontWeight.SemiBold)
+                Text(text = "Open daily set", fontWeight = FontWeight.SemiBold)
             }
         }
     }

@@ -1,19 +1,30 @@
 package com.example.vocablearningapp
 
 import com.example.vocablearningapp.data.MockData
-import com.example.vocablearningapp.domain.model.MemoryLevel
+import com.example.vocablearningapp.domain.model.FsrsState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class MockDataTest {
     @Test
-    fun studySetsStartMostlyForgotWithOnlyThreeLearningWords() {
+    fun studySetsStartMostlyNewWithOnlyThreeLearningWords() {
         val items = MockData.vocabularySets.flatMap { it.words }
 
-        assertEquals(0, items.count { it.memoryLevel == MemoryLevel.MASTERED })
-        assertEquals(3, items.count { it.memoryLevel == MemoryLevel.LEARNING })
-        assertEquals(items.size - 3, items.count { it.memoryLevel == MemoryLevel.FORGOT })
+        assertEquals(0, items.count { it.fsrsState == FsrsState.REVIEW })
+        assertEquals(3, items.count { it.fsrsState == FsrsState.LEARNING })
+        assertEquals(items.size - 3, items.count { it.fsrsState == FsrsState.NEW })
+    }
+
+    @Test
+    fun vocabularyItemsHaveVietnameseMeaningIpaPartOfSpeechAndExample() {
+        val items = MockData.vocabularySets.flatMap { it.words } +
+            MockData.dailyWordsByLevel.values.flatten()
+
+        assertTrue(items.all { it.meaning.isNotBlank() })
+        assertTrue(items.all { it.pronunciation.isNotBlank() })
+        assertTrue(items.all { it.exampleSentence.isNotBlank() })
+        assertTrue(items.all { it.partOfSpeech.label in setOf("noun", "verb", "adj") })
     }
 
     @Test

@@ -23,7 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.vocablearningapp.domain.model.MemoryLevel
+import com.example.vocablearningapp.domain.model.FsrsRating
 import com.example.vocablearningapp.domain.model.VocabularyItem
 import com.example.vocablearningapp.domain.model.VocabularySet
 import com.example.vocablearningapp.ui.component.EmptyState
@@ -46,7 +46,7 @@ import com.example.vocablearningapp.ui.theme.Surface
 fun LearnModeScreen(
     set: VocabularySet?,
     onBack: () -> Unit,
-    onRate: (String, MemoryLevel) -> Unit
+    onRate: (String, FsrsRating) -> Unit
 ) {
     var currentIndex by remember(set?.id) { mutableStateOf(0) }
     var selectedAnswerId by remember(set?.id) { mutableStateOf<String?>(null) }
@@ -131,9 +131,9 @@ fun LearnModeScreen(
                                     selectedAnswerId = option.id
                                     if (option.id == currentItem.id) {
                                         correctAnswers += 1
-                                        onRate(currentItem.id, MemoryLevel.LEARNING)
+                                        onRate(currentItem.id, FsrsRating.GOOD)
                                     } else {
-                                        onRate(currentItem.id, MemoryLevel.FORGOT)
+                                        onRate(currentItem.id, FsrsRating.AGAIN)
                                     }
                                 }
                             )

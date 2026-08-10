@@ -23,7 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.vocablearningapp.domain.model.MemoryLevel
+import com.example.vocablearningapp.domain.model.FsrsRating
 import com.example.vocablearningapp.domain.model.VocabularyItem
 import com.example.vocablearningapp.domain.model.VocabularySet
 import com.example.vocablearningapp.ui.component.EmptyState
@@ -54,7 +54,7 @@ private data class TrueFalseQuestion(
 fun QuizModeScreen(
     set: VocabularySet?,
     onBack: () -> Unit,
-    onRate: (String, MemoryLevel) -> Unit
+    onRate: (String, FsrsRating) -> Unit
 ) {
     var currentIndex by remember(set?.id) { mutableStateOf(0) }
     var selectedAnswer by remember(set?.id) { mutableStateOf<Boolean?>(null) }
@@ -147,9 +147,9 @@ fun QuizModeScreen(
                                 selectedAnswer = true
                                 if (currentQuestion.answer) {
                                     score += 1
-                                    onRate(currentQuestion.wordItem.id, MemoryLevel.MASTERED)
+                                    onRate(currentQuestion.wordItem.id, FsrsRating.GOOD)
                                 } else {
-                                    onRate(currentQuestion.wordItem.id, MemoryLevel.FORGOT)
+                                    onRate(currentQuestion.wordItem.id, FsrsRating.AGAIN)
                                 }
                             }
                         )
@@ -164,9 +164,9 @@ fun QuizModeScreen(
                                 selectedAnswer = false
                                 if (!currentQuestion.answer) {
                                     score += 1
-                                    onRate(currentQuestion.wordItem.id, MemoryLevel.MASTERED)
+                                    onRate(currentQuestion.wordItem.id, FsrsRating.GOOD)
                                 } else {
-                                    onRate(currentQuestion.wordItem.id, MemoryLevel.FORGOT)
+                                    onRate(currentQuestion.wordItem.id, FsrsRating.AGAIN)
                                 }
                             }
                         )

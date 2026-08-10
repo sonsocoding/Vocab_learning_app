@@ -26,11 +26,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.vocablearningapp.domain.model.MemoryLevel
+import com.example.vocablearningapp.domain.model.FsrsRating
 import com.example.vocablearningapp.domain.model.VocabularySet
 import com.example.vocablearningapp.ui.component.EmptyState
 import com.example.vocablearningapp.ui.component.Flashcard
-import com.example.vocablearningapp.ui.component.MemoryLevelButton
+import com.example.vocablearningapp.ui.component.FsrsRatingButton
 import com.example.vocablearningapp.ui.component.PrimaryButton
 import com.example.vocablearningapp.ui.component.VocabDimens
 import com.example.vocablearningapp.ui.component.VocabProgressBar
@@ -44,7 +44,7 @@ import com.example.vocablearningapp.ui.theme.Muted
 fun FlashcardScreen(
     set: VocabularySet?,
     onBack: () -> Unit,
-    onRate: (String, MemoryLevel) -> Unit,
+    onRate: (String, FsrsRating) -> Unit,
     onFinished: () -> Unit
 ) {
     var currentIndex by remember(set?.id) { mutableStateOf(0) }
@@ -140,12 +140,12 @@ fun FlashcardScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        MemoryLevel.entries.forEach { level ->
-                            MemoryLevelButton(
-                                level = level,
+                        FsrsRating.entries.forEach { rating ->
+                            FsrsRatingButton(
+                                rating = rating,
                                 enabled = isFlipped,
                                 onClick = {
-                                    onRate(item.id, level)
+                                    onRate(item.id, rating)
                                     if (currentIndex == sessionWords.lastIndex) {
                                         isComplete = true
                                     } else {

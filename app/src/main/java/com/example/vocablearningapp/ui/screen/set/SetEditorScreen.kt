@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,7 +32,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.vocablearningapp.domain.model.MemoryLevel
+import com.example.vocablearningapp.domain.model.FsrsState
+import com.example.vocablearningapp.domain.model.PartOfSpeech
 import com.example.vocablearningapp.domain.model.VocabularyItem
 import com.example.vocablearningapp.domain.model.VocabularySet
 import com.example.vocablearningapp.ui.component.PrimaryButton
@@ -214,7 +216,17 @@ private fun WordEditorCard(
             }
             EditorField(value = draft.word, onValueChange = { onChange(draft.copy(word = it)) }, label = "Word", placeholder = "ambitious")
             EditorField(value = draft.meaning, onValueChange = { onChange(draft.copy(meaning = it)) }, label = "Meaning", placeholder = "tham vọng")
-            EditorField(value = draft.pronunciation, onValueChange = { onChange(draft.copy(pronunciation = it)) }, label = "Pronunciation", placeholder = "/æmˈbɪʃ.əs/")
+            EditorField(value = draft.pronunciation, onValueChange = { onChange(draft.copy(pronunciation = it)) }, label = "IPA pronunciation", placeholder = "/æmˈbɪʃ.əs/")
+            Text(text = "Part of speech", style = MaterialTheme.typography.labelLarge, color = Ink)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                PartOfSpeech.entries.forEach { partOfSpeech ->
+                    FilterChip(
+                        selected = draft.partOfSpeech == partOfSpeech,
+                        onClick = { onChange(draft.copy(partOfSpeech = partOfSpeech)) },
+                        label = { Text(partOfSpeech.label) }
+                    )
+                }
+            }
             EditorField(value = draft.exampleSentence, onValueChange = { onChange(draft.copy(exampleSentence = it)) }, label = "Example sentence", placeholder = "Use the word in context")
         }
     }
@@ -225,10 +237,17 @@ private data class DraftWord(
     val word: String = "",
     val meaning: String = "",
     val pronunciation: String = "",
+    val partOfSpeech: PartOfSpeech = PartOfSpeech.NOUN,
     val exampleSentence: String = "",
-    val memoryLevel: MemoryLevel = MemoryLevel.FORGOT,
-    val nextReviewAtMillis: Long = 0L,
-    val reviewIntervalDays: Int = 0
+    val fsrsState: FsrsState = FsrsState.NEW,
+    val fsrsStep: Int? = null,
+    val stability: Double = 0.0,
+    val difficulty: Double = 0.0,
+    val dueAtMillis: Long = 0L,
+    val lastReviewAtMillis: Long? = null,
+    val scheduledDays: Int = 0,
+    val reviewCount: Int = 0,
+    val lapseCount: Int = 0
 ) {
     fun toVocabularyItem(setTitle: String, index: Int): VocabularyItem? {
         if (word.isBlank() && meaning.isBlank()) return null
@@ -237,10 +256,19 @@ private data class DraftWord(
             word = word.trim(),
             meaning = meaning.trim(),
             pronunciation = pronunciation.trim(),
-            exampleSentence = exampleSentence.trim(),
-            memoryLevel = memoryLevel,
-            nextReviewAtMillis = nextReviewAtMillis,
-            reviewIntervalDays = reviewIntervalDays
+            partOfSpeech = partOfSpeech,
+            exampleSentence = exampleSentence.trim().ifBlank {
+                "This is an example sentence for ${word.trim()}."
+            },
+            fsrsState = fsrsState,
+            fsrsStep = fsrsStep,
+            stability = stability,
+            difficulty = difficulty,
+            dueAtMillis = dueAtMillis,
+            lastReviewAtMillis = lastReviewAtMillis,
+            scheduledDays = scheduledDays,
+            reviewCount = reviewCount,
+            lapseCount = lapseCount
         )
     }
 
@@ -250,10 +278,17 @@ private data class DraftWord(
             word = item.word,
             meaning = item.meaning,
             pronunciation = item.pronunciation,
+            partOfSpeech = item.partOfSpeech,
             exampleSentence = item.exampleSentence,
-            memoryLevel = item.memoryLevel,
-            nextReviewAtMillis = item.nextReviewAtMillis,
-            reviewIntervalDays = item.reviewIntervalDays
+            fsrsState = item.fsrsState,
+            fsrsStep = item.fsrsStep,
+            stability = item.stability,
+            difficulty = item.difficulty,
+            dueAtMillis = item.dueAtMillis,
+            lastReviewAtMillis = item.lastReviewAtMillis,
+            scheduledDays = item.scheduledDays,
+            reviewCount = item.reviewCount,
+            lapseCount = item.lapseCount
         )
     }
 }

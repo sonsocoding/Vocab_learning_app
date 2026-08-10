@@ -49,7 +49,7 @@ fun NavGraph(
                 dailyWords = appViewModel.dailyWordsSet,
                 onOpenDailyWords = {
                     navController.navigate(
-                        Screen.Flashcards.createRoute(AppViewModel.DAILY_WORDS_SET_ID)
+                        Screen.SetDetail.createRoute(AppViewModel.DAILY_WORDS_SET_ID)
                     )
                 }
             )
@@ -71,7 +71,7 @@ fun NavGraph(
                 items = appViewModel.reviewItems,
                 onStartReview = {
                     navController.navigate(
-                        Screen.Flashcards.createRoute(AppViewModel.TODAY_REVIEW_SET_ID)
+                        Screen.Flashcards.createRoute(AppViewModel.DAILY_REVIEW_SET_ID)
                     )
                 },
                 onOpenSet = { id -> navController.navigate(Screen.SetDetail.createRoute(id)) }

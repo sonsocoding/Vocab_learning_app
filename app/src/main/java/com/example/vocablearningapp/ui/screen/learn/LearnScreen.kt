@@ -11,7 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -91,11 +91,11 @@ private fun ContinueLearningCard(set: VocabularySet, onOpen: () -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = set.title, style = MaterialTheme.typography.titleLarge, color = Ink)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "${set.words.size} words · ${set.progress}% mastered", style = MaterialTheme.typography.bodyMedium, color = Muted)
+            Text(text = "${set.words.size} words · ${set.progress}% in review", style = MaterialTheme.typography.bodyMedium, color = Muted)
             Spacer(modifier = Modifier.height(14.dp))
             VocabProgressBar(progress = set.progress / 100f)
             Spacer(modifier = Modifier.height(16.dp))
-            PrimaryButton(text = "Open set", onClick = onOpen, icon = Icons.Default.ArrowForward)
+            PrimaryButton(text = "Open set", onClick = onOpen, icon = Icons.AutoMirrored.Filled.ArrowForward)
         }
     }
 }

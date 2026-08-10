@@ -42,7 +42,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.example.vocablearningapp.domain.model.MemoryLevel
+import com.example.vocablearningapp.domain.model.FsrsState
 import com.example.vocablearningapp.domain.model.VocabularyItem
 import com.example.vocablearningapp.domain.model.VocabularySet
 import com.example.vocablearningapp.ui.theme.Accent
@@ -214,6 +214,12 @@ fun VocabularyRow(
                 )
                 Spacer(modifier = Modifier.height(3.dp))
                 Text(
+                    text = "${item.pronunciation} · ${item.partOfSpeech.label}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Muted
+                )
+                Spacer(modifier = Modifier.height(3.dp))
+                Text(
                     text = item.meaning,
                     style = MaterialTheme.typography.bodyMedium,
                     color = Muted,
@@ -221,7 +227,7 @@ fun VocabularyRow(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            MemoryPill(level = item.memoryLevel)
+            FsrsStatePill(state = item.fsrsState)
             if (trailingContent != null) {
                 trailingContent()
             }
@@ -230,15 +236,15 @@ fun VocabularyRow(
 }
 
 @Composable
-fun MemoryPill(level: MemoryLevel, modifier: Modifier = Modifier) {
-    val (background, foreground) = memoryColors(level)
+fun FsrsStatePill(state: FsrsState, modifier: Modifier = Modifier) {
+    val (background, foreground) = fsrsColors(state)
     Surface(
         modifier = modifier,
         color = background,
         shape = RoundedCornerShape(50)
     ) {
         Text(
-            text = level.label,
+            text = state.label,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
             style = MaterialTheme.typography.labelMedium,
             color = foreground
@@ -368,8 +374,9 @@ fun AvatarButton(
     }
 }
 
-fun memoryColors(level: MemoryLevel): Pair<Color, Color> = when (level) {
-    MemoryLevel.FORGOT -> ForgotSoft to Forgot
-    MemoryLevel.LEARNING -> LearningSoft to Learning
-    MemoryLevel.MASTERED -> MasteredSoft to Mastered
+fun fsrsColors(state: FsrsState): Pair<Color, Color> = when (state) {
+    FsrsState.NEW -> SurfaceMuted to Muted
+    FsrsState.LEARNING -> LearningSoft to Learning
+    FsrsState.REVIEW -> MasteredSoft to Mastered
+    FsrsState.RELEARNING -> ForgotSoft to Forgot
 }

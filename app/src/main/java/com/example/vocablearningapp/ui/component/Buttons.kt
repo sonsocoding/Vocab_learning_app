@@ -19,7 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.example.vocablearningapp.domain.model.MemoryLevel
+import com.example.vocablearningapp.domain.model.FsrsRating
 import com.example.vocablearningapp.ui.theme.Accent
 import com.example.vocablearningapp.ui.theme.Ink
 import com.example.vocablearningapp.ui.theme.SurfaceMuted
@@ -98,14 +98,20 @@ fun TextAction(
 }
 
 @Composable
-fun MemoryLevelButton(
-    level: MemoryLevel,
+fun FsrsRatingButton(
+    rating: FsrsRating,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
-    val (_, foreground) = memoryColors(level)
-    val (background, _) = memoryColors(level)
+    val stateForColor = when (rating) {
+        FsrsRating.AGAIN -> com.example.vocablearningapp.domain.model.FsrsState.RELEARNING
+        FsrsRating.HARD -> com.example.vocablearningapp.domain.model.FsrsState.LEARNING
+        FsrsRating.GOOD -> com.example.vocablearningapp.domain.model.FsrsState.REVIEW
+        FsrsRating.EASY -> com.example.vocablearningapp.domain.model.FsrsState.REVIEW
+    }
+    val (_, foreground) = fsrsColors(stateForColor)
+    val (background, _) = fsrsColors(stateForColor)
     Button(
         onClick = onClick,
         enabled = enabled,
@@ -118,6 +124,6 @@ fun MemoryLevelButton(
             disabledContentColor = foreground
         )
     ) {
-        Text(text = level.label)
+        Text(text = rating.label)
     }
 }

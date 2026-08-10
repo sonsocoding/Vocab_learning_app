@@ -24,7 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.vocablearningapp.domain.model.MemoryLevel
+import com.example.vocablearningapp.domain.model.FsrsRating
 import com.example.vocablearningapp.domain.model.VocabularyItem
 import com.example.vocablearningapp.domain.model.VocabularySet
 import com.example.vocablearningapp.ui.component.EmptyState
@@ -48,7 +48,7 @@ import com.example.vocablearningapp.ui.theme.Surface
 fun MatchModeScreen(
     set: VocabularySet?,
     onBack: () -> Unit,
-    onRate: (String, MemoryLevel) -> Unit
+    onRate: (String, FsrsRating) -> Unit
 ) {
     var selectedWordId by remember(set?.id) { mutableStateOf<String?>(null) }
     var selectedMeaningId by remember(set?.id) { mutableStateOf<String?>(null) }
@@ -73,12 +73,12 @@ fun MatchModeScreen(
         selectedMeaningId = item.id
         if (item.id == wordId) {
             matchedIds = matchedIds + item.id
-            onRate(item.id, MemoryLevel.MASTERED)
+            onRate(item.id, FsrsRating.GOOD)
             selectedWordId = null
             selectedMeaningId = null
             hasMistake = false
         } else {
-            onRate(wordId, MemoryLevel.FORGOT)
+            onRate(wordId, FsrsRating.AGAIN)
             hasMistake = true
         }
     }

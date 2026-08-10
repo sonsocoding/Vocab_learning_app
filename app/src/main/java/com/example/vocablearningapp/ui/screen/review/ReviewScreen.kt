@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,10 +28,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.vocablearningapp.domain.model.MemoryLevel
+import com.example.vocablearningapp.domain.model.FsrsState
 import com.example.vocablearningapp.domain.model.VocabularyItem
 import com.example.vocablearningapp.domain.model.VocabularySet
-import com.example.vocablearningapp.domain.srs.SpacedRepetition
+import com.example.vocablearningapp.domain.srs.FsrsScheduler
 import com.example.vocablearningapp.ui.component.AppScaffold
 import com.example.vocablearningapp.ui.component.MainTab
 import com.example.vocablearningapp.ui.component.PrimaryButton
@@ -51,10 +52,11 @@ fun ReviewScreen(
     onStartReview: () -> Unit,
     onOpenSet: (String) -> Unit
 ) {
-    var selectedFilter by remember { mutableStateOf<MemoryLevel?>(null) }
-    val nowMillis = remember { System.currentTimeMillis() }
-    val filteredItems = selectedFilter?.let { level -> items.filter { it.memoryLevel == level } } ?: items
-    val dueItems = filteredItems.filter { SpacedRepetition.isDue(it, nowMillis) }
+    var selectedFilter by remember { mutableStateOf<FsrsState?>(null) }
+    val scheduler = remember { FsrsScheduler() }
+    val nowMillis = System.currentTimeMillis()
+    val filteredItems = selectedFilter?.let { state -> items.filter { it.fsrsState == state } } ?: items
+    val dueItems = filteredItems.filter { scheduler.isDue(it, nowMillis) }
 
     AppScaffold(selectedTab = MainTab.REVIEW, onTabSelected = onTabSelected) { innerPadding ->
         Column(
@@ -69,7 +71,7 @@ fun ReviewScreen(
                 Text(text = "Review", style = MaterialTheme.typography.headlineSmall, color = Ink)
                 Spacer(modifier = Modifier.height(5.dp))
                 Text(
-                    text = "Small, regular reviews make new words stick.",
+                    text = "FSRS schedules the right words for your daily review.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Muted
                 )
@@ -90,34 +92,39 @@ fun ReviewScreen(
                     onClick = { selectedFilter = null },
                     label = { Text("All") }
                 )
-                MemoryLevel.entries.forEach { level ->
+                FsrsState.entries.forEach { state ->
                     FilterChip(
-                        selected = selectedFilter == level,
-                        onClick = { selectedFilter = level },
-                        label = { Text(level.label) }
+                        selected = selectedFilter == state,
+                        onClick = { selectedFilter = state },
+                        label = { Text(state.label) }
                     )
                 }
             }
 
             ReviewSection(
                 title = "Due today",
-                subtitle = "${dueItems.size} words are ready",
+                subtitle = "${dueItems.size} cards are ready",
                 items = dueItems.take(4)
             )
             ReviewSection(
-                title = "Weak words",
-                subtitle = "Rated Forgot",
-                items = filteredItems.filter { it.memoryLevel == MemoryLevel.FORGOT }.take(4)
+                title = "New",
+                subtitle = "Cards waiting for their first review",
+                items = filteredItems.filter { it.fsrsState == FsrsState.NEW }.take(4)
             )
             ReviewSection(
                 title = "Learning",
-                subtitle = "Rated Learning",
-                items = filteredItems.filter { it.memoryLevel == MemoryLevel.LEARNING }.take(4)
+                subtitle = "Cards moving through learning steps",
+                items = filteredItems.filter { it.fsrsState == FsrsState.LEARNING }.take(4)
             )
             ReviewSection(
-                title = "Mastered",
-                subtitle = "Rated Mastered",
-                items = filteredItems.filter { it.memoryLevel == MemoryLevel.MASTERED }.take(4)
+                title = "Relearning",
+                subtitle = "Cards being rebuilt after a lapse",
+                items = filteredItems.filter { it.fsrsState == FsrsState.RELEARNING }.take(4)
+            )
+            ReviewSection(
+                title = "Review",
+                subtitle = "Cards that have graduated to long-term review",
+                items = filteredItems.filter { it.fsrsState == FsrsState.REVIEW }.take(4)
             )
         }
     }
@@ -131,7 +138,7 @@ private fun RecommendedReview(
     val recommendedSets = sets
         .sortedWith(
             compareByDescending<VocabularySet> { set ->
-                set.words.count { it.memoryLevel == MemoryLevel.FORGOT }
+                set.words.count { it.fsrsState != FsrsState.REVIEW }
             }.thenBy { it.progress }
         )
         .take(3)
@@ -139,7 +146,7 @@ private fun RecommendedReview(
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         SectionHeader(title = "Recommended review")
         Text(
-            text = "Sets with the most Forgot words and the lowest mastery.",
+            text = "Sets with cards still in New, Learning or Relearning.",
             style = MaterialTheme.typography.bodyMedium,
             color = Muted
         )
@@ -162,8 +169,8 @@ private fun ReviewHero(
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                androidx.compose.material3.Icon(imageVector = Icons.Default.Timer, contentDescription = null, tint = Accent)
-                Text(text = "TODAY'S REVIEW", style = MaterialTheme.typography.labelMedium, color = Accent)
+                Icon(imageVector = Icons.Default.Timer, contentDescription = null, tint = Accent)
+                Text(text = "DAILY REVIEW", style = MaterialTheme.typography.labelMedium, color = Accent)
             }
             Spacer(modifier = Modifier.height(9.dp))
             Text(text = "$dueCount words due today", style = MaterialTheme.typography.titleLarge, color = Ink)
@@ -171,10 +178,11 @@ private fun ReviewHero(
             Text(text = "Estimated $estimatedMinutes minutes", style = MaterialTheme.typography.bodyMedium, color = Muted)
             Spacer(modifier = Modifier.height(16.dp))
             PrimaryButton(
-                text = "Start review",
+                text = "Start daily review",
                 onClick = onStartReview,
                 modifier = Modifier.fillMaxWidth(),
-                icon = Icons.Default.PlayArrow
+                icon = Icons.Default.PlayArrow,
+                enabled = dueCount > 0
             )
         }
     }
@@ -190,7 +198,7 @@ private fun ReviewSection(
         SectionHeader(title = title)
         Text(text = subtitle, style = MaterialTheme.typography.bodyMedium, color = Muted)
         if (items.isEmpty()) {
-            Text(text = "No words here yet.", style = MaterialTheme.typography.bodyMedium, color = Muted)
+            Text(text = "No cards here yet.", style = MaterialTheme.typography.bodyMedium, color = Muted)
         } else {
             items.forEach { item -> VocabularyRow(item = item) }
         }
