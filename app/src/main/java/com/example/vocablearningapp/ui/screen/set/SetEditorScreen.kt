@@ -182,7 +182,7 @@ private fun EditorField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    placeholder: String,
+    placeholder: String = "",
     modifier: Modifier = Modifier
 ) {
     OutlinedTextField(
@@ -190,7 +190,7 @@ private fun EditorField(
         onValueChange = onValueChange,
         modifier = modifier.fillMaxWidth(),
         label = { Text(label) },
-        placeholder = { Text(placeholder) },
+        placeholder = if (placeholder.isNotBlank()) { { Text(placeholder) } } else null,
         singleLine = true,
         shape = RoundedCornerShape(14.dp)
     )
@@ -204,6 +204,11 @@ private fun WordEditorCard(
     onChange: (DraftWord) -> Unit,
     onDelete: () -> Unit
 ) {
+    var wordText by remember(draft.id) { mutableStateOf(draft.word) }
+    var meaningText by remember(draft.id) { mutableStateOf(draft.meaning) }
+    var pronunciationText by remember(draft.id) { mutableStateOf(draft.pronunciation) }
+    var exampleText by remember(draft.id) { mutableStateOf(draft.exampleSentence) }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(VocabDimens.CardRadius),
@@ -221,19 +226,34 @@ private fun WordEditorCard(
                 }
             }
             EditorField(
-                value = draft.word,
+                value = wordText,
                 onValueChange = { newWord ->
-                    val autoIpa = if (draft.pronunciation.isBlank()) IpaGenerator.generateIpa(newWord) else draft.pronunciation
-                    onChange(draft.copy(word = newWord, pronunciation = autoIpa))
+                    wordText = newWord
+                    val autoIpa = if (pronunciationText.isBlank()) IpaGenerator.generateIpa(newWord) else pronunciationText
+                    if (pronunciationText.isBlank() && autoIpa.isNotBlank()) {
+                        pronunciationText = autoIpa
+                    }
+                    onChange(draft.copy(word = newWord, pronunciation = pronunciationText))
                 },
                 label = "Word",
-                placeholder = "ambitious"
+                placeholder = ""
             )
-            EditorField(value = draft.meaning, onValueChange = { onChange(draft.copy(meaning = it)) }, label = "Meaning", placeholder = "tham vọng (hoặc: n. thông báo; v. nhận thấy)")
+            EditorField(
+                value = meaningText,
+                onValueChange = { newMeaning ->
+                    meaningText = newMeaning
+                    onChange(draft.copy(meaning = newMeaning))
+                },
+                label = "Meaning",
+                placeholder = "Ví dụ: n. thông báo, v. nhận thấy"
+            )
             IpaFieldWithHelper(
-                pronunciation = draft.pronunciation,
-                word = draft.word,
-                onPronunciationChange = { onChange(draft.copy(pronunciation = it)) }
+                pronunciation = pronunciationText,
+                word = wordText,
+                onPronunciationChange = { newIpa ->
+                    pronunciationText = newIpa
+                    onChange(draft.copy(pronunciation = newIpa))
+                }
             )
             Text(text = "Part of speech", style = MaterialTheme.typography.labelLarge, color = Ink)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -245,7 +265,15 @@ private fun WordEditorCard(
                     )
                 }
             }
-            EditorField(value = draft.exampleSentence, onValueChange = { onChange(draft.copy(exampleSentence = it)) }, label = "Example sentence", placeholder = "Use the word in context")
+            EditorField(
+                value = exampleText,
+                onValueChange = { newExample ->
+                    exampleText = newExample
+                    onChange(draft.copy(exampleSentence = newExample))
+                },
+                label = "Example sentence",
+                placeholder = ""
+            )
         }
     }
 }
@@ -328,7 +356,7 @@ private fun IpaFieldWithHelper(
 }
 
 private data class DraftWord(
-    val id: String = "",
+    val id: String = "draft-${System.nanoTime()}-${kotlin.random.Random.nextInt(10000)}",
     val word: String = "",
     val meaning: String = "",
     val pronunciation: String = "",
