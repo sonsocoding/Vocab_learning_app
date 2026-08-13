@@ -38,19 +38,24 @@ import com.example.vocablearningapp.ui.theme.Canvas
 import com.example.vocablearningapp.ui.theme.Ink
 import com.example.vocablearningapp.ui.theme.Muted
 
-@OptIn(ExperimentalMaterial3Api::class)
+import com.example.vocablearningapp.ui.component.SecondaryButton
+import com.example.vocablearningapp.ui.state.AppViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FlashcardScreen(
     set: VocabularySet?,
     onBack: () -> Unit,
     onRate: (String, FsrsRating) -> Unit,
-    onFinished: () -> Unit
+    onFinished: () -> Unit,
+    onSkipDailyWord: ((String) -> Unit)? = null
 ) {
     var currentIndex by remember(set?.id) { mutableStateOf(0) }
     var isFlipped by remember(set?.id) { mutableStateOf(false) }
     var isComplete by remember(set?.id) { mutableStateOf(false) }
+    var hasChosenStudy by remember(currentIndex) { mutableStateOf(false) }
     val sessionWords = remember(set?.id) { set?.words.orEmpty() }
+    val isDailyWords = set?.id == AppViewModel.DAILY_WORDS_SET_ID
 
     Scaffold(
         containerColor = Canvas,
@@ -136,17 +141,16 @@ fun FlashcardScreen(
                 )
 
                 Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        FsrsRating.entries.forEach { rating ->
-                            FsrsRatingButton(
-                                rating = rating,
-                                enabled = isFlipped,
+                    if (isDailyWords && !hasChosenStudy) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            SecondaryButton(
+                                text = "Skip",
                                 onClick = {
-                                    onRate(item.id, rating)
-                                    if (currentIndex == sessionWords.lastIndex) {
+                                    onSkipDailyWord?.invoke(item.id)
+                                    if (currentIndex >= sessionWords.lastIndex) {
                                         isComplete = true
                                     } else {
                                         currentIndex += 1
@@ -155,6 +159,35 @@ fun FlashcardScreen(
                                 },
                                 modifier = Modifier.weight(1f)
                             )
+                            PrimaryButton(
+                                text = "Study",
+                                onClick = {
+                                    hasChosenStudy = true
+                                },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            FsrsRating.entries.forEach { rating ->
+                                FsrsRatingButton(
+                                    rating = rating,
+                                    enabled = isFlipped,
+                                    onClick = {
+                                        onRate(item.id, rating)
+                                        if (currentIndex == sessionWords.lastIndex) {
+                                            isComplete = true
+                                        } else {
+                                            currentIndex += 1
+                                            isFlipped = false
+                                        }
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
                         }
                     }
                 }

@@ -127,7 +127,8 @@ fun NavGraph(
                 onRate = appViewModel::rateItem,
                 onFinished = {
                     navController.popBackStack()
-                }
+                },
+                onSkipDailyWord = appViewModel::skipDailyWord
             )
         }
 
