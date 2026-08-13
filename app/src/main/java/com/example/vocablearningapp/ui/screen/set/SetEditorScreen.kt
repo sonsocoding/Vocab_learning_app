@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.example.vocablearningapp.data.DictionaryRepository
 import com.example.vocablearningapp.domain.model.FsrsState
 import com.example.vocablearningapp.domain.model.PartOfSpeech
 import com.example.vocablearningapp.domain.model.VocabularyItem
@@ -243,18 +244,35 @@ private fun WordEditorCard(
                 }
             }
 
-            EditorField(
-                value = draft.word,
-                onValueChange = { newWord ->
-                    draft.word = newWord
-                    val autoIpa = if (draft.pronunciation.isBlank()) IpaGenerator.generateIpa(newWord) else draft.pronunciation
-                    if (draft.pronunciation.isBlank() && autoIpa.isNotBlank()) {
-                        draft.pronunciation = autoIpa
-                    }
-                },
-                label = "Word",
-                placeholder = ""
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                EditorField(
+                    value = draft.word,
+                    onValueChange = { newWord ->
+                        draft.word = newWord
+                        autoFillFromDictionary(newWord, draft, forceFill = false)
+                    },
+                    label = "Word",
+                    placeholder = "e.g. commute, notice...",
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                androidx.compose.material3.Button(
+                    onClick = {
+                        autoFillFromDictionary(draft.word, draft, forceFill = true)
+                    },
+                    shape = RoundedCornerShape(14.dp),
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        containerColor = AccentSoft,
+                        contentColor = Accent
+                    ),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 14.dp)
+                ) {
+                    Text(text = "✨ Auto Fill", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                }
+            }
 
             IpaFieldWithHelper(
                 pronunciation = draft.pronunciation,
@@ -283,6 +301,38 @@ private fun WordEditorCard(
                 onClick = { draft.meanings.add(DraftMeaningState()) },
                 modifier = Modifier.fillMaxWidth()
             )
+        }
+    }
+}
+
+private fun autoFillFromDictionary(word: String, draft: DraftWordState, forceFill: Boolean) {
+    val clean = word.trim()
+    if (clean.isBlank()) return
+
+    val dictWord = DictionaryRepository.lookupWord(clean)
+    if (dictWord != null) {
+        if (forceFill || draft.pronunciation.isBlank()) {
+            draft.pronunciation = dictWord.ipa
+        }
+
+        val isMeaningsEmpty = draft.meanings.all { it.meaning.isBlank() }
+        if (forceFill || isMeaningsEmpty) {
+            if (dictWord.meanings.isNotEmpty()) {
+                draft.meanings.clear()
+                dictWord.meanings.forEach { dMeaning ->
+                    draft.meanings.add(
+                        DraftMeaningState(
+                            initialPos = dMeaning.partOfSpeech,
+                            initialMeaning = dMeaning.meaning,
+                            initialExample = dMeaning.exampleSentence
+                        )
+                    )
+                }
+            }
+        }
+    } else {
+        if (forceFill || draft.pronunciation.isBlank()) {
+            draft.pronunciation = IpaGenerator.generateIpa(clean)
         }
     }
 }
