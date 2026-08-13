@@ -1,10 +1,13 @@
 package com.example.vocablearningapp.ui.state
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.example.vocablearningapp.data.MockData
+import com.example.vocablearningapp.data.StreakManager
+import com.example.vocablearningapp.data.StreakState
 import com.example.vocablearningapp.domain.model.FsrsRating
 import com.example.vocablearningapp.domain.model.FsrsState
 import com.example.vocablearningapp.domain.model.VocabularyItem
@@ -14,17 +17,20 @@ import com.example.vocablearningapp.domain.srs.FsrsScheduler
 data class AppUiState(
     val vocabularySets: List<VocabularySet> = MockData.vocabularySets,
     val dailyWordsByLevel: Map<String, List<VocabularyItem>> = MockData.dailyWordsByLevel,
-    val lastStudiedLevel: String = "A2"
+    val lastStudiedLevel: String = "A2",
+    val streakState: StreakState = StreakState()
 )
 
-class AppViewModel : ViewModel() {
+class AppViewModel(application: Application) : AndroidViewModel(application) {
     companion object {
         const val DAILY_WORDS_SET_ID = "daily-words"
         const val DAILY_REVIEW_SET_ID = "daily-review"
         const val DAILY_WORDS_PER_DAY = 10
     }
 
-    var uiState by mutableStateOf(AppUiState())
+    private val streakManager = StreakManager(application)
+
+    var uiState by mutableStateOf(AppUiState(streakState = streakManager.getStreakState()))
         private set
 
     private val fsrsScheduler = FsrsScheduler()
@@ -110,8 +116,13 @@ class AppViewModel : ViewModel() {
                     } else item
                 }
             },
-            lastStudiedLevel = studiedSetLevel ?: uiState.lastStudiedLevel
+            lastStudiedLevel = studiedSetLevel ?: uiState.lastStudiedLevel,
+            streakState = streakManager.recordActivityToday()
         )
+    }
+
+    fun recordActivity() {
+        uiState = uiState.copy(streakState = streakManager.recordActivityToday())
     }
 
     fun skipDailyWord(itemId: String) {
