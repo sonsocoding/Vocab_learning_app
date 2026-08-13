@@ -103,6 +103,7 @@ private fun BackOfCard(item: VocabularyItem) {
             rawExample = item.exampleSentence,
             fallbackPos = item.partOfSpeech
         )
+
         if (meaningEntries.size > 1) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -155,7 +156,7 @@ private fun BackOfCard(item: VocabularyItem) {
                 textAlign = TextAlign.Center
             )
             if (item.exampleSentence.isNotBlank()) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(18.dp))
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     color = SurfaceMuted,
@@ -179,30 +180,6 @@ private fun BackOfCard(item: VocabularyItem) {
                         )
                     }
                 }
-            }
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            color = SurfaceMuted,
-            shape = RoundedCornerShape(15.dp)
-        ) {
-            Row(
-                modifier = Modifier.padding(start = 15.dp, top = 10.dp, end = 8.dp, bottom = 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "“${item.exampleSentence}”",
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic),
-                    color = Ink,
-                    textAlign = TextAlign.Center
-                )
-                SpeechButton(
-                    text = item.exampleSentence,
-                    contentDescription = "Play example sentence",
-                    tint = Accent
-                )
             }
         }
     }

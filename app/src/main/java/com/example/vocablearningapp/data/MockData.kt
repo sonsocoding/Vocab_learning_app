@@ -6,11 +6,8 @@ import com.example.vocablearningapp.domain.model.VocabularyItem
 import com.example.vocablearningapp.domain.model.VocabularySet
 
 object MockData {
-    private val initialLearningWordIds = setOf(
-        "daily-life-ambitious",
-        "school-assignment",
-        "advanced-nuance-meticulous"
-    )
+    private val now = System.currentTimeMillis()
+    private val oneDay = 86_400_000L
 
     val vocabularySets = listOf(
         VocabularySet(
@@ -20,9 +17,10 @@ object MockData {
             category = "Everyday",
             level = "A1",
             words = listOf(
-                word("everyday-basics", "hello", "xin chào", "/həˈləʊ/", "Hello, it is nice to meet you.", FsrsState.NEW),
-                word("everyday-basics", "family", "gia đình", "/ˈfæməli/", "My family lives near the city.", FsrsState.NEW),
-                word("everyday-basics", "friend", "người bạn", "/frend/", "My best friend studies with me.", FsrsState.NEW),
+                word("everyday-basics", "hello", "xin chào", "/həˈləʊ/", "Hello, it is nice to meet you.", FsrsState.REVIEW, reviewCount = 4, stability = 12.0, dueAtMillis = now - oneDay),
+                word("everyday-basics", "book", "n. cuốn sách; v. đặt chỗ trước", "/bʊk/", "n. I read an interesting book. | v. We need to book a hotel room.", FsrsState.REVIEW, partOfSpeech = PartOfSpeech.NOUN, reviewCount = 3, stability = 8.5, dueAtMillis = now + 2 * oneDay),
+                word("everyday-basics", "family", "gia đình", "/ˈfæməli/", "My family lives near the city.", FsrsState.LEARNING, reviewCount = 1, stability = 1.5, dueAtMillis = now),
+                word("everyday-basics", "friend", "người bạn", "/frend/", "My best friend studies with me.", FsrsState.REVIEW, reviewCount = 2, stability = 5.0, dueAtMillis = now + oneDay),
                 word("everyday-basics", "morning", "buổi sáng", "/ˈmɔːnɪŋ/", "I read the news in the morning.", FsrsState.NEW),
                 word("everyday-basics", "near", "gần", "/nɪə/", "The library is near my home.", FsrsState.NEW),
                 word("everyday-basics", "usually", "thường xuyên", "/ˈjuːʒuəli/", "I usually walk to class.", FsrsState.NEW)
@@ -50,12 +48,13 @@ object MockData {
             category = "Everyday",
             level = "A2",
             words = listOf(
-                word("daily-life", "daily", "hằng ngày", "/ˈdeɪli/", "I take a short walk daily.", FsrsState.NEW),
-                word("daily-life", "ambitious", "tham vọng", "/æmˈbɪʃəs/", "She is ambitious and works hard for her goals.", FsrsState.NEW),
-                word("daily-life", "commute", "đi lại giữa nhà và nơi làm việc hoặc trường học", "/kəˈmjuːt/", "My commute takes about thirty minutes.", FsrsState.NEW),
+                word("daily-life", "daily", "hằng ngày", "/ˈdeɪli/", "I take a short walk daily.", FsrsState.REVIEW, reviewCount = 5, stability = 15.0, dueAtMillis = now - oneDay),
+                word("daily-life", "notice", "n. thông báo, tờ yết thị; v. nhận thấy, chú ý", "/ˈnəʊtɪs/", "n. There was a notice on the bulletin board. | v. Did you notice his new haircut?", FsrsState.REVIEW, partOfSpeech = PartOfSpeech.NOUN, reviewCount = 3, stability = 7.0, dueAtMillis = now + oneDay),
+                word("daily-life", "ambitious", "tham vọng", "/æmˈbɪʃəs/", "She is ambitious and works hard for her goals.", FsrsState.LEARNING, reviewCount = 2, stability = 2.5, dueAtMillis = now),
+                word("daily-life", "commute", "v. đi lại giữa nhà và nơi làm việc; n. quãng đường đi làm", "/kəˈmjuːt/", "v. She commutes to work by subway. | n. My daily commute takes thirty minutes.", FsrsState.REVIEW, partOfSpeech = PartOfSpeech.VERB, reviewCount = 4, stability = 10.0, dueAtMillis = now + 3 * oneDay),
                 word("daily-life", "grocery", "thực phẩm; hàng tạp hóa", "/ˈɡrəʊsəri/", "I need to buy some groceries after work.", FsrsState.NEW),
                 word("daily-life", "habit", "thói quen", "/ˈhæbɪt/", "Reading before bed is a healthy habit.", FsrsState.NEW),
-                word("daily-life", "schedule", "lịch trình", "/ˈʃedjuːl/", "Let me check my schedule first.", FsrsState.NEW),
+                word("daily-life", "schedule", "n. lịch trình; v. lên lịch", "/ˈʃedjuːl/", "n. Let me check my schedule first. | v. We scheduled a meeting for Monday.", FsrsState.NEW, partOfSpeech = PartOfSpeech.NOUN),
                 word("daily-life", "errand", "việc vặt cần làm", "/ˈerənd/", "I have a few errands to run this afternoon.", FsrsState.NEW),
                 word("daily-life", "exhausted", "kiệt sức", "/ɪɡˈzɔːstɪd/", "I felt exhausted after the long trip.", FsrsState.NEW)
             )
@@ -71,22 +70,23 @@ object MockData {
                 word("travel-basics", "luggage", "hành lý", "/ˈlʌɡɪdʒ/", "Please keep your luggage with you.", FsrsState.NEW),
                 word("travel-basics", "ticket", "vé", "/ˈtɪkɪt/", "I booked my train ticket online.", FsrsState.NEW),
                 word("travel-basics", "platform", "sân ga", "/ˈplætfɔːm/", "The train leaves from platform four.", FsrsState.NEW),
-                word("travel-basics", "local", "địa phương; người địa phương", "/ˈləʊkəl/", "We asked a local for restaurant advice.", FsrsState.NEW),
+                word("travel-basics", "local", "adj. địa phương; n. người địa phương", "/ˈləʊkəl/", "adj. We enjoyed the local cuisine. | n. We asked a local for restaurant advice.", FsrsState.NEW, partOfSpeech = PartOfSpeech.ADJECTIVE),
                 word("travel-basics", "crowded", "đông đúc", "/ˈkraʊdɪd/", "The market is crowded at weekends.", FsrsState.NEW)
             )
         ),
         VocabularySet(
             id = "school",
-            title = "School",
+            title = "School & Studies",
             description = "Useful vocabulary for classes, assignments and academic life.",
             category = "Education",
             level = "B1",
             words = listOf(
-                word("school", "assignment", "bài tập được giao", "/əˈsaɪnmənt/", "The assignment is due on Friday.", FsrsState.NEW),
-                word("school", "curriculum", "chương trình học", "/kəˈrɪkjələm/", "The new curriculum includes more practical lessons.", FsrsState.NEW),
+                word("school", "match", "n. trận đấu; v. nối, hợp với", "/mætʃ/", "n. The football match starts at six. | v. Your tie matches your shirt.", FsrsState.REVIEW, partOfSpeech = PartOfSpeech.NOUN, reviewCount = 3, stability = 9.0, dueAtMillis = now - oneDay),
+                word("school", "assignment", "bài tập được giao", "/əˈsaɪnmənt/", "The assignment is due on Friday.", FsrsState.REVIEW, reviewCount = 2, stability = 6.0, dueAtMillis = now + 2 * oneDay),
+                word("school", "curriculum", "chương trình học", "/kəˈrɪkjələm/", "The new curriculum includes more practical lessons.", FsrsState.LEARNING, reviewCount = 1, stability = 2.0, dueAtMillis = now),
                 word("school", "deadline", "hạn chót", "/ˈdedlaɪn/", "We must finish the project before the deadline.", FsrsState.NEW),
                 word("school", "concentrate", "tập trung", "/ˈkɒnsəntreɪt/", "It is easier to concentrate in a quiet room.", FsrsState.NEW),
-                word("school", "lecture", "bài giảng", "/ˈlektʃə/", "Today's lecture was about climate change.", FsrsState.NEW),
+                word("school", "lecture", "n. bài giảng; v. giảng bài", "/ˈlektʃə/", "n. Today's lecture was about climate change. | v. He lectured on medieval history.", FsrsState.NEW, partOfSpeech = PartOfSpeech.NOUN),
                 word("school", "scholarship", "học bổng", "/ˈskɒləʃɪp/", "She received a scholarship to study abroad.", FsrsState.NEW),
                 word("school", "revise", "ôn tập; chỉnh sửa", "/rɪˈvaɪz/", "I need to revise for tomorrow's exam.", FsrsState.NEW)
             )
@@ -113,9 +113,9 @@ object MockData {
             category = "Professional",
             level = "B2",
             words = listOf(
-                word("work-career", "negotiate", "đàm phán; thương lượng", "/nɪˈɡəʊʃieɪt/", "We need to negotiate a fair contract.", FsrsState.NEW),
-                word("work-career", "deadline", "hạn chót", "/ˈdedlaɪn/", "The team met the deadline despite the changes.", FsrsState.NEW),
-                word("work-career", "promotion", "sự thăng chức", "/prəˈməʊʃən/", "She earned a promotion after leading the project.", FsrsState.NEW),
+                word("work-career", "lead", "v. dẫn dắt; n. sự dẫn đầu, dây dẫn", "/liːd/", "v. She will lead the design team. | n. Our team took the lead in the second half.", FsrsState.REVIEW, partOfSpeech = PartOfSpeech.VERB, reviewCount = 4, stability = 14.0, dueAtMillis = now - oneDay),
+                word("work-career", "negotiate", "đàm phán; thương lượng", "/nɪˈɡəʊʃieɪt/", "We need to negotiate a fair contract.", FsrsState.REVIEW, reviewCount = 3, stability = 8.0, dueAtMillis = now + 4 * oneDay),
+                word("work-career", "promotion", "sự thăng chức", "/prəˈməʊʃən/", "She earned a promotion after leading the project.", FsrsState.LEARNING, reviewCount = 1, stability = 1.8, dueAtMillis = now),
                 word("work-career", "efficient", "hiệu quả", "/ɪˈfɪʃənt/", "The new process is much more efficient.", FsrsState.NEW),
                 word("work-career", "initiative", "tính chủ động", "/ɪˈnɪʃətɪv/", "He showed initiative by solving the issue early.", FsrsState.NEW),
                 word("work-career", "collaborate", "hợp tác", "/kəˈlæbəreɪt/", "Our teams collaborate across three offices.", FsrsState.NEW)
@@ -129,205 +129,38 @@ object MockData {
             level = "B2",
             words = listOf(
                 word("science-society", "evidence", "bằng chứng", "/ˈevɪdəns/", "The report provides evidence of a wider trend.", FsrsState.NEW),
-                word("science-society", "impact", "tác động", "/ˈɪmpækt/", "The policy could have a major impact on families.", FsrsState.NEW),
+                word("science-society", "impact", "n. tác động; v. ảnh hưởng", "/ˈɪmpækt/", "n. The policy could have a major impact on families. | v. Lower interest rates impact housing prices.", FsrsState.NEW, partOfSpeech = PartOfSpeech.NOUN),
                 word("science-society", "sustainable", "bền vững", "/səˈsteɪnəbəl/", "The city is investing in sustainable transport.", FsrsState.NEW),
                 word("science-society", "innovation", "sự đổi mới", "/ˌɪnəˈveɪʃən/", "Innovation can change how people communicate.", FsrsState.NEW),
                 word("science-society", "bias", "thiên kiến", "/ˈbaɪəs/", "The researchers checked the study for bias.", FsrsState.NEW),
                 word("science-society", "regulate", "điều chỉnh; quản lý bằng quy định", "/ˈreɡjəleɪt/", "Governments regulate the use of public data.", FsrsState.NEW)
             )
-        ),
-        VocabularySet(
-            id = "academic-writing",
-            title = "Academic Writing",
-            description = "C1 vocabulary for building clear, precise arguments.",
-            category = "Academic",
-            level = "C1",
-            words = listOf(
-                word("academic-writing", "coherent", "mạch lạc", "/kəʊˈhɪərənt/", "The essay presents a coherent argument.", FsrsState.NEW),
-                word("academic-writing", "substantial", "đáng kể; lớn", "/səbˈstænʃəl/", "The study found a substantial difference between groups.", FsrsState.NEW),
-                word("academic-writing", "hypothesis", "giả thuyết", "/haɪˈpɒθəsɪs/", "The experiment was designed to test the hypothesis.", FsrsState.NEW),
-                word("academic-writing", "implication", "hệ quả; hàm ý", "/ˌɪmplɪˈkeɪʃən/", "The findings have important implications for teachers.", FsrsState.NEW),
-                word("academic-writing", "synthesize", "tổng hợp", "/ˈsɪnθəsaɪz/", "The final section synthesizes the main findings.", FsrsState.NEW),
-                word("academic-writing", "ambiguous", "mơ hồ; có nhiều nghĩa", "/æmˈbɪɡjuəs/", "The wording is ambiguous and needs clarification.", FsrsState.NEW)
-            )
-        ),
-        VocabularySet(
-            id = "advanced-nuance",
-            title = "Advanced Nuance",
-            description = "C2 expressions for precision, tone and complex ideas.",
-            category = "Advanced",
-            level = "C2",
-            words = listOf(
-                word("advanced-nuance", "meticulous", "tỉ mỉ; cẩn thận", "/məˈtɪkjələs/", "She kept meticulous records of every decision.", FsrsState.NEW),
-                word("advanced-nuance", "conundrum", "vấn đề nan giải", "/kəˈnʌndrəm/", "The committee faced a difficult ethical conundrum.", FsrsState.NEW),
-                word("advanced-nuance", "pragmatic", "thực tế; thực dụng", "/præɡˈmætɪk/", "They took a pragmatic approach to the negotiations.", FsrsState.NEW),
-                word("advanced-nuance", "unequivocal", "rõ ràng; dứt khoát", "/ˌʌnɪˈkwɪvəkəl/", "The statement was an unequivocal rejection of the proposal.", FsrsState.NEW),
-                word("advanced-nuance", "discerning", "sành sỏi; tinh tường", "/dɪˈsɜːnɪŋ/", "The discerning reader will notice the subtle contrast.", FsrsState.NEW),
-                word("advanced-nuance", "pervasive", "phổ biến rộng khắp", "/pəˈveɪsɪv/", "Digital media has a pervasive influence on public debate.", FsrsState.NEW)
-            )
         )
     )
 
-    // This local pool is separate from study sets and is selected by the user's recent level.
     val dailyWordsByLevel = mapOf(
         "A1" to listOf(
             word("daily-a1", "clock", "đồng hồ", "/klɒk/", "The clock is on the wall.", FsrsState.NEW),
-            word("daily-a1", "smile", "mỉm cười", "/smaɪl/", "She smiled at the child.", FsrsState.NEW),
+            word("daily-a1", "smile", "v. mỉm cười; n. nụ cười", "/smaɪl/", "v. She smiled at the child. | n. He has a warm smile.", FsrsState.NEW, partOfSpeech = PartOfSpeech.VERB),
             word("daily-a1", "early", "sớm", "/ˈɜːli/", "I woke up early today.", FsrsState.NEW),
             word("daily-a1", "street", "đường phố", "/striːt/", "The cafe is on the next street.", FsrsState.NEW),
-            word("daily-a1", "carry", "mang; xách", "/ˈkæri/", "Can you carry this bag?", FsrsState.NEW),
-            word("daily-a1", "animal", "động vật", "/ˈænɪməl/", "The children saw an animal at the zoo.", FsrsState.NEW),
-            word("daily-a1", "clean", "sạch sẽ", "/kliːn/", "Please keep your room clean.", FsrsState.NEW),
-            word("daily-a1", "dinner", "bữa tối", "/ˈdɪnə/", "We have dinner at seven o'clock.", FsrsState.NEW),
-            word("daily-a1", "happy", "vui vẻ", "/ˈhæpi/", "She feels happy today.", FsrsState.NEW),
-            word("daily-a1", "visit", "thăm", "/ˈvɪzɪt/", "We will visit our grandparents this weekend.", FsrsState.NEW)
+            word("daily-a1", "carry", "mang; xách", "/ˈkæri/", "Can you carry this bag?", FsrsState.NEW)
         ),
         "A2" to listOf(
-            word("daily-a2", "curious", "tò mò", "/ˈkjʊəriəs/", "The curious student asked another question.", FsrsState.NEW),
-            word("daily-a2", "repair", "sửa chữa", "/rɪˈpeə/", "The shop can repair your phone.", FsrsState.NEW),
+            word("daily-a2", "notice", "n. thông báo; v. nhận thấy", "/ˈnəʊtɪs/", "n. There is a notice on the door. | v. Did you notice the sign?", FsrsState.NEW, partOfSpeech = PartOfSpeech.NOUN),
+            word("daily-a2", "repair", "v. sửa chữa; n. sự sửa chữa", "/rɪˈpeə/", "v. The shop can repair your phone. | n. The bike is in for repair.", FsrsState.NEW, partOfSpeech = PartOfSpeech.VERB),
             word("daily-a2", "reliable", "đáng tin cậy", "/rɪˈlaɪəbəl/", "We need a reliable internet connection.", FsrsState.NEW),
-            word("daily-a2", "recently", "gần đây", "/ˈriːsəntli/", "Have you seen any good films recently?", FsrsState.NEW),
-            word("daily-a2", "improve", "cải thiện", "/ɪmˈpruːv/", "Practice will improve your speaking.", FsrsState.NEW),
-            word("daily-a2", "arrange", "sắp xếp", "/əˈreɪndʒ/", "I will arrange a meeting for next week.", FsrsState.NEW),
-            word("daily-a2", "choice", "lựa chọn", "/tʃɔɪs/", "You have a choice between tea and coffee.", FsrsState.NEW),
-            word("daily-a2", "healthy", "khỏe mạnh", "/ˈhelθi/", "Walking every day is a healthy habit.", FsrsState.NEW),
-            word("daily-a2", "journey", "hành trình", "/ˈdʒɜːni/", "The journey took nearly three hours.", FsrsState.NEW),
-            word("daily-a2", "notice", "nhận thấy; thông báo", "/ˈnəʊtɪs/", "Did you notice the new sign outside?", FsrsState.NEW)
+            word("daily-a2", "improve", "cải thiện", "/ɪmˈpruːv/", "Practice will improve your speaking.", FsrsState.NEW)
         ),
         "B1" to listOf(
-            word("daily-b1", "adapt", "thích nghi", "/əˈdæpt/", "Animals adapt to changes in their environment.", FsrsState.NEW),
-            word("daily-b1", "feature", "đặc điểm; tính năng", "/ˈfiːtʃə/", "The app has a useful search feature.", FsrsState.NEW),
-            word("daily-b1", "outcome", "kết quả", "/ˈaʊtkʌm/", "The outcome was better than expected.", FsrsState.NEW),
-            word("daily-b1", "influence", "ảnh hưởng", "/ˈɪnfluəns/", "Music can influence our mood.", FsrsState.NEW),
-            word("daily-b1", "approach", "cách tiếp cận", "/əˈprəʊtʃ/", "We need a different approach to the problem.", FsrsState.NEW),
-            word("daily-b1", "maintain", "duy trì", "/meɪnˈteɪn/", "It is important to maintain a healthy routine.", FsrsState.NEW),
-            word("daily-b1", "benefit", "lợi ích", "/ˈbenɪfɪt/", "Regular exercise has many benefits.", FsrsState.NEW),
-            word("daily-b1", "accurate", "chính xác", "/ˈækjərət/", "Please give me accurate information.", FsrsState.NEW),
-            word("daily-b1", "encounter", "gặp phải", "/ɪnˈkaʊntə/", "You may encounter a few problems at first.", FsrsState.NEW),
-            word("daily-b1", "considerable", "đáng kể", "/kənˈsɪdərəbəl/", "The project requires a considerable amount of time.", FsrsState.NEW)
+            word("daily-b1", "feature", "n. đặc điểm; v. có sự tham gia của", "/ˈfiːtʃə/", "n. The app has a useful search feature. | v. The film features top actors.", FsrsState.NEW, partOfSpeech = PartOfSpeech.NOUN),
+            word("daily-b1", "approach", "n. cách tiếp cận; v. tiếp cận", "/əˈprəʊtʃ/", "n. We need a new approach. | v. The train is approaching the station.", FsrsState.NEW, partOfSpeech = PartOfSpeech.NOUN),
+            word("daily-b1", "benefit", "n. lợi ích; v. được hưởng lợi", "/ˈbenɪfɪt/", "n. Regular exercise has many benefits. | v. Patients will benefit from treatment.", FsrsState.NEW, partOfSpeech = PartOfSpeech.NOUN)
         ),
         "B2" to listOf(
-            word("daily-b2", "compelling", "thuyết phục; hấp dẫn", "/kəmˈpelɪŋ/", "The speaker made a compelling argument.", FsrsState.NEW),
-            word("daily-b2", "allocate", "phân bổ", "/ˈæləkeɪt/", "The manager allocated more time to training.", FsrsState.NEW),
             word("daily-b2", "perspective", "góc nhìn; quan điểm", "/pəˈspektɪv/", "Travel gave her a new perspective.", FsrsState.NEW),
-            word("daily-b2", "contribute", "đóng góp", "/kənˈtrɪbjuːt/", "Several factors contributed to the success.", FsrsState.NEW),
-            word("daily-b2", "justify", "biện minh; chứng minh là hợp lý", "/ˈdʒʌstɪfaɪ/", "The data does not justify that conclusion.", FsrsState.NEW),
-            word("daily-b2", "implement", "triển khai", "/ˈɪmplɪment/", "The team will implement the new plan next month.", FsrsState.NEW),
-            word("daily-b2", "subtle", "tinh tế; khó nhận ra", "/ˈsʌtəl/", "There was a subtle difference between the two designs.", FsrsState.NEW),
-            word("daily-b2", "constraint", "sự hạn chế", "/kənˈstreɪnt/", "Time was the main constraint on the project.", FsrsState.NEW),
-            word("daily-b2", "enhance", "nâng cao; tăng cường", "/ɪnˈhɑːns/", "The update will enhance the user experience.", FsrsState.NEW),
-            word("daily-b2", "controversial", "gây tranh cãi", "/ˌkɒntrəˈvɜːʃəl/", "The proposal remains controversial among experts.", FsrsState.NEW)
-        ),
-        "C1" to listOf(
-            word("daily-c1", "alleviate", "làm giảm; xoa dịu", "/əˈliːvieɪt/", "The new policy may alleviate pressure on families.", FsrsState.NEW),
-            word("daily-c1", "articulate", "diễn đạt rõ ràng", "/ɑːˈtɪkjələt/", "She gave an articulate response to the question.", FsrsState.NEW),
-            word("daily-c1", "discern", "nhận ra; phân biệt", "/dɪˈsɜːn/", "It is difficult to discern the pattern at first.", FsrsState.NEW),
-            word("daily-c1", "criterion", "tiêu chí", "/kraɪˈtɪəriən/", "Cost was the main criterion for the decision.", FsrsState.NEW),
-            word("daily-c1", "resilient", "kiên cường; có khả năng phục hồi", "/rɪˈzɪliənt/", "The resilient community rebuilt after the storm.", FsrsState.NEW),
-            word("daily-c1", "consecutive", "liên tiếp", "/kənˈsekjətɪv/", "She worked for five consecutive days.", FsrsState.NEW),
-            word("daily-c1", "devise", "nghĩ ra; xây dựng", "/dɪˈvaɪz/", "The researchers devised a new method.", FsrsState.NEW),
-            word("daily-c1", "inherent", "vốn có", "/ɪnˈhɪərənt/", "Every solution has inherent limitations.", FsrsState.NEW),
-            word("daily-c1", "facilitate", "tạo điều kiện", "/fəˈsɪlɪteɪt/", "The workshop will facilitate discussion between the teams.", FsrsState.NEW),
-            word("daily-c1", "notion", "khái niệm; quan niệm", "/ˈnəʊʃən/", "He rejected the notion that success is only about money.", FsrsState.NEW)
-        ),
-        "C2" to listOf(
-            word("daily-c2", "inexorable", "không thể ngăn cản", "/ɪnˈeksərəbəl/", "The inexorable advance of technology changed the industry.", FsrsState.NEW),
-            word("daily-c2", "juxtapose", "đặt cạnh nhau để so sánh", "/ˌdʒʌkstəˈpəʊz/", "The article juxtaposes two opposing viewpoints.", FsrsState.NEW),
-            word("daily-c2", "tenuous", "mong manh; không chắc chắn", "/ˈtenjuəs/", "The connection between the events remains tenuous.", FsrsState.NEW),
-            word("daily-c2", "perfunctory", "qua loa; chiếu lệ", "/pəˈfʌŋktəri/", "He offered a perfunctory apology and left.", FsrsState.NEW),
-            word("daily-c2", "ubiquitous", "phổ biến ở khắp nơi", "/juːˈbɪkwɪtəs/", "Smartphones are ubiquitous in modern cities.", FsrsState.NEW),
-            word("daily-c2", "ambivalent", "mâu thuẫn; không dứt khoát", "/æmˈbɪvələnt/", "She felt ambivalent about accepting the offer.", FsrsState.NEW),
-            word("daily-c2", "conundrum", "vấn đề nan giải", "/kəˈnʌndrəm/", "The lack of funding created a difficult conundrum.", FsrsState.NEW),
-            word("daily-c2", "exacerbate", "làm trầm trọng thêm", "/ɪɡˈzæsəbeɪt/", "Poor communication can exacerbate the problem.", FsrsState.NEW),
-            word("daily-c2", "reticent", "kín tiếng; dè dặt", "/ˈretɪsənt/", "He was reticent to discuss his personal views.", FsrsState.NEW),
-            word("daily-c2", "scrutinize", "xem xét kỹ lưỡng", "/ˈskruːtənaɪz/", "The committee will scrutinize every detail of the proposal.", FsrsState.NEW)
+            word("daily-b2", "enhance", "nâng cao; tăng cường", "/ɪnˈhɑːns/", "The update will enhance the user experience.", FsrsState.NEW)
         )
-    )
-
-    private val partOfSpeechByWord: Map<String, PartOfSpeech>
-        get() = mapOf(
-        "hello" to PartOfSpeech.NOUN,
-        "near" to PartOfSpeech.ADJECTIVE,
-        "usually" to PartOfSpeech.ADJECTIVE,
-        "quiet" to PartOfSpeech.ADJECTIVE,
-        "borrow" to PartOfSpeech.VERB,
-        "daily" to PartOfSpeech.ADJECTIVE,
-        "ambitious" to PartOfSpeech.ADJECTIVE,
-        "commute" to PartOfSpeech.VERB,
-        "exhausted" to PartOfSpeech.ADJECTIVE,
-        "local" to PartOfSpeech.ADJECTIVE,
-        "crowded" to PartOfSpeech.ADJECTIVE,
-        "concentrate" to PartOfSpeech.VERB,
-        "revise" to PartOfSpeech.VERB,
-        "catchy" to PartOfSpeech.ADJECTIVE,
-        "negotiate" to PartOfSpeech.VERB,
-        "efficient" to PartOfSpeech.ADJECTIVE,
-        "collaborate" to PartOfSpeech.VERB,
-        "sustainable" to PartOfSpeech.ADJECTIVE,
-        "regulate" to PartOfSpeech.VERB,
-        "coherent" to PartOfSpeech.ADJECTIVE,
-        "substantial" to PartOfSpeech.ADJECTIVE,
-        "synthesize" to PartOfSpeech.VERB,
-        "ambiguous" to PartOfSpeech.ADJECTIVE,
-        "meticulous" to PartOfSpeech.ADJECTIVE,
-        "pragmatic" to PartOfSpeech.ADJECTIVE,
-        "unequivocal" to PartOfSpeech.ADJECTIVE,
-        "discerning" to PartOfSpeech.ADJECTIVE,
-        "pervasive" to PartOfSpeech.ADJECTIVE,
-        "smile" to PartOfSpeech.VERB,
-        "early" to PartOfSpeech.ADJECTIVE,
-        "carry" to PartOfSpeech.VERB,
-        "animal" to PartOfSpeech.NOUN,
-        "clean" to PartOfSpeech.ADJECTIVE,
-        "dinner" to PartOfSpeech.NOUN,
-        "happy" to PartOfSpeech.ADJECTIVE,
-        "visit" to PartOfSpeech.VERB,
-        "curious" to PartOfSpeech.ADJECTIVE,
-        "repair" to PartOfSpeech.VERB,
-        "reliable" to PartOfSpeech.ADJECTIVE,
-        "recently" to PartOfSpeech.ADJECTIVE,
-        "improve" to PartOfSpeech.VERB,
-        "arrange" to PartOfSpeech.VERB,
-        "choice" to PartOfSpeech.NOUN,
-        "healthy" to PartOfSpeech.ADJECTIVE,
-        "journey" to PartOfSpeech.NOUN,
-        "notice" to PartOfSpeech.VERB,
-        "adapt" to PartOfSpeech.VERB,
-        "influence" to PartOfSpeech.VERB,
-        "approach" to PartOfSpeech.VERB,
-        "maintain" to PartOfSpeech.VERB,
-        "benefit" to PartOfSpeech.NOUN,
-        "accurate" to PartOfSpeech.ADJECTIVE,
-        "encounter" to PartOfSpeech.VERB,
-        "considerable" to PartOfSpeech.ADJECTIVE,
-        "compelling" to PartOfSpeech.ADJECTIVE,
-        "allocate" to PartOfSpeech.VERB,
-        "contribute" to PartOfSpeech.VERB,
-        "justify" to PartOfSpeech.VERB,
-        "implement" to PartOfSpeech.VERB,
-        "subtle" to PartOfSpeech.ADJECTIVE,
-        "constraint" to PartOfSpeech.NOUN,
-        "enhance" to PartOfSpeech.VERB,
-        "controversial" to PartOfSpeech.ADJECTIVE,
-        "alleviate" to PartOfSpeech.VERB,
-        "articulate" to PartOfSpeech.VERB,
-        "discern" to PartOfSpeech.VERB,
-        "resilient" to PartOfSpeech.ADJECTIVE,
-        "consecutive" to PartOfSpeech.ADJECTIVE,
-        "devise" to PartOfSpeech.VERB,
-        "inherent" to PartOfSpeech.ADJECTIVE,
-        "facilitate" to PartOfSpeech.VERB,
-        "notion" to PartOfSpeech.NOUN,
-        "inexorable" to PartOfSpeech.ADJECTIVE,
-        "juxtapose" to PartOfSpeech.VERB,
-        "tenuous" to PartOfSpeech.ADJECTIVE,
-        "perfunctory" to PartOfSpeech.ADJECTIVE,
-        "ubiquitous" to PartOfSpeech.ADJECTIVE,
-        "ambivalent" to PartOfSpeech.ADJECTIVE,
-        "conundrum" to PartOfSpeech.NOUN,
-        "exacerbate" to PartOfSpeech.VERB,
-        "reticent" to PartOfSpeech.ADJECTIVE,
-        "scrutinize" to PartOfSpeech.VERB
     )
 
     private fun word(
@@ -335,31 +168,24 @@ object MockData {
         word: String,
         meaning: String,
         pronunciation: String,
-        example: String,
-        _seedState: FsrsState
+        exampleSentence: String,
+        fsrsState: FsrsState,
+        partOfSpeech: PartOfSpeech = PartOfSpeech.NOUN,
+        reviewCount: Int = 0,
+        stability: Double = 0.0,
+        dueAtMillis: Long = 0L
     ): VocabularyItem {
-        val id = "$setId-${word.lowercase().replace(" ", "-")}"
-        val seededState = if (id in initialLearningWordIds) {
-            FsrsState.LEARNING
-        } else {
-            _seedState
-        }
-        val nowMillis = System.currentTimeMillis()
         return VocabularyItem(
-            id = id,
+            id = "$setId-$word",
             word = word,
             meaning = meaning,
             pronunciation = pronunciation,
-            partOfSpeech = partOfSpeechByWord[word] ?: PartOfSpeech.NOUN,
-            exampleSentence = example,
-            fsrsState = seededState,
-            fsrsStep = if (seededState == FsrsState.NEW) null else 0,
-            dueAtMillis = if (seededState == FsrsState.NEW) {
-                0L
-            } else {
-                nowMillis
-            },
-            scheduledDays = 0
+            partOfSpeech = partOfSpeech,
+            exampleSentence = exampleSentence,
+            fsrsState = fsrsState,
+            reviewCount = reviewCount,
+            stability = stability,
+            dueAtMillis = dueAtMillis
         )
     }
 }

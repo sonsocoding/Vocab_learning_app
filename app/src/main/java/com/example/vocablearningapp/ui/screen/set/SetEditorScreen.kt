@@ -29,6 +29,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +38,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.example.vocablearningapp.domain.model.FsrsState
 import com.example.vocablearningapp.domain.model.PartOfSpeech
@@ -191,9 +194,22 @@ private fun EditorField(
     placeholder: String = "",
     modifier: Modifier = Modifier
 ) {
+    var textFieldValue by remember {
+        mutableStateOf(TextFieldValue(text = value, selection = TextRange(value.length)))
+    }
+
+    LaunchedEffect(value) {
+        if (value != textFieldValue.text) {
+            textFieldValue = TextFieldValue(text = value, selection = TextRange(value.length))
+        }
+    }
+
     OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
+        value = textFieldValue,
+        onValueChange = { newValue ->
+            textFieldValue = newValue
+            onValueChange(newValue.text)
+        },
         modifier = modifier.fillMaxWidth(),
         label = { Text(label) },
         placeholder = if (placeholder.isNotBlank()) { { Text(placeholder) } } else null,
@@ -311,24 +327,18 @@ private fun MeaningEditorRow(
                 }
             }
 
-            OutlinedTextField(
+            EditorField(
                 value = meaningState.meaning,
                 onValueChange = { meaningState.meaning = it },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("Meaning ${if (canDeleteMeaning) "${index + 1}" else ""}") },
-                placeholder = { Text("e.g. notice, attention...") },
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp)
+                label = "Meaning ${if (canDeleteMeaning) "${index + 1}" else ""}",
+                placeholder = "e.g. notice, attention..."
             )
 
-            OutlinedTextField(
+            EditorField(
                 value = meaningState.exampleSentence,
                 onValueChange = { meaningState.exampleSentence = it },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("Example sentence") },
-                placeholder = { Text("e.g. Did you notice his new haircut?") },
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp)
+                label = "Example sentence",
+                placeholder = "e.g. Did you notice his new haircut?"
             )
         }
     }
@@ -345,14 +355,12 @@ private fun IpaFieldWithHelper(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            OutlinedTextField(
+            EditorField(
                 value = pronunciation,
                 onValueChange = onPronunciationChange,
-                modifier = Modifier.weight(1f),
-                label = { Text("IPA pronunciation") },
-                placeholder = { Text("/æmˈbɪʃ.əs/") },
-                singleLine = true,
-                shape = RoundedCornerShape(14.dp)
+                label = "IPA pronunciation",
+                placeholder = "/æmˈbɪʃ.əs/",
+                modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.width(8.dp))
             androidx.compose.material3.Button(
