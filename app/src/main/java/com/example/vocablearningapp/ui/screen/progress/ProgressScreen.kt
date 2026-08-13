@@ -40,12 +40,15 @@ import com.example.vocablearningapp.ui.theme.Ink
 import com.example.vocablearningapp.ui.theme.Muted
 import com.example.vocablearningapp.ui.theme.Surface
 
+import com.example.vocablearningapp.data.StreakState
+
 @Composable
 fun ProgressScreen(
     onTabSelected: (MainTab) -> Unit,
     sets: List<VocabularySet>,
     items: List<VocabularyItem>,
-    onOpenSet: (String) -> Unit
+    onOpenSet: (String) -> Unit,
+    streakState: StreakState = StreakState()
 ) {
     val totalWords = items.size
     val reviewWords = items.count { it.fsrsState == FsrsState.REVIEW }
@@ -66,6 +69,24 @@ fun ProgressScreen(
                     text = "A clear view of your FSRS learning journey.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Muted
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StatCard(
+                    value = "${streakState.currentStreak} days 🔥",
+                    label = "Current streak",
+                    icon = Icons.Default.BookmarkBorder,
+                    modifier = Modifier.weight(1f)
+                )
+                StatCard(
+                    value = "${streakState.bestStreak} days 🏆",
+                    label = "Best streak",
+                    icon = Icons.Default.Check,
+                    modifier = Modifier.weight(1f)
                 )
             }
 

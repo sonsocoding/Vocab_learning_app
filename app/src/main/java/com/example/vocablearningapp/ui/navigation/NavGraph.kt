@@ -51,7 +51,8 @@ fun NavGraph(
                     navController.navigate(
                         Screen.SetDetail.createRoute(AppViewModel.DAILY_WORDS_SET_ID)
                     )
-                }
+                },
+                streakState = appViewModel.uiState.streakState
             )
         }
 
@@ -83,7 +84,8 @@ fun NavGraph(
                 onTabSelected = ::navigateToTab,
                 sets = appViewModel.sets,
                 items = appViewModel.allItems,
-                onOpenSet = { id -> navController.navigate(Screen.SetDetail.createRoute(id)) }
+                onOpenSet = { id -> navController.navigate(Screen.SetDetail.createRoute(id)) },
+                streakState = appViewModel.uiState.streakState
             )
         }
 

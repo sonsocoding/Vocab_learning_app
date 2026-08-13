@@ -41,6 +41,13 @@ import com.example.vocablearningapp.ui.theme.Ink
 import com.example.vocablearningapp.ui.theme.Muted
 import com.example.vocablearningapp.ui.theme.White
 
+import com.example.vocablearningapp.data.StreakState
+import com.example.vocablearningapp.ui.theme.Border
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Surface
+
 @Composable
 fun HomeScreen(
     onTabSelected: (MainTab) -> Unit,
@@ -49,7 +56,8 @@ fun HomeScreen(
     onSeeAllSets: () -> Unit,
     onCreateSet: () -> Unit,
     dailyWords: VocabularySet,
-    onOpenDailyWords: () -> Unit
+    onOpenDailyWords: () -> Unit,
+    streakState: StreakState = StreakState()
 ) {
     AppScaffold(
         selectedTab = MainTab.HOME,
@@ -63,7 +71,8 @@ fun HomeScreen(
                 .padding(horizontal = VocabDimens.ScreenPadding, vertical = 18.dp),
             verticalArrangement = Arrangement.spacedBy(VocabDimens.SectionGap)
         ) {
-            Header()
+            Header(streakState = streakState)
+            StreakCard(streakState = streakState)
             DailyWordsCard(dailyWords = dailyWords, onOpenDailyWords = onOpenDailyWords)
 
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -89,7 +98,7 @@ fun HomeScreen(
 }
 
 @Composable
-private fun Header() {
+private fun Header(streakState: StreakState) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -100,12 +109,107 @@ private fun Header() {
                 style = MaterialTheme.typography.headlineSmall,
                 color = Ink
             )
-            Spacer(modifier = Modifier.height(5.dp))
+            Spacer(modifier = Modifier.height(3.dp))
             Text(
                 text = "Ready for a little progress today?",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Muted
             )
+        }
+        Surface(
+            color = Color(0xFFFFF3E0),
+            shape = RoundedCornerShape(50),
+            border = BorderStroke(1.dp, Color(0xFFFFCC80))
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "🔥", style = MaterialTheme.typography.bodyMedium)
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "${streakState.currentStreak}",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color(0xFFE65100),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun StreakCard(streakState: StreakState) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = com.example.vocablearningapp.ui.theme.Surface),
+        border = BorderStroke(1.dp, Border)
+    ) {
+        Column(modifier = Modifier.padding(18.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = "🔥", style = MaterialTheme.typography.titleLarge)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column {
+                        Text(
+                            text = "${streakState.currentStreak} Day Streak",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Ink
+                        )
+                        Text(
+                            text = "Best record: ${streakState.bestStreak} days",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Muted
+                        )
+                    }
+                }
+                Surface(
+                    color = if (streakState.isStudiedToday) Color(0xFFE8F5E9) else Color(0xFFFFF3E0),
+                    shape = RoundedCornerShape(50)
+                ) {
+                    Text(
+                        text = if (streakState.isStudiedToday) "Active Today ✓" else "Study Today!",
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (streakState.isStudiedToday) Color(0xFF2E7D32) else Color(0xFFE65100),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            val dayLabels = listOf("M", "T", "W", "T", "F", "S", "S")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                dayLabels.forEachIndexed { index, label ->
+                    val dayNum = index + 1
+                    val isActive = dayNum in streakState.activeDaysThisWeek
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Surface(
+                            modifier = Modifier.size(36.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            color = if (isActive) Accent else com.example.vocablearningapp.ui.theme.Surface,
+                            border = if (isActive) null else BorderStroke(1.dp, Border)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = if (isActive) "🔥" else label,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = if (isActive) White else Muted
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
