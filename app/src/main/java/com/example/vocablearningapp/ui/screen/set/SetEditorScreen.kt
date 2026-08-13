@@ -11,7 +11,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.font.FontWeight
+import com.example.vocablearningapp.domain.util.IpaGenerator
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -214,9 +220,21 @@ private fun WordEditorCard(
                     Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete word", tint = Muted)
                 }
             }
-            EditorField(value = draft.word, onValueChange = { onChange(draft.copy(word = it)) }, label = "Word", placeholder = "ambitious")
+            EditorField(
+                value = draft.word,
+                onValueChange = { newWord ->
+                    val autoIpa = if (draft.pronunciation.isBlank()) IpaGenerator.generateIpa(newWord) else draft.pronunciation
+                    onChange(draft.copy(word = newWord, pronunciation = autoIpa))
+                },
+                label = "Word",
+                placeholder = "ambitious"
+            )
             EditorField(value = draft.meaning, onValueChange = { onChange(draft.copy(meaning = it)) }, label = "Meaning", placeholder = "tham vọng")
-            EditorField(value = draft.pronunciation, onValueChange = { onChange(draft.copy(pronunciation = it)) }, label = "IPA pronunciation", placeholder = "/æmˈbɪʃ.əs/")
+            IpaFieldWithHelper(
+                pronunciation = draft.pronunciation,
+                word = draft.word,
+                onPronunciationChange = { onChange(draft.copy(pronunciation = it)) }
+            )
             Text(text = "Part of speech", style = MaterialTheme.typography.labelLarge, color = Ink)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 PartOfSpeech.entries.forEach { partOfSpeech ->
@@ -228,6 +246,83 @@ private fun WordEditorCard(
                 }
             }
             EditorField(value = draft.exampleSentence, onValueChange = { onChange(draft.copy(exampleSentence = it)) }, label = "Example sentence", placeholder = "Use the word in context")
+        }
+    }
+}
+
+@Composable
+private fun IpaFieldWithHelper(
+    pronunciation: String,
+    word: String,
+    onPronunciationChange: (String) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedTextField(
+                value = pronunciation,
+                onValueChange = onPronunciationChange,
+                modifier = Modifier.weight(1f),
+                label = { Text("IPA pronunciation") },
+                placeholder = { Text("/æmˈbɪʃ.əs/") },
+                singleLine = true,
+                shape = RoundedCornerShape(14.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            androidx.compose.material3.Button(
+                onClick = {
+                    val generated = IpaGenerator.generateIpa(word)
+                    if (generated.isNotBlank()) {
+                        onPronunciationChange(generated)
+                    }
+                },
+                shape = RoundedCornerShape(14.dp),
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                    containerColor = com.example.vocablearningapp.ui.theme.AccentSoft,
+                    contentColor = com.example.vocablearningapp.ui.theme.Accent
+                ),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 14.dp)
+            ) {
+                Text(text = "✨ Auto IPA", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+            }
+        }
+
+        Text(
+            text = "Quick IPA symbols:",
+            style = MaterialTheme.typography.labelSmall,
+            color = Muted
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            IpaGenerator.commonIpaSymbols.forEach { symbol ->
+                Surface(
+                    onClick = {
+                        val updated = if (pronunciation.endsWith("/")) {
+                            pronunciation.dropLast(1) + symbol + "/"
+                        } else {
+                            pronunciation + symbol
+                        }
+                        onPronunciationChange(updated)
+                    },
+                    shape = RoundedCornerShape(8.dp),
+                    color = Surface,
+                    border = BorderStroke(1.dp, Border)
+                ) {
+                    Text(
+                        text = symbol,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Ink,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
         }
     }
 }
