@@ -146,19 +146,25 @@ fun NavGraph(
                 StudyMode.LEARN -> LearnModeScreen(
                     set = appViewModel.setById(setId),
                     onBack = { navController.popBackStack() },
-                    onRate = appViewModel::rateItem
+                    onRate = appViewModel::rateItem,
+                    onSkipDailyWord = appViewModel::skipDailyWord,
+                    onLearnDailyWord = appViewModel::learnDailyWord
                 )
 
                 StudyMode.QUIZ -> QuizModeScreen(
                     set = appViewModel.setById(setId),
                     onBack = { navController.popBackStack() },
-                    onRate = appViewModel::rateItem
+                    onRate = appViewModel::rateItem,
+                    onSkipDailyWord = appViewModel::skipDailyWord,
+                    onLearnDailyWord = appViewModel::learnDailyWord
                 )
 
                 StudyMode.MATCH -> MatchModeScreen(
                     set = appViewModel.setById(setId),
                     onBack = { navController.popBackStack() },
-                    onRate = appViewModel::rateItem
+                    onRate = appViewModel::rateItem,
+                    onSkipDailyWord = appViewModel::skipDailyWord,
+                    onLearnDailyWord = appViewModel::learnDailyWord
                 )
 
                 else -> PracticePlaceholderScreen(

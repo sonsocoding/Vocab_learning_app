@@ -42,16 +42,23 @@ import com.example.vocablearningapp.ui.theme.MasteredSoft
 import com.example.vocablearningapp.ui.theme.Muted
 import com.example.vocablearningapp.ui.theme.Surface
 
+import com.example.vocablearningapp.ui.component.SessionResultSummary
+import com.example.vocablearningapp.ui.component.WordSessionResult
+import com.example.vocablearningapp.ui.state.AppViewModel
+
 @Composable
 fun LearnModeScreen(
     set: VocabularySet?,
     onBack: () -> Unit,
-    onRate: (String, FsrsRating) -> Unit
+    onRate: (String, FsrsRating) -> Unit,
+    onSkipDailyWord: ((String) -> Unit)? = null,
+    onLearnDailyWord: ((String) -> Unit)? = null
 ) {
     var currentIndex by remember(set?.id) { mutableStateOf(0) }
     var selectedAnswerId by remember(set?.id) { mutableStateOf<String?>(null) }
     var correctAnswers by remember(set?.id) { mutableStateOf(0) }
     var isComplete by remember(set?.id) { mutableStateOf(false) }
+    var wordResults by remember(set?.id) { mutableStateOf(mapOf<String, Boolean>()) }
     val sessionWords = remember(set?.id) { set?.words.orEmpty().shuffled().take(10) }
     val currentItem = sessionWords.getOrNull(currentIndex)
     val options = remember(currentItem?.id) {
@@ -71,12 +78,23 @@ fun LearnModeScreen(
                 modifier = Modifier.padding(innerPadding).padding(24.dp)
             )
 
-            isComplete -> LearnComplete(
-                total = sessionWords.size,
-                correct = correctAnswers,
-                onBack = onBack,
-                modifier = Modifier.padding(innerPadding)
-            )
+            isComplete -> {
+                val resultsList = sessionWords.map { word ->
+                    WordSessionResult(
+                        word = word,
+                        isCorrect = wordResults[word.id] ?: false
+                    )
+                }
+                SessionResultSummary(
+                    title = "Learning session complete",
+                    results = resultsList,
+                    isDailyWords = set?.id == AppViewModel.DAILY_WORDS_SET_ID,
+                    onBack = onBack,
+                    onSkipDailyWord = onSkipDailyWord,
+                    onLearnDailyWord = onLearnDailyWord,
+                    modifier = Modifier.padding(innerPadding)
+                )
+            }
 
             currentItem != null -> {
                 val isAnswerSelected = selectedAnswerId != null
@@ -129,7 +147,11 @@ fun LearnModeScreen(
                                 enabled = !isAnswerSelected,
                                 onClick = {
                                     selectedAnswerId = option.id
-                                    if (option.id == currentItem.id) {
+                                    val isCorrectOption = option.id == currentItem.id
+                                    if (currentItem.id !in wordResults) {
+                                        wordResults = wordResults + (currentItem.id to isCorrectOption)
+                                    }
+                                    if (isCorrectOption) {
                                         correctAnswers += 1
                                         onRate(currentItem.id, FsrsRating.GOOD)
                                     } else {

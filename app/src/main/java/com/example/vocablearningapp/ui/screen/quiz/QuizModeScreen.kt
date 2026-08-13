@@ -42,6 +42,10 @@ import com.example.vocablearningapp.ui.theme.MasteredSoft
 import com.example.vocablearningapp.ui.theme.Muted
 import com.example.vocablearningapp.ui.theme.Surface
 
+import com.example.vocablearningapp.ui.component.SessionResultSummary
+import com.example.vocablearningapp.ui.component.WordSessionResult
+import com.example.vocablearningapp.ui.state.AppViewModel
+
 private data class TrueFalseQuestion(
     val wordItem: VocabularyItem,
     val meaningItem: VocabularyItem
@@ -54,12 +58,15 @@ private data class TrueFalseQuestion(
 fun QuizModeScreen(
     set: VocabularySet?,
     onBack: () -> Unit,
-    onRate: (String, FsrsRating) -> Unit
+    onRate: (String, FsrsRating) -> Unit,
+    onSkipDailyWord: ((String) -> Unit)? = null,
+    onLearnDailyWord: ((String) -> Unit)? = null
 ) {
     var currentIndex by remember(set?.id) { mutableStateOf(0) }
     var selectedAnswer by remember(set?.id) { mutableStateOf<Boolean?>(null) }
     var score by remember(set?.id) { mutableStateOf(0) }
     var isComplete by remember(set?.id) { mutableStateOf(false) }
+    var wordResults by remember(set?.id) { mutableStateOf(mapOf<String, Boolean>()) }
     val questions = remember(set?.id) {
         val words = set?.words.orEmpty().shuffled().take(10)
         words.map { wordItem ->
@@ -85,12 +92,23 @@ fun QuizModeScreen(
                 modifier = Modifier.padding(innerPadding).padding(24.dp)
             )
 
-            isComplete -> QuizComplete(
-                total = questions.size,
-                score = score,
-                onBack = onBack,
-                modifier = Modifier.padding(innerPadding)
-            )
+            isComplete -> {
+                val resultsList = questions.map { q ->
+                    WordSessionResult(
+                        word = q.wordItem,
+                        isCorrect = wordResults[q.wordItem.id] ?: false
+                    )
+                }
+                SessionResultSummary(
+                    title = "Quiz complete",
+                    results = resultsList,
+                    isDailyWords = set?.id == AppViewModel.DAILY_WORDS_SET_ID,
+                    onBack = onBack,
+                    onSkipDailyWord = onSkipDailyWord,
+                    onLearnDailyWord = onLearnDailyWord,
+                    modifier = Modifier.padding(innerPadding)
+                )
+            }
 
             currentQuestion != null -> {
                 val hasAnswer = selectedAnswer != null
@@ -145,7 +163,9 @@ fun QuizModeScreen(
                             modifier = Modifier.weight(1f),
                             onClick = {
                                 selectedAnswer = true
-                                if (currentQuestion.answer) {
+                                val isCorrectChoice = currentQuestion.answer
+                                wordResults = wordResults + (currentQuestion.wordItem.id to isCorrectChoice)
+                                if (isCorrectChoice) {
                                     score += 1
                                     onRate(currentQuestion.wordItem.id, FsrsRating.GOOD)
                                 } else {
@@ -162,7 +182,9 @@ fun QuizModeScreen(
                             modifier = Modifier.weight(1f),
                             onClick = {
                                 selectedAnswer = false
-                                if (!currentQuestion.answer) {
+                                val isCorrectChoice = !currentQuestion.answer
+                                wordResults = wordResults + (currentQuestion.wordItem.id to isCorrectChoice)
+                                if (isCorrectChoice) {
                                     score += 1
                                     onRate(currentQuestion.wordItem.id, FsrsRating.GOOD)
                                 } else {

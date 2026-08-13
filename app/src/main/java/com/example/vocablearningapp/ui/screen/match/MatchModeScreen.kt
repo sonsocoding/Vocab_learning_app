@@ -44,15 +44,22 @@ import com.example.vocablearningapp.ui.theme.MasteredSoft
 import com.example.vocablearningapp.ui.theme.Muted
 import com.example.vocablearningapp.ui.theme.Surface
 
+import com.example.vocablearningapp.ui.component.SessionResultSummary
+import com.example.vocablearningapp.ui.component.WordSessionResult
+import com.example.vocablearningapp.ui.state.AppViewModel
+
 @Composable
 fun MatchModeScreen(
     set: VocabularySet?,
     onBack: () -> Unit,
-    onRate: (String, FsrsRating) -> Unit
+    onRate: (String, FsrsRating) -> Unit,
+    onSkipDailyWord: ((String) -> Unit)? = null,
+    onLearnDailyWord: ((String) -> Unit)? = null
 ) {
     var selectedWordId by remember(set?.id) { mutableStateOf<String?>(null) }
     var selectedMeaningId by remember(set?.id) { mutableStateOf<String?>(null) }
     var matchedIds by remember(set?.id) { mutableStateOf(emptySet<String>()) }
+    var wordMistakes by remember(set?.id) { mutableStateOf(setOf<String>()) }
     var hasMistake by remember(set?.id) { mutableStateOf(false) }
     val sessionWords = remember(set?.id) { set?.words.orEmpty().shuffled().take(4) }
     val meaningWords = remember(set?.id) { sessionWords.shuffled() }
@@ -80,6 +87,7 @@ fun MatchModeScreen(
         } else {
             onRate(wordId, FsrsRating.AGAIN)
             hasMistake = true
+            wordMistakes = wordMistakes + wordId
         }
     }
 
@@ -94,11 +102,23 @@ fun MatchModeScreen(
                 modifier = Modifier.padding(innerPadding).padding(24.dp)
             )
 
-            isComplete -> MatchComplete(
-                total = sessionWords.size,
-                onBack = onBack,
-                modifier = Modifier.padding(innerPadding)
-            )
+            isComplete -> {
+                val resultsList = sessionWords.map { word ->
+                    WordSessionResult(
+                        word = word,
+                        isCorrect = word.id !in wordMistakes
+                    )
+                }
+                SessionResultSummary(
+                    title = "Match complete",
+                    results = resultsList,
+                    isDailyWords = set?.id == AppViewModel.DAILY_WORDS_SET_ID,
+                    onBack = onBack,
+                    onSkipDailyWord = onSkipDailyWord,
+                    onLearnDailyWord = onLearnDailyWord,
+                    modifier = Modifier.padding(innerPadding)
+                )
+            }
 
             else -> {
                 Column(
