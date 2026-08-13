@@ -114,6 +114,18 @@ class AppViewModel : ViewModel() {
         )
     }
 
+    fun skipDailyWord(itemId: String) {
+        uiState = uiState.copy(
+            dailyWordsByLevel = uiState.dailyWordsByLevel.mapValues { (_, items) ->
+                items.filterNot { it.id == itemId }
+            }
+        )
+    }
+
+    fun learnDailyWord(itemId: String) {
+        rateItem(itemId, FsrsRating.GOOD)
+    }
+
     fun saveSet(
         setId: String?,
         title: String,
