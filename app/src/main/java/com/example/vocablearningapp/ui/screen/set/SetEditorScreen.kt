@@ -205,7 +205,6 @@ private fun WordEditorCard(
     onDelete: () -> Unit
 ) {
     var wordText by remember(draft.id) { mutableStateOf(draft.word) }
-    var meaningText by remember(draft.id) { mutableStateOf(draft.meaning) }
     var pronunciationText by remember(draft.id) { mutableStateOf(draft.pronunciation) }
     var exampleText by remember(draft.id) { mutableStateOf(draft.exampleSentence) }
 
@@ -215,16 +214,18 @@ private fun WordEditorCard(
         colors = CardDefaults.cardColors(containerColor = Surface),
         border = BorderStroke(1.dp, Border)
     ) {
-        Column(modifier = Modifier.padding(15.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(modifier = Modifier.padding(15.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = "Word ${index + 1}", style = MaterialTheme.typography.titleMedium, color = Ink)
                 IconButton(onClick = onDelete, enabled = canDelete) {
                     Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete word", tint = Muted)
                 }
             }
+
             EditorField(
                 value = wordText,
                 onValueChange = { newWord ->
@@ -238,15 +239,7 @@ private fun WordEditorCard(
                 label = "Word",
                 placeholder = ""
             )
-            EditorField(
-                value = meaningText,
-                onValueChange = { newMeaning ->
-                    meaningText = newMeaning
-                    onChange(draft.copy(meaning = newMeaning))
-                },
-                label = "Meaning",
-                placeholder = "Ví dụ: n. thông báo, v. nhận thấy"
-            )
+
             IpaFieldWithHelper(
                 pronunciation = pronunciationText,
                 word = wordText,
@@ -255,16 +248,41 @@ private fun WordEditorCard(
                     onChange(draft.copy(pronunciation = newIpa))
                 }
             )
-            Text(text = "Part of speech", style = MaterialTheme.typography.labelLarge, color = Ink)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                PartOfSpeech.entries.forEach { partOfSpeech ->
-                    FilterChip(
-                        selected = draft.partOfSpeech == partOfSpeech,
-                        onClick = { onChange(draft.copy(partOfSpeech = partOfSpeech)) },
-                        label = { Text(partOfSpeech.label) }
-                    )
-                }
+
+            Text(
+                text = "Meanings & Parts of Speech",
+                style = MaterialTheme.typography.labelLarge,
+                color = Ink,
+                fontWeight = FontWeight.Bold
+            )
+
+            draft.meanings.forEachIndexed { mIndex, mDraft ->
+                MeaningEditorRow(
+                    index = mIndex,
+                    meaning = mDraft,
+                    canDeleteMeaning = draft.meanings.size > 1,
+                    onMeaningChange = { updatedMeaning ->
+                        val updatedList = draft.meanings.toMutableList()
+                        updatedList[mIndex] = updatedMeaning
+                        onChange(draft.copy(meanings = updatedList))
+                    },
+                    onDeleteMeaning = {
+                        val updatedList = draft.meanings.toMutableList()
+                        updatedList.removeAt(mIndex)
+                        onChange(draft.copy(meanings = updatedList))
+                    }
+                )
             }
+
+            SecondaryButton(
+                text = "+ Thêm nghĩa (n / v / adj)",
+                onClick = {
+                    val updatedList = draft.meanings + DraftMeaning()
+                    onChange(draft.copy(meanings = updatedList))
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+
             EditorField(
                 value = exampleText,
                 onValueChange = { newExample ->
@@ -273,6 +291,65 @@ private fun WordEditorCard(
                 },
                 label = "Example sentence",
                 placeholder = ""
+            )
+        }
+    }
+}
+
+@Composable
+private fun MeaningEditorRow(
+    index: Int,
+    meaning: DraftMeaning,
+    canDeleteMeaning: Boolean,
+    onMeaningChange: (DraftMeaning) -> Unit,
+    onDeleteMeaning: () -> Unit
+) {
+    var localMeaningText by remember(meaning.id) { mutableStateOf(meaning.meaning) }
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = com.example.vocablearningapp.ui.theme.SurfaceMuted,
+        shape = RoundedCornerShape(14.dp),
+        border = BorderStroke(1.dp, Border)
+    ) {
+        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    PartOfSpeech.entries.forEach { pos ->
+                        FilterChip(
+                            selected = meaning.partOfSpeech == pos,
+                            onClick = { onMeaningChange(meaning.copy(partOfSpeech = pos)) },
+                            label = { Text(pos.label) }
+                        )
+                    }
+                }
+                if (canDeleteMeaning) {
+                    IconButton(onClick = onDeleteMeaning) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete meaning",
+                            tint = Muted,
+                            modifier = Modifier.height(18.dp)
+                        )
+                    }
+                }
+            }
+
+            OutlinedTextField(
+                value = localMeaningText,
+                onValueChange = { newText ->
+                    localMeaningText = newText
+                    onMeaningChange(meaning.copy(meaning = newText))
+                },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Nghĩa ${if (canDeleteMeaning) "${index + 1}" else ""}") },
+                placeholder = { Text("ví dụ: nhận thấy, chú ý...") },
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp)
             )
         }
     }
@@ -355,12 +432,17 @@ private fun IpaFieldWithHelper(
     }
 }
 
+private data class DraftMeaning(
+    val id: String = "m-${System.nanoTime()}-${kotlin.random.Random.nextInt(10000)}",
+    val partOfSpeech: PartOfSpeech = PartOfSpeech.NOUN,
+    val meaning: String = ""
+)
+
 private data class DraftWord(
     val id: String = "draft-${System.nanoTime()}-${kotlin.random.Random.nextInt(10000)}",
     val word: String = "",
-    val meaning: String = "",
+    val meanings: List<DraftMeaning> = listOf(DraftMeaning()),
     val pronunciation: String = "",
-    val partOfSpeech: PartOfSpeech = PartOfSpeech.NOUN,
     val exampleSentence: String = "",
     val fsrsState: FsrsState = FsrsState.NEW,
     val fsrsStep: Int? = null,
@@ -372,14 +454,26 @@ private data class DraftWord(
     val reviewCount: Int = 0,
     val lapseCount: Int = 0
 ) {
+    val primaryPartOfSpeech: PartOfSpeech
+        get() = meanings.firstOrNull()?.partOfSpeech ?: PartOfSpeech.NOUN
+
+    val formattedMeaning: String
+        get() {
+            val valid = meanings.filter { it.meaning.isNotBlank() }
+            if (valid.isEmpty()) return ""
+            if (valid.size == 1) return valid[0].meaning.trim()
+            return valid.joinToString("; ") { "${it.partOfSpeech.label}. ${it.meaning.trim()}" }
+        }
+
     fun toVocabularyItem(setTitle: String, index: Int): VocabularyItem? {
-        if (word.isBlank() && meaning.isBlank()) return null
+        val finalMeaning = formattedMeaning
+        if (word.isBlank() && finalMeaning.isBlank()) return null
         return VocabularyItem(
             id = id.ifBlank { "${setTitle.lowercase().replace(" ", "-")}-$index" },
             word = word.trim(),
-            meaning = meaning.trim(),
+            meaning = finalMeaning,
             pronunciation = pronunciation.trim(),
-            partOfSpeech = partOfSpeech,
+            partOfSpeech = primaryPartOfSpeech,
             exampleSentence = exampleSentence.trim().ifBlank {
                 "This is an example sentence for ${word.trim()}."
             },
@@ -396,22 +490,32 @@ private data class DraftWord(
     }
 
     companion object {
-        fun from(item: VocabularyItem) = DraftWord(
-            id = item.id,
-            word = item.word,
-            meaning = item.meaning,
-            pronunciation = item.pronunciation,
-            partOfSpeech = item.partOfSpeech,
-            exampleSentence = item.exampleSentence,
-            fsrsState = item.fsrsState,
-            fsrsStep = item.fsrsStep,
-            stability = item.stability,
-            difficulty = item.difficulty,
-            dueAtMillis = item.dueAtMillis,
-            lastReviewAtMillis = item.lastReviewAtMillis,
-            scheduledDays = item.scheduledDays,
-            reviewCount = item.reviewCount,
-            lapseCount = item.lapseCount
-        )
+        fun from(item: VocabularyItem): DraftWord {
+            val parsedEntries = com.example.vocablearningapp.domain.util.MeaningParser.parse(item.meaning, item.partOfSpeech)
+            val draftMeanings = if (parsedEntries.isEmpty()) {
+                listOf(DraftMeaning(partOfSpeech = item.partOfSpeech, meaning = item.meaning))
+            } else {
+                parsedEntries.map { entry ->
+                    DraftMeaning(partOfSpeech = entry.partOfSpeech, meaning = entry.meaning)
+                }
+            }
+
+            return DraftWord(
+                id = item.id,
+                word = item.word,
+                meanings = draftMeanings,
+                pronunciation = item.pronunciation,
+                exampleSentence = item.exampleSentence,
+                fsrsState = item.fsrsState,
+                fsrsStep = item.fsrsStep,
+                stability = item.stability,
+                difficulty = item.difficulty,
+                dueAtMillis = item.dueAtMillis,
+                lastReviewAtMillis = item.lastReviewAtMillis,
+                scheduledDays = item.scheduledDays,
+                reviewCount = item.reviewCount,
+                lapseCount = item.lapseCount
+            )
+        }
     }
 }
