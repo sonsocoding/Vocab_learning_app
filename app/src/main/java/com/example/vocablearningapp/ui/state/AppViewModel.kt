@@ -21,6 +21,7 @@ class AppViewModel : ViewModel() {
     companion object {
         const val DAILY_WORDS_SET_ID = "daily-words"
         const val DAILY_REVIEW_SET_ID = "daily-review"
+        const val DAILY_WORDS_PER_DAY = 10
     }
 
     var uiState by mutableStateOf(AppUiState())
@@ -45,7 +46,9 @@ class AppViewModel : ViewModel() {
                 description = "Fresh words generated from your recent learning level.",
                 category = "Daily practice",
                 level = uiState.lastStudiedLevel,
-                words = uiState.dailyWordsByLevel[uiState.lastStudiedLevel].orEmpty()
+                words = uiState.dailyWordsByLevel[uiState.lastStudiedLevel]
+                    .orEmpty()
+                    .take(DAILY_WORDS_PER_DAY)
             )
         }
 

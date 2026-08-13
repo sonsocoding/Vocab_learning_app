@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -111,7 +113,9 @@ fun SetDetailScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     SectionHeader(title = "Study modes")
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Max),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         StudyModeCard(
@@ -119,18 +123,24 @@ fun SetDetailScreen(
                             subtitle = StudyMode.FLASHCARDS.subtitle,
                             icon = Icons.Default.BookmarkBorder,
                             onClick = { onOpenMode(StudyMode.FLASHCARDS) },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
                         )
                         StudyModeCard(
                             title = StudyMode.LEARN.title,
                             subtitle = StudyMode.LEARN.subtitle,
                             icon = Icons.Default.MenuBook,
                             onClick = { onOpenMode(StudyMode.LEARN) },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
                         )
                     }
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Max),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         StudyModeCard(
@@ -138,14 +148,18 @@ fun SetDetailScreen(
                             subtitle = StudyMode.QUIZ.subtitle,
                             icon = Icons.Default.Check,
                             onClick = { onOpenMode(StudyMode.QUIZ) },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
                         )
                         StudyModeCard(
                             title = StudyMode.MATCH.title,
                             subtitle = StudyMode.MATCH.subtitle,
                             icon = Icons.Default.PlayArrow,
                             onClick = { onOpenMode(StudyMode.MATCH) },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
                         )
                     }
                 }

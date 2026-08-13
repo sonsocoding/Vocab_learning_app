@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -268,7 +269,12 @@ fun StudyModeCard(
         border = BorderStroke(1.dp, Border),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Top
+        ) {
             Box(
                 modifier = Modifier
                     .size(42.dp)
@@ -279,9 +285,21 @@ fun StudyModeCard(
                 Icon(imageVector = icon, contentDescription = null, tint = Accent)
             }
             Spacer(modifier = Modifier.height(13.dp))
-            Text(text = title, style = MaterialTheme.typography.titleMedium, color = Ink)
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = Ink,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
             Spacer(modifier = Modifier.height(3.dp))
-            Text(text = subtitle, style = MaterialTheme.typography.bodyMedium, color = Muted)
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Muted,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }

@@ -168,49 +168,79 @@ object MockData {
         )
     )
 
-    // These words are generated separately from study sets for the Daily Words feature.
+    // This local pool is separate from study sets and is selected by the user's recent level.
     val dailyWordsByLevel = mapOf(
         "A1" to listOf(
             word("daily-a1", "clock", "đồng hồ", "/klɒk/", "The clock is on the wall.", FsrsState.NEW),
             word("daily-a1", "smile", "mỉm cười", "/smaɪl/", "She smiled at the child.", FsrsState.NEW),
             word("daily-a1", "early", "sớm", "/ˈɜːli/", "I woke up early today.", FsrsState.NEW),
             word("daily-a1", "street", "đường phố", "/striːt/", "The cafe is on the next street.", FsrsState.NEW),
-            word("daily-a1", "carry", "mang; xách", "/ˈkæri/", "Can you carry this bag?", FsrsState.NEW)
+            word("daily-a1", "carry", "mang; xách", "/ˈkæri/", "Can you carry this bag?", FsrsState.NEW),
+            word("daily-a1", "animal", "động vật", "/ˈænɪməl/", "The children saw an animal at the zoo.", FsrsState.NEW),
+            word("daily-a1", "clean", "sạch sẽ", "/kliːn/", "Please keep your room clean.", FsrsState.NEW),
+            word("daily-a1", "dinner", "bữa tối", "/ˈdɪnə/", "We have dinner at seven o'clock.", FsrsState.NEW),
+            word("daily-a1", "happy", "vui vẻ", "/ˈhæpi/", "She feels happy today.", FsrsState.NEW),
+            word("daily-a1", "visit", "thăm", "/ˈvɪzɪt/", "We will visit our grandparents this weekend.", FsrsState.NEW)
         ),
         "A2" to listOf(
             word("daily-a2", "curious", "tò mò", "/ˈkjʊəriəs/", "The curious student asked another question.", FsrsState.NEW),
             word("daily-a2", "repair", "sửa chữa", "/rɪˈpeə/", "The shop can repair your phone.", FsrsState.NEW),
             word("daily-a2", "reliable", "đáng tin cậy", "/rɪˈlaɪəbəl/", "We need a reliable internet connection.", FsrsState.NEW),
             word("daily-a2", "recently", "gần đây", "/ˈriːsəntli/", "Have you seen any good films recently?", FsrsState.NEW),
-            word("daily-a2", "improve", "cải thiện", "/ɪmˈpruːv/", "Practice will improve your speaking.", FsrsState.NEW)
+            word("daily-a2", "improve", "cải thiện", "/ɪmˈpruːv/", "Practice will improve your speaking.", FsrsState.NEW),
+            word("daily-a2", "arrange", "sắp xếp", "/əˈreɪndʒ/", "I will arrange a meeting for next week.", FsrsState.NEW),
+            word("daily-a2", "choice", "lựa chọn", "/tʃɔɪs/", "You have a choice between tea and coffee.", FsrsState.NEW),
+            word("daily-a2", "healthy", "khỏe mạnh", "/ˈhelθi/", "Walking every day is a healthy habit.", FsrsState.NEW),
+            word("daily-a2", "journey", "hành trình", "/ˈdʒɜːni/", "The journey took nearly three hours.", FsrsState.NEW),
+            word("daily-a2", "notice", "nhận thấy; thông báo", "/ˈnəʊtɪs/", "Did you notice the new sign outside?", FsrsState.NEW)
         ),
         "B1" to listOf(
             word("daily-b1", "adapt", "thích nghi", "/əˈdæpt/", "Animals adapt to changes in their environment.", FsrsState.NEW),
             word("daily-b1", "feature", "đặc điểm; tính năng", "/ˈfiːtʃə/", "The app has a useful search feature.", FsrsState.NEW),
             word("daily-b1", "outcome", "kết quả", "/ˈaʊtkʌm/", "The outcome was better than expected.", FsrsState.NEW),
             word("daily-b1", "influence", "ảnh hưởng", "/ˈɪnfluəns/", "Music can influence our mood.", FsrsState.NEW),
-            word("daily-b1", "approach", "cách tiếp cận", "/əˈprəʊtʃ/", "We need a different approach to the problem.", FsrsState.NEW)
+            word("daily-b1", "approach", "cách tiếp cận", "/əˈprəʊtʃ/", "We need a different approach to the problem.", FsrsState.NEW),
+            word("daily-b1", "maintain", "duy trì", "/meɪnˈteɪn/", "It is important to maintain a healthy routine.", FsrsState.NEW),
+            word("daily-b1", "benefit", "lợi ích", "/ˈbenɪfɪt/", "Regular exercise has many benefits.", FsrsState.NEW),
+            word("daily-b1", "accurate", "chính xác", "/ˈækjərət/", "Please give me accurate information.", FsrsState.NEW),
+            word("daily-b1", "encounter", "gặp phải", "/ɪnˈkaʊntə/", "You may encounter a few problems at first.", FsrsState.NEW),
+            word("daily-b1", "considerable", "đáng kể", "/kənˈsɪdərəbəl/", "The project requires a considerable amount of time.", FsrsState.NEW)
         ),
         "B2" to listOf(
             word("daily-b2", "compelling", "thuyết phục; hấp dẫn", "/kəmˈpelɪŋ/", "The speaker made a compelling argument.", FsrsState.NEW),
             word("daily-b2", "allocate", "phân bổ", "/ˈæləkeɪt/", "The manager allocated more time to training.", FsrsState.NEW),
             word("daily-b2", "perspective", "góc nhìn; quan điểm", "/pəˈspektɪv/", "Travel gave her a new perspective.", FsrsState.NEW),
             word("daily-b2", "contribute", "đóng góp", "/kənˈtrɪbjuːt/", "Several factors contributed to the success.", FsrsState.NEW),
-            word("daily-b2", "justify", "biện minh; chứng minh là hợp lý", "/ˈdʒʌstɪfaɪ/", "The data does not justify that conclusion.", FsrsState.NEW)
+            word("daily-b2", "justify", "biện minh; chứng minh là hợp lý", "/ˈdʒʌstɪfaɪ/", "The data does not justify that conclusion.", FsrsState.NEW),
+            word("daily-b2", "implement", "triển khai", "/ˈɪmplɪment/", "The team will implement the new plan next month.", FsrsState.NEW),
+            word("daily-b2", "subtle", "tinh tế; khó nhận ra", "/ˈsʌtəl/", "There was a subtle difference between the two designs.", FsrsState.NEW),
+            word("daily-b2", "constraint", "sự hạn chế", "/kənˈstreɪnt/", "Time was the main constraint on the project.", FsrsState.NEW),
+            word("daily-b2", "enhance", "nâng cao; tăng cường", "/ɪnˈhɑːns/", "The update will enhance the user experience.", FsrsState.NEW),
+            word("daily-b2", "controversial", "gây tranh cãi", "/ˌkɒntrəˈvɜːʃəl/", "The proposal remains controversial among experts.", FsrsState.NEW)
         ),
         "C1" to listOf(
             word("daily-c1", "alleviate", "làm giảm; xoa dịu", "/əˈliːvieɪt/", "The new policy may alleviate pressure on families.", FsrsState.NEW),
             word("daily-c1", "articulate", "diễn đạt rõ ràng", "/ɑːˈtɪkjələt/", "She gave an articulate response to the question.", FsrsState.NEW),
             word("daily-c1", "discern", "nhận ra; phân biệt", "/dɪˈsɜːn/", "It is difficult to discern the pattern at first.", FsrsState.NEW),
             word("daily-c1", "criterion", "tiêu chí", "/kraɪˈtɪəriən/", "Cost was the main criterion for the decision.", FsrsState.NEW),
-            word("daily-c1", "resilient", "kiên cường; có khả năng phục hồi", "/rɪˈzɪliənt/", "The resilient community rebuilt after the storm.", FsrsState.NEW)
+            word("daily-c1", "resilient", "kiên cường; có khả năng phục hồi", "/rɪˈzɪliənt/", "The resilient community rebuilt after the storm.", FsrsState.NEW),
+            word("daily-c1", "consecutive", "liên tiếp", "/kənˈsekjətɪv/", "She worked for five consecutive days.", FsrsState.NEW),
+            word("daily-c1", "devise", "nghĩ ra; xây dựng", "/dɪˈvaɪz/", "The researchers devised a new method.", FsrsState.NEW),
+            word("daily-c1", "inherent", "vốn có", "/ɪnˈhɪərənt/", "Every solution has inherent limitations.", FsrsState.NEW),
+            word("daily-c1", "facilitate", "tạo điều kiện", "/fəˈsɪlɪteɪt/", "The workshop will facilitate discussion between the teams.", FsrsState.NEW),
+            word("daily-c1", "notion", "khái niệm; quan niệm", "/ˈnəʊʃən/", "He rejected the notion that success is only about money.", FsrsState.NEW)
         ),
         "C2" to listOf(
             word("daily-c2", "inexorable", "không thể ngăn cản", "/ɪnˈeksərəbəl/", "The inexorable advance of technology changed the industry.", FsrsState.NEW),
             word("daily-c2", "juxtapose", "đặt cạnh nhau để so sánh", "/ˌdʒʌkstəˈpəʊz/", "The article juxtaposes two opposing viewpoints.", FsrsState.NEW),
             word("daily-c2", "tenuous", "mong manh; không chắc chắn", "/ˈtenjuəs/", "The connection between the events remains tenuous.", FsrsState.NEW),
             word("daily-c2", "perfunctory", "qua loa; chiếu lệ", "/pəˈfʌŋktəri/", "He offered a perfunctory apology and left.", FsrsState.NEW),
-            word("daily-c2", "ubiquitous", "phổ biến ở khắp nơi", "/juːˈbɪkwɪtəs/", "Smartphones are ubiquitous in modern cities.", FsrsState.NEW)
+            word("daily-c2", "ubiquitous", "phổ biến ở khắp nơi", "/juːˈbɪkwɪtəs/", "Smartphones are ubiquitous in modern cities.", FsrsState.NEW),
+            word("daily-c2", "ambivalent", "mâu thuẫn; không dứt khoát", "/æmˈbɪvələnt/", "She felt ambivalent about accepting the offer.", FsrsState.NEW),
+            word("daily-c2", "conundrum", "vấn đề nan giải", "/kəˈnʌndrəm/", "The lack of funding created a difficult conundrum.", FsrsState.NEW),
+            word("daily-c2", "exacerbate", "làm trầm trọng thêm", "/ɪɡˈzæsəbeɪt/", "Poor communication can exacerbate the problem.", FsrsState.NEW),
+            word("daily-c2", "reticent", "kín tiếng; dè dặt", "/ˈretɪsənt/", "He was reticent to discuss his personal views.", FsrsState.NEW),
+            word("daily-c2", "scrutinize", "xem xét kỹ lưỡng", "/ˈskruːtənaɪz/", "The committee will scrutinize every detail of the proposal.", FsrsState.NEW)
         )
     )
 
@@ -247,27 +277,57 @@ object MockData {
         "smile" to PartOfSpeech.VERB,
         "early" to PartOfSpeech.ADJECTIVE,
         "carry" to PartOfSpeech.VERB,
+        "animal" to PartOfSpeech.NOUN,
+        "clean" to PartOfSpeech.ADJECTIVE,
+        "dinner" to PartOfSpeech.NOUN,
+        "happy" to PartOfSpeech.ADJECTIVE,
+        "visit" to PartOfSpeech.VERB,
         "curious" to PartOfSpeech.ADJECTIVE,
         "repair" to PartOfSpeech.VERB,
         "reliable" to PartOfSpeech.ADJECTIVE,
         "recently" to PartOfSpeech.ADJECTIVE,
         "improve" to PartOfSpeech.VERB,
+        "arrange" to PartOfSpeech.VERB,
+        "choice" to PartOfSpeech.NOUN,
+        "healthy" to PartOfSpeech.ADJECTIVE,
+        "journey" to PartOfSpeech.NOUN,
+        "notice" to PartOfSpeech.VERB,
         "adapt" to PartOfSpeech.VERB,
         "influence" to PartOfSpeech.VERB,
         "approach" to PartOfSpeech.VERB,
+        "maintain" to PartOfSpeech.VERB,
+        "benefit" to PartOfSpeech.NOUN,
+        "accurate" to PartOfSpeech.ADJECTIVE,
+        "encounter" to PartOfSpeech.VERB,
+        "considerable" to PartOfSpeech.ADJECTIVE,
         "compelling" to PartOfSpeech.ADJECTIVE,
         "allocate" to PartOfSpeech.VERB,
         "contribute" to PartOfSpeech.VERB,
         "justify" to PartOfSpeech.VERB,
+        "implement" to PartOfSpeech.VERB,
+        "subtle" to PartOfSpeech.ADJECTIVE,
+        "constraint" to PartOfSpeech.NOUN,
+        "enhance" to PartOfSpeech.VERB,
+        "controversial" to PartOfSpeech.ADJECTIVE,
         "alleviate" to PartOfSpeech.VERB,
         "articulate" to PartOfSpeech.VERB,
         "discern" to PartOfSpeech.VERB,
         "resilient" to PartOfSpeech.ADJECTIVE,
+        "consecutive" to PartOfSpeech.ADJECTIVE,
+        "devise" to PartOfSpeech.VERB,
+        "inherent" to PartOfSpeech.ADJECTIVE,
+        "facilitate" to PartOfSpeech.VERB,
+        "notion" to PartOfSpeech.NOUN,
         "inexorable" to PartOfSpeech.ADJECTIVE,
         "juxtapose" to PartOfSpeech.VERB,
         "tenuous" to PartOfSpeech.ADJECTIVE,
         "perfunctory" to PartOfSpeech.ADJECTIVE,
-        "ubiquitous" to PartOfSpeech.ADJECTIVE
+        "ubiquitous" to PartOfSpeech.ADJECTIVE,
+        "ambivalent" to PartOfSpeech.ADJECTIVE,
+        "conundrum" to PartOfSpeech.NOUN,
+        "exacerbate" to PartOfSpeech.VERB,
+        "reticent" to PartOfSpeech.ADJECTIVE,
+        "scrutinize" to PartOfSpeech.VERB
     )
 
     private fun word(

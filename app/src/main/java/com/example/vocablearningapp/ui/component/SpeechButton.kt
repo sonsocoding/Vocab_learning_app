@@ -1,5 +1,6 @@
 package com.example.vocablearningapp.ui.component
 
+import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
@@ -12,9 +13,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import java.util.Locale
+
+private const val TTS_VOLUME_MULTIPLIER = 2.0f
 
 @Composable
 fun SpeechButton(
@@ -44,7 +47,9 @@ fun SpeechButton(
             textToSpeech.speak(
                 text,
                 TextToSpeech.QUEUE_FLUSH,
-                null,
+                Bundle().apply {
+                    putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, TTS_VOLUME_MULTIPLIER)
+                },
                 "vocabulary-${text.hashCode()}"
             )
         },
