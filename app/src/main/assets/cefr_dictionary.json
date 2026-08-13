@@ -1,0 +1,424 @@
+[
+  {
+    "word": "hello",
+    "ipa": "/həˈləʊ/",
+    "level": "A1",
+    "category": "Everyday",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "lời chào",
+        "exampleSentence": "She gave me a friendly hello when I entered."
+      }
+    ]
+  },
+  {
+    "word": "book",
+    "ipa": "/bʊk/",
+    "level": "A1",
+    "category": "Everyday",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "cuốn sách",
+        "exampleSentence": "I read an interesting book about ancient history."
+      },
+      {
+        "partOfSpeech": "verb",
+        "meaning": "đặt chỗ trước, đặt vé",
+        "exampleSentence": "We need to book a hotel room before the weekend."
+      }
+    ]
+  },
+  {
+    "word": "family",
+    "ipa": "/ˈfæməli/",
+    "level": "A1",
+    "category": "Everyday",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "gia đình",
+        "exampleSentence": "My family lives in a quiet neighborhood near the park."
+      }
+    ]
+  },
+  {
+    "word": "friend",
+    "ipa": "/frend/",
+    "level": "A1",
+    "category": "Everyday",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "người bạn",
+        "exampleSentence": "My best friend helps me practice English every day."
+      }
+    ]
+  },
+  {
+    "word": "morning",
+    "ipa": "/ˈmɔːnɪŋ/",
+    "level": "A1",
+    "category": "Everyday",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "buổi sáng",
+        "exampleSentence": "I enjoy drinking hot tea in the morning."
+      }
+    ]
+  },
+  {
+    "word": "water",
+    "ipa": "/ˈwɔːtə/",
+    "level": "A1",
+    "category": "Everyday",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "nước",
+        "exampleSentence": "Drink plenty of water during hot summer days."
+      },
+      {
+        "partOfSpeech": "verb",
+        "meaning": "tưới nước",
+        "exampleSentence": "Please water the flowers in the garden."
+      }
+    ]
+  },
+  {
+    "word": "house",
+    "ipa": "/haʊs/",
+    "level": "A1",
+    "category": "Everyday",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "ngôi nhà",
+        "exampleSentence": "Their new house has a beautiful backyard."
+      }
+    ]
+  },
+  {
+    "word": "kitchen",
+    "ipa": "/ˈkɪtʃən/",
+    "level": "A1",
+    "category": "Everyday",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "nhà bếp",
+        "exampleSentence": "The kitchen is clean and well-equipped."
+      }
+    ]
+  },
+  {
+    "word": "smile",
+    "ipa": "/smaɪl/",
+    "level": "A1",
+    "category": "Everyday",
+    "meanings": [
+      {
+        "partOfSpeech": "verb",
+        "meaning": "mỉm cười",
+        "exampleSentence": "She smiled warmly when she saw her old friend."
+      },
+      {
+        "partOfSpeech": "noun",
+        "meaning": "nụ cười",
+        "exampleSentence": "He has a polite and welcoming smile."
+      }
+    ]
+  },
+  {
+    "word": "notice",
+    "ipa": "/ˈnəʊtɪs/",
+    "level": "A2",
+    "category": "Everyday",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "thông báo, tờ yết thị",
+        "exampleSentence": "There was a notice posted on the bulletin board."
+      },
+      {
+        "partOfSpeech": "verb",
+        "meaning": "nhận thấy, chú ý",
+        "exampleSentence": "Did you notice the changes in the new schedule?"
+      }
+    ]
+  },
+  {
+    "word": "commute",
+    "ipa": "/kəˈmjuːt/",
+    "level": "A2",
+    "category": "Everyday",
+    "meanings": [
+      {
+        "partOfSpeech": "verb",
+        "meaning": "đi lại giữa nhà và nơi làm việc",
+        "exampleSentence": "She commutes to the downtown office by subway."
+      },
+      {
+        "partOfSpeech": "noun",
+        "meaning": "quãng đường đi làm",
+        "exampleSentence": "My daily commute takes about forty minutes."
+      }
+    ]
+  },
+  {
+    "word": "ambitious",
+    "ipa": "/æmˈbɪʃəs/",
+    "level": "A2",
+    "category": "Everyday",
+    "meanings": [
+      {
+        "partOfSpeech": "adj",
+        "meaning": "tham vọng, có nhiều hoài bão",
+        "exampleSentence": "He is an ambitious young engineer with big goals."
+      }
+    ]
+  },
+  {
+    "word": "grocery",
+    "ipa": "/ˈɡrəʊsəri/",
+    "level": "A2",
+    "category": "Everyday",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "thực phẩm, hàng tạp hóa",
+        "exampleSentence": "I need to buy some fresh groceries after work."
+      }
+    ]
+  },
+  {
+    "word": "journey",
+    "ipa": "/ˈdʒɜːni/",
+    "level": "A2",
+    "category": "Travel",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "hành trình, chuyến đi",
+        "exampleSentence": "The train journey across the mountains was breathtaking."
+      }
+    ]
+  },
+  {
+    "word": "luggage",
+    "ipa": "/ˈlʌɡɪdʒ/",
+    "level": "A2",
+    "category": "Travel",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "hành lý",
+        "exampleSentence": "Please keep your luggage with you at all times."
+      }
+    ]
+  },
+  {
+    "word": "ticket",
+    "ipa": "/ˈtɪkɪt/",
+    "level": "A2",
+    "category": "Travel",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "vé",
+        "exampleSentence": "I reserved a flight ticket using the mobile app."
+      }
+    ]
+  },
+  {
+    "word": "match",
+    "ipa": "/mætʃ/",
+    "level": "B1",
+    "category": "Interests",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "trận đấu",
+        "exampleSentence": "The championship football match starts at eight tonight."
+      },
+      {
+        "partOfSpeech": "verb",
+        "meaning": "nối, làm cho tương hợp",
+        "exampleSentence": "The blue shoes match her jacket perfectly."
+      }
+    ]
+  },
+  {
+    "word": "curriculum",
+    "ipa": "/kəˈrɪkjələm/",
+    "level": "B1",
+    "category": "Education",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "chương trình giảng dạy",
+        "exampleSentence": "The school updated its science curriculum this year."
+      }
+    ]
+  },
+  {
+    "word": "assignment",
+    "ipa": "/əˈsaɪnmənt/",
+    "level": "B1",
+    "category": "Education",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "bài tập được giao",
+        "exampleSentence": "Students must submit the written assignment by Friday."
+      }
+    ]
+  },
+  {
+    "word": "deadline",
+    "ipa": "/ˈdedlaɪn/",
+    "level": "B1",
+    "category": "Professional",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "hạn chót",
+        "exampleSentence": "Our team worked late to meet the project deadline."
+      }
+    ]
+  },
+  {
+    "word": "lecture",
+    "ipa": "/ˈlektʃə/",
+    "level": "B1",
+    "category": "Education",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "bài giảng",
+        "exampleSentence": "The professor gave an inspiring lecture on renewable energy."
+      },
+      {
+        "partOfSpeech": "verb",
+        "meaning": "thuyết giảng, giảng bài",
+        "exampleSentence": "She lectures on modern European history at the university."
+      }
+    ]
+  },
+  {
+    "word": "lead",
+    "ipa": "/liːd/",
+    "level": "B2",
+    "category": "Professional",
+    "meanings": [
+      {
+        "partOfSpeech": "verb",
+        "meaning": "dẫn dắt, lãnh đạo",
+        "exampleSentence": "She was chosen to lead the international research team."
+      },
+      {
+        "partOfSpeech": "noun",
+        "meaning": "sự dẫn đầu, đầu manh mối",
+        "exampleSentence": "Our company took the lead in green technology."
+      }
+    ]
+  },
+  {
+    "word": "negotiate",
+    "ipa": "/nɪˈɡəʊʃieɪt/",
+    "level": "B2",
+    "category": "Professional",
+    "meanings": [
+      {
+        "partOfSpeech": "verb",
+        "meaning": "đàm phán, thương lượng",
+        "exampleSentence": "The diplomats met to negotiate a peaceful agreement."
+      }
+    ]
+  },
+  {
+    "word": "impact",
+    "ipa": "/ˈɪmpækt/",
+    "level": "B2",
+    "category": "Society",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "tác động, ảnh hưởng mạnh mẽ",
+        "exampleSentence": "Technology has a profound impact on modern communication."
+      },
+      {
+        "partOfSpeech": "verb",
+        "meaning": "ảnh hưởng trực tiếp đến",
+        "exampleSentence": "High inflation rates negatively impact consumer spending."
+      }
+    ]
+  },
+  {
+    "word": "sustainable",
+    "ipa": "/səˈsteɪnəbəl/",
+    "level": "B2",
+    "category": "Society",
+    "meanings": [
+      {
+        "partOfSpeech": "adj",
+        "meaning": "bền vững, phát triển lâu dài",
+        "exampleSentence": "The city is investing heavily in sustainable public transport."
+      }
+    ]
+  },
+  {
+    "word": "coherent",
+    "ipa": "/kəʊˈhɪərənt/",
+    "level": "C1",
+    "category": "Academic",
+    "meanings": [
+      {
+        "partOfSpeech": "adj",
+        "meaning": "mạch lạc, chặt chẽ",
+        "exampleSentence": "The candidate presented a clear and coherent strategy."
+      }
+    ]
+  },
+  {
+    "word": "hypothesis",
+    "ipa": "/haɪˈpɒθəsɪs/",
+    "level": "C1",
+    "category": "Academic",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "giả thuyết khoa học",
+        "exampleSentence": "The laboratory experiment supported the original hypothesis."
+      }
+    ]
+  },
+  {
+    "word": "meticulous",
+    "ipa": "/məˈtɪkjələs/",
+    "level": "C2",
+    "category": "Advanced",
+    "meanings": [
+      {
+        "partOfSpeech": "adj",
+        "meaning": "tỉ mỉ, cẩn thận từng chi tiết",
+        "exampleSentence": "The artist paid meticulous attention to every brushstroke."
+      }
+    ]
+  },
+  {
+    "word": "conundrum",
+    "ipa": "/kəˈnʌndrəm/",
+    "level": "C2",
+    "category": "Advanced",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "vấn đề nan giải, câu đố hóc húa",
+        "exampleSentence": "Finding a balance between speed and quality is a classic conundrum."
+      }
+    ]
+  }
+]

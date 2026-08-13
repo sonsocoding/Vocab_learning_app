@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.example.vocablearningapp.data.DictionaryRepository
 import com.example.vocablearningapp.data.MockData
 import com.example.vocablearningapp.data.StreakManager
 import com.example.vocablearningapp.data.StreakState
@@ -32,6 +33,24 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     var uiState by mutableStateOf(AppUiState(streakState = streakManager.getStreakState()))
         private set
+
+    init {
+        DictionaryRepository.init(application)
+        val dictionarySets = DictionaryRepository.getSeedVocabularySets()
+        val dictionaryDailyWords = mapOf(
+            "A1" to DictionaryRepository.getDailyWordsForLevel("A1"),
+            "A2" to DictionaryRepository.getDailyWordsForLevel("A2"),
+            "B1" to DictionaryRepository.getDailyWordsForLevel("B1"),
+            "B2" to DictionaryRepository.getDailyWordsForLevel("B2"),
+            "C1" to DictionaryRepository.getDailyWordsForLevel("C1"),
+            "C2" to DictionaryRepository.getDailyWordsForLevel("C2")
+        )
+
+        uiState = uiState.copy(
+            vocabularySets = dictionarySets,
+            dailyWordsByLevel = dictionaryDailyWords
+        )
+    }
 
     private val fsrsScheduler = FsrsScheduler()
 

@@ -1,85 +1,8 @@
 package com.example.vocablearningapp.domain.util
 
-object IpaGenerator {
-    private val dictionary = mapOf(
-        "hello" to "/həˈləʊ/",
-        "family" to "/ˈfæməli/",
-        "friend" to "/frend/",
-        "morning" to "/ˈmɔːnɪŋ/",
-        "near" to "/nɪə/",
-        "usually" to "/ˈjuːʒuəli/",
-        "kitchen" to "/ˈkɪtʃən/",
-        "bedroom" to "/ˈbedruːm/",
-        "parent" to "/ˈpeərənt/",
-        "garden" to "/ˈɡɑːdən/",
-        "quiet" to "/ˈkwaɪət/",
-        "borrow" to "/ˈbɒrəʊ/",
-        "daily" to "/ˈdeɪli/",
-        "ambitious" to "/æmˈbɪʃ.əs/",
-        "commute" to "/kəˈmjuːt/",
-        "grocery" to "/ˈɡrəʊsəri/",
-        "habit" to "/ˈhæbɪt/",
-        "schedule" to "/ˈʃedjuːl/",
-        "errand" to "/ˈerənd/",
-        "exhausted" to "/ɪɡˈzɔːstɪd/",
-        "journey" to "/ˈdʒɜːni/",
-        "luggage" to "/ˈlʌɡɪdʒ/",
-        "ticket" to "/ˈtɪkɪt/",
-        "platform" to "/ˈplætfɔːm/",
-        "local" to "/ˈləʊkəl/",
-        "crowded" to "/ˈkraʊdɪd/",
-        "assignment" to "/əˈsaɪnmənt/",
-        "curriculum" to "/kəˈrɪkjələm/",
-        "deadline" to "/ˈdedlaɪn/",
-        "concentrate" to "/ˈkɒnsəntreɪt/",
-        "lecture" to "/ˈlektʃə/",
-        "scholarship" to "/ˈskɒləʃɪp/",
-        "revise" to "/rɪˈvaɪz/",
-        "melody" to "/ˈmelədi/",
-        "choreography" to "/ˌkɒriˈɒɡrəfi/",
-        "lyrics" to "/ˈlɪrɪks/",
-        "catchy" to "/ˈkætʃi/",
-        "rehearsal" to "/rɪˈhɜːsəl/",
-        "performance" to "/pəˈfɔːməns/",
-        "negotiate" to "/nɪˈɡəʊʃieɪt/",
-        "promotion" to "/prəˈməʊʃən/",
-        "efficient" to "/ɪˈfɪʃənt/",
-        "initiative" to "/ɪˈnɪʃətɪv/",
-        "collaborate" to "/kəˈlæbəreɪt/",
-        "evidence" to "/ˈevɪdəns/",
-        "impact" to "/ˈɪmpækt/",
-        "sustainable" to "/səˈsteɪnəbəl/",
-        "innovation" to "/ˌɪnəˈveɪʃən/",
-        "bias" to "/ˈbaɪəs/",
-        "regulate" to "/ˈreɡjəleɪt/",
-        "coherent" to "/kəʊˈhɪərənt/",
-        "substantial" to "/səbˈstænʃəl/",
-        "hypothesis" to "/haɪˈpɒθəsɪs/",
-        "implication" to "/ˌɪmplɪˈkeɪʃən/",
-        "synthesize" to "/ˈsɪnθəsaɪz/",
-        "ambiguous" to "/æmˈbɪɡjuəs/",
-        "meticulous" to "/məˈtɪkjələs/",
-        "conundrum" to "/kəˈnʌndrəm/",
-        "pragmatic" to "/præɡˈmætɪk/",
-        "unequivocal" to "/ˌʌnɪˈkwɪvəkəl/",
-        "discerning" to "/dɪˈsɜːnɪŋ/",
-        "pervasive" to "/pəˈveɪsɪv/",
-        "computer" to "/kəmˈpjuː.tər/",
-        "student" to "/ˈstjuː.dənt/",
-        "teacher" to "/ˈtiː.tʃər/",
-        "language" to "/ˈlæŋ.ɡwɪdʒ/",
-        "vocabulary" to "/vəˈkæb.jə.lər.i/",
-        "learning" to "/ˈlɜː.nɪŋ/",
-        "system" to "/ˈsɪs.təm/",
-        "beautiful" to "/ˈbjuː.tɪ.fəl/",
-        "important" to "/ɪmˈpɔː.tənt/",
-        "challenge" to "/ˈtʃæl.ɪndʒ/",
-        "success" to "/səkˈses/",
-        "future" to "/ˈfjuː.tʃər/",
-        "practice" to "/ˈpræk.tɪs/",
-        "knowledge" to "/ˈnɒl.ɪdʒ/"
-    )
+import com.example.vocablearningapp.data.DictionaryRepository
 
+object IpaGenerator {
     val commonIpaSymbols = listOf(
         "ˈ", "ˌ", "ː", "æ", "ə", "ɪ", "ʊ", "θ", "ð", "ʃ", "ʒ", "ŋ", "ʌ", "ɔː", "iː", "uː", "eɪ", "aɪ", "ɔɪ", "əʊ", "aʊ", "ɪə", "eə", "/"
     )
@@ -88,7 +11,7 @@ object IpaGenerator {
         val clean = rawWord.trim().lowercase()
         if (clean.isBlank()) return ""
 
-        dictionary[clean]?.let { return it }
+        DictionaryRepository.lookupWord(clean)?.ipa?.let { return it }
 
         var ipa = clean
             .replace("tion", "ʃən")
