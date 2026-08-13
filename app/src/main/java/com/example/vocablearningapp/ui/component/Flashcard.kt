@@ -98,12 +98,48 @@ private fun BackOfCard(item: VocabularyItem) {
             )
         }
         Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = item.meaning,
-            style = MaterialTheme.typography.headlineSmall,
-            color = Ink,
-            textAlign = TextAlign.Center
-        )
+        val meaningEntries = com.example.vocablearningapp.domain.util.MeaningParser.parse(item.meaning, item.partOfSpeech)
+        if (meaningEntries.size > 1) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                meaningEntries.forEach { entry ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Surface(
+                            color = com.example.vocablearningapp.ui.theme.AccentSoft,
+                            shape = RoundedCornerShape(50)
+                        ) {
+                            Text(
+                                text = entry.partOfSpeech.label,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Accent,
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                            )
+                        }
+                        Spacer(modifier = Modifier.size(6.dp))
+                        Text(
+                            text = entry.meaning,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Ink,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+        } else {
+            Text(
+                text = item.meaning,
+                style = MaterialTheme.typography.headlineSmall,
+                color = Ink,
+                textAlign = TextAlign.Center
+            )
+        }
         Spacer(modifier = Modifier.height(20.dp))
         Surface(
             modifier = Modifier.fillMaxWidth(),

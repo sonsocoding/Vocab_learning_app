@@ -229,7 +229,7 @@ private fun WordEditorCard(
                 label = "Word",
                 placeholder = "ambitious"
             )
-            EditorField(value = draft.meaning, onValueChange = { onChange(draft.copy(meaning = it)) }, label = "Meaning", placeholder = "tham vọng")
+            EditorField(value = draft.meaning, onValueChange = { onChange(draft.copy(meaning = it)) }, label = "Meaning", placeholder = "tham vọng (hoặc: n. thông báo; v. nhận thấy)")
             IpaFieldWithHelper(
                 pronunciation = draft.pronunciation,
                 word = draft.word,
