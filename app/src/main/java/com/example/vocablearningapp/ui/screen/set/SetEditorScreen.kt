@@ -1,6 +1,7 @@
 package com.example.vocablearningapp.ui.screen.set
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,15 +10,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.text.font.FontWeight
-import com.example.vocablearningapp.domain.util.IpaGenerator
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -29,28 +25,37 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.vocablearningapp.domain.model.FsrsState
 import com.example.vocablearningapp.domain.model.PartOfSpeech
 import com.example.vocablearningapp.domain.model.VocabularyItem
 import com.example.vocablearningapp.domain.model.VocabularySet
+import com.example.vocablearningapp.domain.util.IpaGenerator
+import com.example.vocablearningapp.domain.util.MeaningParser
 import com.example.vocablearningapp.ui.component.PrimaryButton
 import com.example.vocablearningapp.ui.component.SecondaryButton
 import com.example.vocablearningapp.ui.component.VocabDimens
 import com.example.vocablearningapp.ui.component.VocabTopBar
+import com.example.vocablearningapp.ui.theme.Accent
+import com.example.vocablearningapp.ui.theme.AccentSoft
 import com.example.vocablearningapp.ui.theme.Border
 import com.example.vocablearningapp.ui.theme.Canvas
 import com.example.vocablearningapp.ui.theme.Ink
 import com.example.vocablearningapp.ui.theme.Muted
 import com.example.vocablearningapp.ui.theme.Surface
+import com.example.vocablearningapp.ui.theme.SurfaceMuted
 
 @Composable
 fun SetEditorScreen(
@@ -62,12 +67,13 @@ fun SetEditorScreen(
     var description by remember(set?.id) { mutableStateOf(set?.description.orEmpty()) }
     var level by remember(set?.id) { mutableStateOf(set?.level ?: "A2") }
     var category by remember(set?.id) { mutableStateOf(set?.category ?: "General") }
+
     val draftWords = remember(set?.id) {
-        mutableStateListOf<DraftWord>().apply {
+        mutableStateListOf<DraftWordState>().apply {
             if (set == null || set.words.isEmpty()) {
-                add(DraftWord())
+                add(DraftWordState())
             } else {
-                addAll(set.words.map { DraftWord.from(it) })
+                addAll(set.words.map { DraftWordState.from(it) })
             }
         }
     }
@@ -79,7 +85,7 @@ fun SetEditorScreen(
                 title = if (set == null) "Create set" else "Edit set",
                 onBack = onBack,
                 actions = {
-                    androidx.compose.material3.TextButton(onClick = {
+                    TextButton(onClick = {
                         onSave(
                             title,
                             description,
@@ -88,7 +94,7 @@ fun SetEditorScreen(
                             draftWords.mapIndexedNotNull { index, draft -> draft.toVocabularyItem(title, index) }
                         )
                     }) {
-                        Text(text = "Save", color = com.example.vocablearningapp.ui.theme.Accent)
+                        Text(text = "Save", color = Accent)
                     }
                 }
             )
@@ -118,7 +124,7 @@ fun SetEditorScreen(
                         value = category,
                         onValueChange = { category = it },
                         label = "Category",
-                        placeholder = "Everyday",
+                        placeholder = "General",
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -127,17 +133,18 @@ fun SetEditorScreen(
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
                         Text(text = "Words", style = MaterialTheme.typography.titleLarge, color = Ink)
                         Spacer(modifier = Modifier.height(3.dp))
-                        Text(text = "Add a term, meaning and context.", style = MaterialTheme.typography.bodyMedium, color = Muted)
+                        Text(text = "Add a term, meanings and examples.", style = MaterialTheme.typography.bodyMedium, color = Muted)
                     }
                     Text(
                         text = "${draftWords.size}",
                         style = MaterialTheme.typography.titleLarge,
-                        color = com.example.vocablearningapp.ui.theme.Accent
+                        color = Accent
                     )
                 }
 
@@ -146,14 +153,13 @@ fun SetEditorScreen(
                         index = index,
                         draft = draft,
                         canDelete = draftWords.size > 1,
-                        onChange = { updated -> draftWords[index] = updated },
                         onDelete = { draftWords.removeAt(index) }
                     )
                 }
 
                 SecondaryButton(
-                    text = "Add word",
-                    onClick = { draftWords.add(DraftWord()) },
+                    text = "+ Add word",
+                    onClick = { draftWords.add(DraftWordState()) },
                     modifier = Modifier.fillMaxWidth(),
                     icon = Icons.Default.Add
                 )
@@ -199,15 +205,10 @@ private fun EditorField(
 @Composable
 private fun WordEditorCard(
     index: Int,
-    draft: DraftWord,
+    draft: DraftWordState,
     canDelete: Boolean,
-    onChange: (DraftWord) -> Unit,
     onDelete: () -> Unit
 ) {
-    var wordText by remember(draft.id) { mutableStateOf(draft.word) }
-    var pronunciationText by remember(draft.id) { mutableStateOf(draft.pronunciation) }
-    var exampleText by remember(draft.id) { mutableStateOf(draft.exampleSentence) }
-
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(VocabDimens.CardRadius),
@@ -227,30 +228,26 @@ private fun WordEditorCard(
             }
 
             EditorField(
-                value = wordText,
+                value = draft.word,
                 onValueChange = { newWord ->
-                    wordText = newWord
-                    val autoIpa = if (pronunciationText.isBlank()) IpaGenerator.generateIpa(newWord) else pronunciationText
-                    if (pronunciationText.isBlank() && autoIpa.isNotBlank()) {
-                        pronunciationText = autoIpa
+                    draft.word = newWord
+                    val autoIpa = if (draft.pronunciation.isBlank()) IpaGenerator.generateIpa(newWord) else draft.pronunciation
+                    if (draft.pronunciation.isBlank() && autoIpa.isNotBlank()) {
+                        draft.pronunciation = autoIpa
                     }
-                    onChange(draft.copy(word = newWord, pronunciation = pronunciationText))
                 },
                 label = "Word",
                 placeholder = ""
             )
 
             IpaFieldWithHelper(
-                pronunciation = pronunciationText,
-                word = wordText,
-                onPronunciationChange = { newIpa ->
-                    pronunciationText = newIpa
-                    onChange(draft.copy(pronunciation = newIpa))
-                }
+                pronunciation = draft.pronunciation,
+                word = draft.word,
+                onPronunciationChange = { draft.pronunciation = it }
             )
 
             Text(
-                text = "Meanings & Parts of Speech",
+                text = "Meanings & Examples",
                 style = MaterialTheme.typography.labelLarge,
                 color = Ink,
                 fontWeight = FontWeight.Bold
@@ -259,38 +256,16 @@ private fun WordEditorCard(
             draft.meanings.forEachIndexed { mIndex, mDraft ->
                 MeaningEditorRow(
                     index = mIndex,
-                    meaning = mDraft,
+                    meaningState = mDraft,
                     canDeleteMeaning = draft.meanings.size > 1,
-                    onMeaningChange = { updatedMeaning ->
-                        val updatedList = draft.meanings.toMutableList()
-                        updatedList[mIndex] = updatedMeaning
-                        onChange(draft.copy(meanings = updatedList))
-                    },
-                    onDeleteMeaning = {
-                        val updatedList = draft.meanings.toMutableList()
-                        updatedList.removeAt(mIndex)
-                        onChange(draft.copy(meanings = updatedList))
-                    }
+                    onDeleteMeaning = { draft.meanings.removeAt(mIndex) }
                 )
             }
 
             SecondaryButton(
-                text = "+ Thêm nghĩa (n / v / adj)",
-                onClick = {
-                    val updatedList = draft.meanings + DraftMeaning()
-                    onChange(draft.copy(meanings = updatedList))
-                },
+                text = "+ Add another meaning",
+                onClick = { draft.meanings.add(DraftMeaningState()) },
                 modifier = Modifier.fillMaxWidth()
-            )
-
-            EditorField(
-                value = exampleText,
-                onValueChange = { newExample ->
-                    exampleText = newExample
-                    onChange(draft.copy(exampleSentence = newExample))
-                },
-                label = "Example sentence",
-                placeholder = ""
             )
         }
     }
@@ -299,16 +274,13 @@ private fun WordEditorCard(
 @Composable
 private fun MeaningEditorRow(
     index: Int,
-    meaning: DraftMeaning,
+    meaningState: DraftMeaningState,
     canDeleteMeaning: Boolean,
-    onMeaningChange: (DraftMeaning) -> Unit,
     onDeleteMeaning: () -> Unit
 ) {
-    var localMeaningText by remember(meaning.id) { mutableStateOf(meaning.meaning) }
-
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = com.example.vocablearningapp.ui.theme.SurfaceMuted,
+        color = SurfaceMuted,
         shape = RoundedCornerShape(14.dp),
         border = BorderStroke(1.dp, Border)
     ) {
@@ -321,8 +293,8 @@ private fun MeaningEditorRow(
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     PartOfSpeech.entries.forEach { pos ->
                         FilterChip(
-                            selected = meaning.partOfSpeech == pos,
-                            onClick = { onMeaningChange(meaning.copy(partOfSpeech = pos)) },
+                            selected = meaningState.partOfSpeech == pos,
+                            onClick = { meaningState.partOfSpeech = pos },
                             label = { Text(pos.label) }
                         )
                     }
@@ -340,14 +312,21 @@ private fun MeaningEditorRow(
             }
 
             OutlinedTextField(
-                value = localMeaningText,
-                onValueChange = { newText ->
-                    localMeaningText = newText
-                    onMeaningChange(meaning.copy(meaning = newText))
-                },
+                value = meaningState.meaning,
+                onValueChange = { meaningState.meaning = it },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Nghĩa ${if (canDeleteMeaning) "${index + 1}" else ""}") },
-                placeholder = { Text("ví dụ: nhận thấy, chú ý...") },
+                label = { Text("Meaning ${if (canDeleteMeaning) "${index + 1}" else ""}") },
+                placeholder = { Text("e.g. notice, attention...") },
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp)
+            )
+
+            OutlinedTextField(
+                value = meaningState.exampleSentence,
+                onValueChange = { meaningState.exampleSentence = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Example sentence") },
+                placeholder = { Text("e.g. Did you notice his new haircut?") },
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp)
             )
@@ -385,8 +364,8 @@ private fun IpaFieldWithHelper(
                 },
                 shape = RoundedCornerShape(14.dp),
                 colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                    containerColor = com.example.vocablearningapp.ui.theme.AccentSoft,
-                    contentColor = com.example.vocablearningapp.ui.theme.Accent
+                    containerColor = AccentSoft,
+                    contentColor = Accent
                 ),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 14.dp)
             ) {
@@ -432,18 +411,22 @@ private fun IpaFieldWithHelper(
     }
 }
 
-private data class DraftMeaning(
+private class DraftMeaningState(
     val id: String = "m-${System.nanoTime()}-${kotlin.random.Random.nextInt(10000)}",
-    val partOfSpeech: PartOfSpeech = PartOfSpeech.NOUN,
-    val meaning: String = ""
-)
+    initialPos: PartOfSpeech = PartOfSpeech.NOUN,
+    initialMeaning: String = "",
+    initialExample: String = ""
+) {
+    var partOfSpeech by mutableStateOf(initialPos)
+    var meaning by mutableStateOf(initialMeaning)
+    var exampleSentence by mutableStateOf(initialExample)
+}
 
-private data class DraftWord(
+private class DraftWordState(
     val id: String = "draft-${System.nanoTime()}-${kotlin.random.Random.nextInt(10000)}",
-    val word: String = "",
-    val meanings: List<DraftMeaning> = listOf(DraftMeaning()),
-    val pronunciation: String = "",
-    val exampleSentence: String = "",
+    initialWord: String = "",
+    initialPronunciation: String = "",
+    initialMeanings: List<DraftMeaningState> = emptyList(),
     val fsrsState: FsrsState = FsrsState.NEW,
     val fsrsStep: Int? = null,
     val stability: Double = 0.0,
@@ -454,6 +437,12 @@ private data class DraftWord(
     val reviewCount: Int = 0,
     val lapseCount: Int = 0
 ) {
+    var word by mutableStateOf(initialWord)
+    var pronunciation by mutableStateOf(initialPronunciation)
+    val meanings = mutableStateListOf<DraftMeaningState>().apply {
+        if (initialMeanings.isEmpty()) add(DraftMeaningState()) else addAll(initialMeanings)
+    }
+
     val primaryPartOfSpeech: PartOfSpeech
         get() = meanings.firstOrNull()?.partOfSpeech ?: PartOfSpeech.NOUN
 
@@ -465,6 +454,14 @@ private data class DraftWord(
             return valid.joinToString("; ") { "${it.partOfSpeech.label}. ${it.meaning.trim()}" }
         }
 
+    val formattedExample: String
+        get() {
+            val valid = meanings.filter { it.exampleSentence.isNotBlank() }
+            if (valid.isEmpty()) return ""
+            if (valid.size == 1) return valid[0].exampleSentence.trim()
+            return valid.joinToString(" | ") { "${it.partOfSpeech.label}. ${it.exampleSentence.trim()}" }
+        }
+
     fun toVocabularyItem(setTitle: String, index: Int): VocabularyItem? {
         val finalMeaning = formattedMeaning
         if (word.isBlank() && finalMeaning.isBlank()) return null
@@ -474,7 +471,7 @@ private data class DraftWord(
             meaning = finalMeaning,
             pronunciation = pronunciation.trim(),
             partOfSpeech = primaryPartOfSpeech,
-            exampleSentence = exampleSentence.trim().ifBlank {
+            exampleSentence = formattedExample.ifBlank {
                 "This is an example sentence for ${word.trim()}."
             },
             fsrsState = fsrsState,
@@ -490,22 +487,25 @@ private data class DraftWord(
     }
 
     companion object {
-        fun from(item: VocabularyItem): DraftWord {
-            val parsedEntries = com.example.vocablearningapp.domain.util.MeaningParser.parse(item.meaning, item.partOfSpeech)
+        fun from(item: VocabularyItem): DraftWordState {
+            val parsedEntries = MeaningParser.parse(
+                rawMeaning = item.meaning,
+                rawExample = item.exampleSentence,
+                fallbackPos = item.partOfSpeech
+            )
             val draftMeanings = if (parsedEntries.isEmpty()) {
-                listOf(DraftMeaning(partOfSpeech = item.partOfSpeech, meaning = item.meaning))
+                listOf(DraftMeaningState(initialPos = item.partOfSpeech, initialMeaning = item.meaning, initialExample = item.exampleSentence))
             } else {
                 parsedEntries.map { entry ->
-                    DraftMeaning(partOfSpeech = entry.partOfSpeech, meaning = entry.meaning)
+                    DraftMeaningState(initialPos = entry.partOfSpeech, initialMeaning = entry.meaning, initialExample = entry.exampleSentence)
                 }
             }
 
-            return DraftWord(
+            return DraftWordState(
                 id = item.id,
-                word = item.word,
-                meanings = draftMeanings,
-                pronunciation = item.pronunciation,
-                exampleSentence = item.exampleSentence,
+                initialWord = item.word,
+                initialPronunciation = item.pronunciation,
+                initialMeanings = draftMeanings,
                 fsrsState = item.fsrsState,
                 fsrsStep = item.fsrsStep,
                 stability = item.stability,

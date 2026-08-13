@@ -98,37 +98,52 @@ private fun BackOfCard(item: VocabularyItem) {
             )
         }
         Spacer(modifier = Modifier.height(12.dp))
-        val meaningEntries = com.example.vocablearningapp.domain.util.MeaningParser.parse(item.meaning, item.partOfSpeech)
+        val meaningEntries = com.example.vocablearningapp.domain.util.MeaningParser.parse(
+            rawMeaning = item.meaning,
+            rawExample = item.exampleSentence,
+            fallbackPos = item.partOfSpeech
+        )
         if (meaningEntries.size > 1) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 meaningEntries.forEach { entry ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Surface(
-                            color = com.example.vocablearningapp.ui.theme.AccentSoft,
-                            shape = RoundedCornerShape(50)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
                         ) {
+                            Surface(
+                                color = com.example.vocablearningapp.ui.theme.AccentSoft,
+                                shape = RoundedCornerShape(50)
+                            ) {
+                                Text(
+                                    text = entry.partOfSpeech.label,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Accent,
+                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                                )
+                            }
+                            Spacer(modifier = Modifier.size(6.dp))
                             Text(
-                                text = entry.partOfSpeech.label,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Accent,
-                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                                text = entry.meaning,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Ink,
+                                textAlign = TextAlign.Center
                             )
                         }
-                        Spacer(modifier = Modifier.size(6.dp))
-                        Text(
-                            text = entry.meaning,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Ink,
-                            textAlign = TextAlign.Center
-                        )
+                        if (entry.exampleSentence.isNotBlank()) {
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text(
+                                text = "“${entry.exampleSentence}”",
+                                style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
+                                color = Muted,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
             }
@@ -139,6 +154,32 @@ private fun BackOfCard(item: VocabularyItem) {
                 color = Ink,
                 textAlign = TextAlign.Center
             )
+            if (item.exampleSentence.isNotBlank()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = SurfaceMuted,
+                    shape = RoundedCornerShape(15.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(start = 15.dp, top = 10.dp, end = 8.dp, bottom = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "“${item.exampleSentence}”",
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic),
+                            color = Ink,
+                            textAlign = TextAlign.Center
+                        )
+                        SpeechButton(
+                            text = item.exampleSentence,
+                            contentDescription = "Play example sentence",
+                            tint = Accent
+                        )
+                    }
+                }
+            }
         }
         Spacer(modifier = Modifier.height(20.dp))
         Surface(
