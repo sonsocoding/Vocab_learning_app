@@ -248,15 +248,15 @@ private fun WordEditorCard(
                 value = draft.word,
                 onValueChange = { newWord ->
                     draft.word = newWord
-                    if (draft.pronunciation.isBlank()) {
+                    val dictWord = DictionaryRepository.lookupWord(newWord)
+                    if (dictWord != null) {
+                        autoFillAllFromDictionary(newWord, draft)
+                    } else {
                         draft.pronunciation = IpaGenerator.generateIpa(newWord)
-                    }
-                    if (draft.meanings.isNotEmpty() && draft.meanings[0].meaning.isBlank()) {
-                        fillMeaningRowFromDictionary(newWord, 0, draft.meanings[0].partOfSpeech, draft.meanings)
                     }
                 },
                 label = "Word",
-                placeholder = "e.g. commute, notice..."
+                placeholder = "e.g. key, money, commute..."
             )
 
             IpaFieldWithHelper(

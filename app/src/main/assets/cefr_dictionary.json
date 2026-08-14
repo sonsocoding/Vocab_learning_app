@@ -13,6 +13,37 @@
     ]
   },
   {
+    "word": "key",
+    "ipa": "/kiː/",
+    "level": "A1",
+    "category": "Everyday",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "chìa khóa, phím bấm",
+        "exampleSentence": "I lost my house key on my way back."
+      },
+      {
+        "partOfSpeech": "adj",
+        "meaning": "chủ chốt, quan trọng",
+        "exampleSentence": "Good communication is a key factor in teamwork."
+      }
+    ]
+  },
+  {
+    "word": "money",
+    "ipa": "/ˈmʌni/",
+    "level": "A1",
+    "category": "Everyday",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "tiền, tiền bạc",
+        "exampleSentence": "She saved money to buy a new laptop for work."
+      }
+    ]
+  },
+  {
     "word": "book",
     "ipa": "/bʊk/",
     "level": "A1",
@@ -27,6 +58,78 @@
         "partOfSpeech": "verb",
         "meaning": "đặt chỗ trước, đặt vé",
         "exampleSentence": "We need to book a hotel room before the weekend."
+      }
+    ]
+  },
+  {
+    "word": "time",
+    "ipa": "/taɪm/",
+    "level": "A1",
+    "category": "Everyday",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "thời gian, thời điểm",
+        "exampleSentence": "What time does the lesson start today?"
+      },
+      {
+        "partOfSpeech": "verb",
+        "meaning": "bấm giờ, tính thời gian",
+        "exampleSentence": "The coach timed the runner's lap accurately."
+      }
+    ]
+  },
+  {
+    "word": "water",
+    "ipa": "/ˈwɔːtə/",
+    "level": "A1",
+    "category": "Everyday",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "nước",
+        "exampleSentence": "Drink plenty of water during hot summer days."
+      },
+      {
+        "partOfSpeech": "verb",
+        "meaning": "tưới nước",
+        "exampleSentence": "Please water the flowers in the garden."
+      }
+    ]
+  },
+  {
+    "word": "phone",
+    "ipa": "/fəʊn/",
+    "level": "A1",
+    "category": "Everyday",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "điện thoại",
+        "exampleSentence": "My phone is ringing in my bag."
+      },
+      {
+        "partOfSpeech": "verb",
+        "meaning": "gọi điện thoại",
+        "exampleSentence": "I will phone you as soon as I arrive."
+      }
+    ]
+  },
+  {
+    "word": "work",
+    "ipa": "/wɜːk/",
+    "level": "A1",
+    "category": "Work",
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "meaning": "công việc, việc làm",
+        "exampleSentence": "He has a lot of work to finish today."
+      },
+      {
+        "partOfSpeech": "verb",
+        "meaning": "làm việc, hoạt động",
+        "exampleSentence": "She works at an international technology firm."
       }
     ]
   },
@@ -53,37 +156,6 @@
         "partOfSpeech": "noun",
         "meaning": "người bạn",
         "exampleSentence": "My best friend helps me practice English every day."
-      }
-    ]
-  },
-  {
-    "word": "morning",
-    "ipa": "/ˈmɔːnɪŋ/",
-    "level": "A1",
-    "category": "Everyday",
-    "meanings": [
-      {
-        "partOfSpeech": "noun",
-        "meaning": "buổi sáng",
-        "exampleSentence": "I enjoy drinking hot tea in the morning."
-      }
-    ]
-  },
-  {
-    "word": "water",
-    "ipa": "/ˈwɔːtə/",
-    "level": "A1",
-    "category": "Everyday",
-    "meanings": [
-      {
-        "partOfSpeech": "noun",
-        "meaning": "nước",
-        "exampleSentence": "Drink plenty of water during hot summer days."
-      },
-      {
-        "partOfSpeech": "verb",
-        "meaning": "tưới nước",
-        "exampleSentence": "Please water the flowers in the garden."
       }
     ]
   },
@@ -128,6 +200,42 @@
         "partOfSpeech": "noun",
         "meaning": "nụ cười",
         "exampleSentence": "He has a polite and welcoming smile."
+      }
+    ]
+  },
+  {
+    "word": "run",
+    "ipa": "/rʌn/",
+    "level": "A1",
+    "category": "Everyday",
+    "meanings": [
+      {
+        "partOfSpeech": "verb",
+        "meaning": "chạy, vận hành, quản lý",
+        "exampleSentence": "He runs five miles every morning to stay fit."
+      },
+      {
+        "partOfSpeech": "noun",
+        "meaning": "cuộc chạy, đường chạy",
+        "exampleSentence": "She went for a quick morning run in the park."
+      }
+    ]
+  },
+  {
+    "word": "watch",
+    "ipa": "/wɒtʃ/",
+    "level": "A1",
+    "category": "Everyday",
+    "meanings": [
+      {
+        "partOfSpeech": "verb",
+        "meaning": "xem, quan sát, theo dõi",
+        "exampleSentence": "We watch movies together every Friday night."
+      },
+      {
+        "partOfSpeech": "noun",
+        "meaning": "đồng hồ đeo tay",
+        "exampleSentence": "My father gave me a classic leather watch."
       }
     ]
   },
@@ -240,7 +348,7 @@
     "meanings": [
       {
         "partOfSpeech": "noun",
-        "meaning": "trận đấu",
+        "meaning": "trận đấu, bao diêm",
         "exampleSentence": "The championship football match starts at eight tonight."
       },
       {
@@ -416,7 +524,7 @@
     "meanings": [
       {
         "partOfSpeech": "noun",
-        "meaning": "vấn đề nan giải, câu đố hóc húa",
+        "meaning": "vấn đề nan giải, câu đố hóc búa",
         "exampleSentence": "Finding a balance between speed and quality is a classic conundrum."
       }
     ]
