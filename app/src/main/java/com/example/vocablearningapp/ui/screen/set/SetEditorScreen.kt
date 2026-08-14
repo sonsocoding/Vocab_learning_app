@@ -244,35 +244,20 @@ private fun WordEditorCard(
                 }
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                EditorField(
-                    value = draft.word,
-                    onValueChange = { newWord ->
-                        draft.word = newWord
-                        autoFillFromDictionary(newWord, draft, forceFill = false)
-                    },
-                    label = "Word",
-                    placeholder = "e.g. commute, notice...",
-                    modifier = Modifier.weight(1f)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                androidx.compose.material3.Button(
-                    onClick = {
-                        autoFillFromDictionary(draft.word, draft, forceFill = true)
-                    },
-                    shape = RoundedCornerShape(14.dp),
-                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                        containerColor = AccentSoft,
-                        contentColor = Accent
-                    ),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 14.dp)
-                ) {
-                    Text(text = "✨ Auto Fill", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-                }
-            }
+            EditorField(
+                value = draft.word,
+                onValueChange = { newWord ->
+                    draft.word = newWord
+                    if (draft.pronunciation.isBlank()) {
+                        draft.pronunciation = IpaGenerator.generateIpa(newWord)
+                    }
+                    if (draft.meanings.isNotEmpty() && draft.meanings[0].meaning.isBlank()) {
+                        fillMeaningRowFromDictionary(newWord, 0, draft.meanings[0].partOfSpeech, draft.meanings)
+                    }
+                },
+                label = "Word",
+                placeholder = "e.g. commute, notice..."
+            )
 
             IpaFieldWithHelper(
                 pronunciation = draft.pronunciation,
@@ -280,17 +265,30 @@ private fun WordEditorCard(
                 onPronunciationChange = { draft.pronunciation = it }
             )
 
-            Text(
-                text = "Meanings & Examples",
-                style = MaterialTheme.typography.labelLarge,
-                color = Ink,
-                fontWeight = FontWeight.Bold
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Meanings & Examples",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Ink,
+                    fontWeight = FontWeight.Bold
+                )
+                TextButton(
+                    onClick = { autoFillAllFromDictionary(draft.word, draft) }
+                ) {
+                    Text(text = "✨ Auto Fill", color = Accent, fontWeight = FontWeight.Bold)
+                }
+            }
 
             draft.meanings.forEachIndexed { mIndex, mDraft ->
                 MeaningEditorRow(
+                    word = draft.word,
                     index = mIndex,
                     meaningState = mDraft,
+                    allMeanings = draft.meanings,
                     canDeleteMeaning = draft.meanings.size > 1,
                     onDeleteMeaning = { draft.meanings.removeAt(mIndex) }
                 )
@@ -298,49 +296,71 @@ private fun WordEditorCard(
 
             SecondaryButton(
                 text = "+ Add another meaning",
-                onClick = { draft.meanings.add(DraftMeaningState()) },
+                onClick = {
+                    val newRow = DraftMeaningState()
+                    draft.meanings.add(newRow)
+                    val newIndex = draft.meanings.lastIndex
+                    fillMeaningRowFromDictionary(draft.word, newIndex, newRow.partOfSpeech, draft.meanings)
+                },
                 modifier = Modifier.fillMaxWidth()
             )
         }
     }
 }
 
-private fun autoFillFromDictionary(word: String, draft: DraftWordState, forceFill: Boolean) {
+private fun fillMeaningRowFromDictionary(
+    word: String,
+    meaningIndex: Int,
+    targetPos: PartOfSpeech,
+    allMeanings: List<DraftMeaningState>
+) {
+    val clean = word.trim()
+    if (clean.isBlank()) return
+
+    val dictWord = DictionaryRepository.lookupWord(clean) ?: return
+    val matchingPosEntries = dictWord.meanings.filter { it.partOfSpeech == targetPos }
+
+    val posOccurrence = allMeanings.take(meaningIndex).count { it.partOfSpeech == targetPos }
+
+    if (posOccurrence < matchingPosEntries.size) {
+        val entry = matchingPosEntries[posOccurrence]
+        val targetRow = allMeanings[meaningIndex]
+        targetRow.partOfSpeech = targetPos
+        targetRow.meaning = entry.meaning
+        targetRow.exampleSentence = entry.exampleSentence
+    }
+}
+
+private fun autoFillAllFromDictionary(word: String, draft: DraftWordState) {
     val clean = word.trim()
     if (clean.isBlank()) return
 
     val dictWord = DictionaryRepository.lookupWord(clean)
     if (dictWord != null) {
-        if (forceFill || draft.pronunciation.isBlank()) {
-            draft.pronunciation = dictWord.ipa
-        }
-
-        val isMeaningsEmpty = draft.meanings.all { it.meaning.isBlank() }
-        if (forceFill || isMeaningsEmpty) {
-            if (dictWord.meanings.isNotEmpty()) {
-                draft.meanings.clear()
-                dictWord.meanings.forEach { dMeaning ->
-                    draft.meanings.add(
-                        DraftMeaningState(
-                            initialPos = dMeaning.partOfSpeech,
-                            initialMeaning = dMeaning.meaning,
-                            initialExample = dMeaning.exampleSentence
-                        )
+        draft.pronunciation = dictWord.ipa
+        if (dictWord.meanings.isNotEmpty()) {
+            draft.meanings.clear()
+            dictWord.meanings.forEach { dMeaning ->
+                draft.meanings.add(
+                    DraftMeaningState(
+                        initialPos = dMeaning.partOfSpeech,
+                        initialMeaning = dMeaning.meaning,
+                        initialExample = dMeaning.exampleSentence
                     )
-                }
+                )
             }
         }
     } else {
-        if (forceFill || draft.pronunciation.isBlank()) {
-            draft.pronunciation = IpaGenerator.generateIpa(clean)
-        }
+        draft.pronunciation = IpaGenerator.generateIpa(clean)
     }
 }
 
 @Composable
 private fun MeaningEditorRow(
+    word: String,
     index: Int,
     meaningState: DraftMeaningState,
+    allMeanings: List<DraftMeaningState>,
     canDeleteMeaning: Boolean,
     onDeleteMeaning: () -> Unit
 ) {
@@ -360,7 +380,10 @@ private fun MeaningEditorRow(
                     PartOfSpeech.entries.forEach { pos ->
                         FilterChip(
                             selected = meaningState.partOfSpeech == pos,
-                            onClick = { meaningState.partOfSpeech = pos },
+                            onClick = {
+                                meaningState.partOfSpeech = pos
+                                fillMeaningRowFromDictionary(word, index, pos, allMeanings)
+                            },
                             label = { Text(pos.label) }
                         )
                     }
