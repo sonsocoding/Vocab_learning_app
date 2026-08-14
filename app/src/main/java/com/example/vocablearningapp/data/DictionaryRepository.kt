@@ -61,6 +61,7 @@ data class DictionaryWord(
 
 object DictionaryRepository {
     private var wordsList: List<DictionaryWord> = emptyList()
+    private var wordsMap: Map<String, DictionaryWord> = emptyMap()
     private val now = System.currentTimeMillis()
     private val oneDay = 86_400_000L
 
@@ -69,7 +70,8 @@ object DictionaryRepository {
         try {
             val jsonString = context.assets.open("cefr_dictionary.json").bufferedReader().use { it.readText() }
             val jsonArray = JSONArray(jsonString)
-            val list = mutableListOf<DictionaryWord>()
+            val list = ArrayList<DictionaryWord>(jsonArray.length())
+            val map = HashMap<String, DictionaryWord>(jsonArray.length())
 
             for (i in 0 until jsonArray.length()) {
                 val obj = jsonArray.getJSONObject(i)
@@ -79,7 +81,7 @@ object DictionaryRepository {
                 val category = obj.optString("category", "General")
 
                 val meaningsArray = obj.getJSONArray("meanings")
-                val meanings = mutableListOf<DictionaryMeaning>()
+                val meanings = ArrayList<DictionaryMeaning>(meaningsArray.length())
                 for (j in 0 until meaningsArray.length()) {
                     val mObj = meaningsArray.getJSONObject(j)
                     val posStr = mObj.optString("partOfSpeech", "noun")
@@ -97,9 +99,12 @@ object DictionaryRepository {
                     )
                 }
 
-                list.add(DictionaryWord(word, ipa, level, category, meanings))
+                val dictWord = DictionaryWord(word, ipa, level, category, meanings)
+                list.add(dictWord)
+                map[word.lowercase()] = dictWord
             }
             wordsList = list
+            wordsMap = map
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -107,7 +112,7 @@ object DictionaryRepository {
 
     fun lookupWord(word: String): DictionaryWord? {
         val clean = word.trim().lowercase()
-        return wordsList.firstOrNull { it.word.lowercase() == clean }
+        return wordsMap[clean]
     }
 
     fun getDailyWordsForLevel(level: String): List<VocabularyItem> {
