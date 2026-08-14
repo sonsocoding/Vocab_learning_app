@@ -117,7 +117,8 @@ object DictionaryRepository {
 
     fun getDailyWordsForLevel(level: String): List<VocabularyItem> {
         val matching = wordsList.filter { it.level.equals(level, ignoreCase = true) }
-            .ifEmpty { wordsList.take(6) }
+            .take(10)
+            .ifEmpty { wordsList.take(10) }
 
         return matching.map { dictWord ->
             dictWord.toVocabularyItem(setId = "daily-${level.lowercase()}")
@@ -134,7 +135,7 @@ object DictionaryRepository {
             val setLevel = dictWords.firstOrNull()?.level ?: "A1"
             val setId = categoryName.lowercase().replace(" ", "-")
 
-            val vocabItems = dictWords.mapIndexed { index, dictWord ->
+            val vocabItems = dictWords.take(10).mapIndexed { index, dictWord ->
                 val (fsrsState, reviewCount, stability, dueAtMillis) = when (index % 4) {
                     0 -> Quadruple(FsrsState.REVIEW, 3, 8.5, now - oneDay)
                     1 -> Quadruple(FsrsState.LEARNING, 1, 1.5, now)
@@ -163,7 +164,7 @@ object DictionaryRepository {
             )
         }
 
-        return sets.ifEmpty { MockData.vocabularySets }
+        return sets
     }
 }
 
