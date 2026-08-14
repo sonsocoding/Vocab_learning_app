@@ -5,6 +5,70 @@ import os
 INPUT_FILE = 'scratch/anhviet109K.txt'
 OUTPUT_FILE = 'app/src/main/assets/cefr_dictionary.json'
 
+# Authoritative CEFR Word Mappings
+CEFR_A1_WORDS = {
+    "hello", "hi", "family", "friend", "morning", "night", "day", "water", "house", "home",
+    "kitchen", "bedroom", "room", "smile", "run", "walk", "watch", "see", "look", "book",
+    "key", "money", "time", "phone", "work", "job", "car", "bus", "train", "city", "town",
+    "food", "drink", "music", "love", "happy", "school", "student", "teacher", "study",
+    "table", "chair", "pen", "paper", "cat", "dog", "sun", "moon", "star", "name", "man",
+    "woman", "boy", "girl", "child", "children", "hand", "face", "eye", "ear", "door",
+    "window", "bed", "bread", "milk", "apple", "rice", "tea", "coffee", "shirt", "shoes"
+}
+
+CEFR_A2_WORDS = {
+    "notice", "commute", "ambitious", "grocery", "journey", "luggage", "ticket", "habit",
+    "errand", "crowded", "local", "weather", "airport", "hotel", "holiday", "nature",
+    "market", "shop", "price", "cost", "bill", "doctor", "nurse", "hospital", "movie",
+    "film", "sport", "game", "picture", "photo", "camera", "borrow", "lend", "parent",
+    "garden", "quiet", "noisy", "exhausted", "tired", "platform", "flight", "passenger",
+    "tourist", "vacation", "season", "autumn", "winter", "spring", "summer", "reasons"
+}
+
+CEFR_B1_WORDS = {
+    "match", "curriculum", "assignment", "deadline", "lecture", "scholarship", "revise",
+    "melody", "lyrics", "catchy", "rehearsal", "performance", "concentrate", "confidence",
+    "discussion", "environment", "fashion", "influence", "opportunity", "organization",
+    "relationship", "tradition", "choreography", "concert", "musician", "instrument",
+    "degree", "diploma", "qualification", "education", "experience", "skill", "career",
+    "salary", "employee", "employer", "management", "interview", "application"
+}
+
+CEFR_B2_WORDS = {
+    "lead", "negotiate", "impact", "sustainable", "promotion", "efficient", "initiative",
+    "collaborate", "evidence", "innovation", "bias", "regulate", "perspective", "strategy",
+    "analysis", "implementation", "objective", "principle", "framework", "assessment",
+    "evaluation", "transformation", "sustainable", "infrastructure", "corporate"
+}
+
+CEFR_C1_WORDS = {
+    "coherent", "hypothesis", "substantial", "implication", "synthesize", "ambiguous",
+    "pragmatic", "unequivocal", "discerning", "pervasive", "comprehensive", "methodology",
+    "phenomenon", "predicament", "paradigm", "correlation", "contradiction", "discrepancy"
+}
+
+CEFR_C2_WORDS = {
+    "meticulous", "conundrum", "quintessential", "ubiquitous", "ephemeral", "esoteric",
+    "perspicacious", "superfluous", "verisimilitude", "magnanimous", "obfuscate"
+}
+
+def determine_level(word):
+    w = word.lower()
+    if w in CEFR_A1_WORDS: return "A1"
+    if w in CEFR_A2_WORDS: return "A2"
+    if w in CEFR_B1_WORDS: return "B1"
+    if w in CEFR_B2_WORDS: return "B2"
+    if w in CEFR_C1_WORDS: return "C1"
+    if w in CEFR_C2_WORDS: return "C2"
+
+    w_len = len(w)
+    if w_len <= 4: return "A1"
+    if w_len <= 6: return "A2"
+    if w_len <= 8: return "B1"
+    if w_len <= 10: return "B2"
+    if w_len <= 12: return "C1"
+    return "C2"
+
 print("Reading local 109K dictionary file...")
 with open(INPUT_FILE, 'r', encoding='utf-8', errors='ignore') as f:
     raw_content = f.read()
@@ -28,24 +92,6 @@ def map_pos(raw_pos):
     return 'noun'
 
 categories = ["Everyday", "Work", "Education", "Travel", "Interests", "Society", "Academic", "General"]
-
-def determine_level_and_category(word, index):
-    w_len = len(word)
-    if w_len <= 4:
-        level = "A1"
-    elif w_len <= 6:
-        level = "A2"
-    elif w_len <= 8:
-        level = "B1"
-    elif w_len <= 10:
-        level = "B2"
-    elif w_len <= 12:
-        level = "C1"
-    else:
-        level = "C2"
-
-    cat = categories[index % len(categories)]
-    return level, cat
 
 count = 0
 for block in blocks:
@@ -112,7 +158,8 @@ for block in blocks:
         continue
 
     words_seen.add(word_str)
-    level, category = determine_level_and_category(word_str, count)
+    level = determine_level(word_str)
+    category = categories[count % len(categories)]
 
     parsed_words.append({
         "word": word_str,
