@@ -117,64 +117,15 @@ object DictionaryRepository {
 
     fun getDailyWordsForLevel(level: String): List<VocabularyItem> {
         val matching = wordsList.filter { it.level.equals(level, ignoreCase = true) }
-            .take(10)
-            .ifEmpty { wordsList.take(10) }
+        val selected = if (matching.size >= 10) matching.shuffled().take(10) else wordsList.shuffled().take(10)
 
-        return matching.map { dictWord ->
+        return selected.map { dictWord ->
             dictWord.toVocabularyItem(setId = "daily-${level.lowercase()}")
         }
     }
 
     fun getSeedVocabularySets(): List<VocabularySet> {
-        if (wordsList.isEmpty()) return MockData.vocabularySets
-
-        val levels = listOf("A1", "A2", "B1", "B2")
-        val sets = mutableListOf<VocabularySet>()
-
-        levels.forEach { lvl ->
-            val matchingWords = wordsList.filter { it.level.equals(lvl, ignoreCase = true) }
-            if (matchingWords.isNotEmpty()) {
-                val categoryName = when (lvl) {
-                    "A1" -> "Beginner Essentials"
-                    "A2" -> "Everyday Life"
-                    "B1" -> "Education & Work"
-                    "B2" -> "Business & Society"
-                    else -> "General Vocabulary"
-                }
-
-                val setId = "set-${lvl.lowercase()}"
-
-                val vocabItems = matchingWords.take(10).mapIndexed { index, dictWord ->
-                    val (fsrsState, reviewCount, stability, dueAtMillis) = when (index % 4) {
-                        0 -> Quadruple(FsrsState.REVIEW, 3, 8.5, now - oneDay)
-                        1 -> Quadruple(FsrsState.LEARNING, 1, 1.5, now)
-                        2 -> Quadruple(FsrsState.REVIEW, 2, 5.0, now + 2 * oneDay)
-                        else -> Quadruple(FsrsState.NEW, 0, 0.0, 0L)
-                    }
-
-                    dictWord.toVocabularyItem(
-                        setId = setId,
-                        fsrsState = fsrsState,
-                        reviewCount = reviewCount,
-                        stability = stability,
-                        dueAtMillis = dueAtMillis
-                    )
-                }
-
-                sets.add(
-                    VocabularySet(
-                        id = setId,
-                        title = "$categoryName ($lvl)",
-                        description = "Curated $lvl level vocabulary set.",
-                        category = categoryName,
-                        level = lvl,
-                        words = vocabItems
-                    )
-                )
-            }
-        }
-
-        return sets.ifEmpty { MockData.vocabularySets }
+        return MockData.vocabularySets
     }
 }
 
