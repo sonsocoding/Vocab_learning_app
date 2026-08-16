@@ -13,6 +13,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
@@ -57,6 +59,7 @@ fun HomeScreen(
     onCreateSet: () -> Unit,
     dailyWords: VocabularySet,
     onOpenDailyWords: () -> Unit,
+    onOpenAiChat: () -> Unit = {},
     streakState: StreakState = StreakState()
 ) {
     AppScaffold(
@@ -73,6 +76,7 @@ fun HomeScreen(
         ) {
             Header(streakState = streakState)
             StreakCard(streakState = streakState)
+            AiTutorBanner(onOpenAiChat = onOpenAiChat)
             DailyWordsCard(dailyWords = dailyWords, onOpenDailyWords = onOpenDailyWords)
 
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -257,6 +261,77 @@ private fun DailyWordsCard(
                 Spacer(modifier = Modifier.width(7.dp))
                 Text(text = "Open daily set", fontWeight = FontWeight.SemiBold)
             }
+        }
+    }
+}
+
+@Composable
+private fun AiTutorBanner(onOpenAiChat: () -> Unit) {
+    Card(
+        onClick = onOpenAiChat,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, Color(0xFFC8E6C9))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Surface(
+                shape = androidx.compose.foundation.shape.CircleShape,
+                color = com.example.vocablearningapp.ui.theme.AccentSoft,
+                modifier = Modifier.size(46.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.AutoAwesome,
+                        contentDescription = null,
+                        tint = Accent,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "VocabAI Coach",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Ink
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Surface(
+                        color = com.example.vocablearningapp.ui.theme.AccentSoft,
+                        shape = RoundedCornerShape(6.dp)
+                    ) {
+                        Text(
+                            text = "AI TUTOR",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = AccentDark,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "Generate custom sets & ask any English questions",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Muted
+                )
+            }
+
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = Muted,
+                modifier = Modifier.size(18.dp)
+            )
         }
     }
 }

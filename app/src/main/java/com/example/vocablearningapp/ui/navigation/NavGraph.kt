@@ -52,6 +52,9 @@ fun NavGraph(
                         Screen.SetDetail.createRoute(AppViewModel.DAILY_WORDS_SET_ID)
                     )
                 },
+                onOpenAiChat = {
+                    navController.navigate(Screen.AiChat.route)
+                },
                 streakState = appViewModel.uiState.streakState
             )
         }
@@ -203,6 +206,25 @@ fun NavGraph(
                 onSave = { title, description, level, category, words ->
                     appViewModel.saveSet(setId, title, description, level, category, words)
                     navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Screen.AiChat.route) {
+            com.example.vocablearningapp.ui.screen.ai.AiChatScreen(
+                onBack = { navController.popBackStack() },
+                onSaveSet = { set ->
+                    appViewModel.saveSet(
+                        setId = set.id,
+                        title = set.title,
+                        description = set.description,
+                        level = set.level,
+                        category = set.category,
+                        words = set.words
+                    )
+                },
+                onOpenSet = { setId ->
+                    navController.navigate(Screen.SetDetail.createRoute(setId))
                 }
             )
         }

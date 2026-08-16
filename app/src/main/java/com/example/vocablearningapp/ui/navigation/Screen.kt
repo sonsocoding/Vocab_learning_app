@@ -18,4 +18,5 @@ sealed class Screen(val route: String) {
     object SetEditor : Screen("set-editor/{setId}") {
         fun createRoute(setId: String) = "set-editor/$setId"
     }
+    object AiChat : Screen("ai-chat")
 }
