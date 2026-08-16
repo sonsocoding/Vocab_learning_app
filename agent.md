@@ -41,6 +41,10 @@ app/src/main/
 │   │   ├── DictionaryRepository.kt# Tra cứu từ điển, tìm kiếm gợi ý từ (searchWords), sinh bộ từ Daily
 │   │   ├── MockData.kt            # Dữ liệu mẫu khởi tạo ban đầu cho Room DB
 │   │   ├── StreakManager.kt       # Quản lý chuỗi ngày học liên tục (Streak) qua SharedPreferences
+│   │   ├── ai/                    # AI Tutor & LLM Agent Layer
+│   │   │   ├── AiModels.kt        # Data classes: AiChatMessage, AiGeneratedSet, AiActionPayload
+│   │   │   ├── AiPreferences.kt   # Quản lý cấu hình Gemini API Key trong SharedPreferences
+│   │   │   └── GeminiApiClient.kt # Client giao tiếp Google Gemini API (Structured JSON) + Offline Mock Engine
 │   │   ├── local/                 # Room Database (Local Persistence)
 │   │   │   ├── AppDatabase.kt     # RoomDatabase (tables: vocabulary_sets, vocabulary_items)
 │   │   │   ├── dao/
@@ -58,6 +62,7 @@ app/src/main/
 │   │   │   ├── FsrsScheduler.kt   # Bộ lập lịch FSRS-6 (tính stability, difficulty, interval, due date)
 │   │   │   └── FsrsRatingEvaluator.kt # Đánh giá xếp hạng FSRS tự động dựa trên thời gian phản hồi & độ chính xác
 │   │   └── util/
+│   │       ├── ExampleSentenceGenerator.kt # Bộ sinh câu ví dụ ngữ cảnh tự nhiên
 │   │       ├── IpaGenerator.kt    # Bộ sinh phiên âm IPA tự động và bàn phím ký tự IPA
 │   │       └── MeaningParser.kt   # Bộ bóc tách đa nghĩa & đa từ loại (n., v., adj.)
 │   └── ui/                        # Tầng giao diện (UI Layer)
@@ -70,10 +75,12 @@ app/src/main/
 │       │   └── SpeechButton.kt    # Nút phát âm Text-to-Speech
 │       ├── navigation/
 │       │   ├── NavGraph.kt        # Khai báo tuyến đường (NavHost) và kết nối ViewModel
-│       │   └── Screen.kt          # Định nghĩa danh sách các Route (Home, Learn, Review, Progress, Practice, SetEditor...)
+│       │   └── Screen.kt          # Định nghĩa danh sách các Route (Home, Learn, Review, Progress, Practice, SetEditor, AiChat...)
 │       ├── screen/
+│       │   ├── ai/
+│       │   │   └── AiChatScreen.kt# Màn hình Gia sư AI (VocabAI Coach): Chat, tạo bộ từ 1-chạm vào Room DB
 │       │   ├── flashcard/FlashcardScreen.kt   # Màn hình học Flashcard tự đánh giá FSRS
-│       │   ├── home/HomeScreen.kt             # Trang chủ: Streak, Daily Words, Danh sách Set gần đây
+│       │   ├── home/HomeScreen.kt             # Trang chủ: Streak, AI Tutor Banner, Daily Words, Danh sách Set gần đây
 │       │   ├── learn/LearnScreen.kt           # Tab Học: Bộ từ đang học, danh sách Set
 │       │   ├── learn/LearnModeScreen.kt       # Chế độ trắc nghiệm 4 đáp án (Multiple Choice)
 │       │   ├── match/MatchModeScreen.kt       # Chế độ ghép cặp Từ - Nghĩa (Matching Pairs)
@@ -97,27 +104,33 @@ app/src/main/
 
 ## 4. Các tính năng cốt lõi hiện có (Implemented Features)
 
-1. **Lưu trữ dữ liệu bền vững (Room Database)**:
+1. **Gia sư AI Trực tuyến & Tạo bộ từ 1-chạm (VocabAI Coach LLM)**:
+   - Tích hợp Google Gemini 1.5 Flash thông qua Structured JSON Action (`CREATE_VOCAB_SET`).
+   - Tự động sinh từ vựng theo chủ đề (Job Interview, Travel, Technology...), đầy đủ IPA, nghĩa tiếng Việt và câu ví dụ.
+   - Thẻ xem trước tương tác (Interactive Set Card) cho phép bấm **`[💾 Save to My Sets]`** lưu thẳng vào Room Database.
+   - Hỗ trợ **Dual-Engine**: Live Gemini API qua API Key hoặc Offline Smart Mock Engine khi không có mạng.
+   - Tài liệu đặc tả: [`llm_ai_tutor_spec.md`](file:///Users/macbookair/Documents/Huster/Source-Code/VocabLearningApp/llm_ai_tutor_spec.md).
+2. **Lưu trữ dữ liệu bền vững (Room Database)**:
    - Toàn bộ các bộ từ vựng tạo mới/chỉnh sửa và lịch sử FSRS được lưu trữ trong SQLite cục bộ trên máy người dùng thông qua Room DB.
    - Tự động seed dữ liệu mẫu trong lần khởi chạy đầu tiên.
-2. **Gợi ý từ vựng theo thời gian thực (Real-time Word Suggestions)**:
+3. **Gợi ý từ vựng theo thời gian thực (Real-time Word Suggestions)**:
    - Trong màn hình Soạn thảo bộ từ (`SetEditorScreen`), khi người dùng gõ từ vựng, hệ thống tự động tra cứu kho từ điển CEFR và hiển thị danh sách từ gợi ý phù hợp.
    - Khi chọn từ gợi ý, hệ thống tự động điền: Từ, Phiên âm IPA, Từ loại, tất cả các nghĩa tiếng Việt và câu ví dụ tương ứng.
-3. **Thuật toán Spaced Repetition FSRS-6 & Smart Evaluator**:
+4. **Thuật toán Spaced Repetition FSRS-6 & Smart Evaluator**:
    - Triển khai 21 tham số FSRS-6, tính toán `stability`, `difficulty`, `retrievability`, `dueAtMillis`.
    - Xem chi tiết tại tài liệu đặc tả: [`fsrs_system_spec.md`](file:///Users/macbookair/Documents/Huster/Source-Code/VocabLearningApp/fsrs_system_spec.md).
    - Tự động chuyển đổi hành vi trong từng Game (Độ chính xác, Thời gian phản xạ, Số lần gợi ý Hint, Undo) thành 4 mức FSRS Rating (`Again`, `Hard`, `Good`, `Easy`).
-4. **Hệ thống 6 Chế độ Học tập Toàn diện (6 Study Modes)**:
+5. **Hệ thống 6 Chế độ Học tập Toàn diện (6 Study Modes)**:
    - **Flashcards**: Lật thẻ 2 mặt, phát âm câu và từ bằng TTS, người học tự đánh giá theo 4 nút FSRS.
    - **Learn (Multiple Choice)**: Trắc nghiệm 4 lựa chọn nghĩa tiếng Việt, chấm điểm tức thì và đưa vào FSRS.
    - **Quiz (True/False)**: Phản xạ nhanh kiểm tra tính đúng/sai giữa từ và nghĩa.
    - **Match (Ghép cặp)**: Trò chơi ghép 4 từ tiếng Anh tương ứng 4 nghĩa tiếng Việt.
    - **Fill in the Blank (Điền từ khuyết)**: Ẩn từ vựng trong câu ví dụ, người học gõ phím hoặc mở gợi ý ký tự.
    - **Sentence Scramble (Sắp xếp câu)**: Xáo trộn các mảnh ghép từ trong câu ví dụ, người học lắp ghép thành câu hoàn chỉnh theo đúng ngữ pháp.
-5. **Theo dõi Streak & Thống kê tiến độ**:
+6. **Theo dõi Streak & Thống kê tiến độ**:
    - Tính chuỗi ngày học hiện tại (`currentStreak`), kỷ lục (`bestStreak`), và hiển thị các ngày hoạt động trong tuần (Thứ 2 - Chủ nhật).
    - Biểu đồ phân bổ trạng thái thẻ FSRS và tỉ lệ chính xác.
-6. **Từ vựng hàng ngày (Daily Words)**:
+7. **Từ vựng hàng ngày (Daily Words)**:
    - Tự động lấy danh sách 10 từ theo cấp độ người dùng đang học từ kho từ điển `cefr_dictionary.json`.
    - Hỗ trợ thao tác `Study` (đưa vào chu trình học) hoặc `Skip` (bỏ qua từ đã biết).
 
@@ -142,3 +155,4 @@ app/src/main/
 - [ ] **Kiểm tra trình độ đầu vào (CEFR Placement Test)**: Bài kiểm tra 10-15 câu trắc nghiệm để gợi ý cấp độ khởi đầu phù hợp cho người học.
 - [ ] **Sổ tay từ khó / Hay sai (Weak Words / Mistake Bank)**: Danh sách tổng hợp các từ có `lapseCount > 0` hoặc rating nhiều lần là `Again`.
 - [ ] **Export / Import dữ liệu**: Nhập/xuất bộ từ vựng qua file CSV, JSON hoặc Anki package.
+
