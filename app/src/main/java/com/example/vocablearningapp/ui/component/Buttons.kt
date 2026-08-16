@@ -56,10 +56,12 @@ fun SecondaryButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    icon: ImageVector? = null
+    icon: ImageVector? = null,
+    enabled: Boolean = true
 ) {
     OutlinedButton(
         onClick = onClick,
+        enabled = enabled,
         modifier = modifier.height(48.dp),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
         colors = ButtonDefaults.outlinedButtonColors(contentColor = Ink)
