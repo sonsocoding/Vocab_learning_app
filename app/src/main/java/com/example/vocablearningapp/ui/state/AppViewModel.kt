@@ -2,6 +2,7 @@ package com.example.vocablearningapp.ui.state
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,11 +10,13 @@ import com.example.vocablearningapp.data.DictionaryRepository
 import com.example.vocablearningapp.data.MockData
 import com.example.vocablearningapp.data.StreakManager
 import com.example.vocablearningapp.data.StreakState
+import com.example.vocablearningapp.data.repository.VocabularyRepository
 import com.example.vocablearningapp.domain.model.FsrsRating
 import com.example.vocablearningapp.domain.model.FsrsState
 import com.example.vocablearningapp.domain.model.VocabularyItem
 import com.example.vocablearningapp.domain.model.VocabularySet
 import com.example.vocablearningapp.domain.srs.FsrsScheduler
+import kotlinx.coroutines.launch
 
 data class AppUiState(
     val vocabularySets: List<VocabularySet> = MockData.vocabularySets,
@@ -30,13 +33,13 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private val streakManager = StreakManager(application)
+    private val vocabularyRepository = VocabularyRepository(application)
 
     var uiState by mutableStateOf(AppUiState(streakState = streakManager.getStreakState()))
         private set
 
     init {
         DictionaryRepository.init(application)
-        val dictionarySets = DictionaryRepository.getSeedVocabularySets()
         val dictionaryDailyWords = mapOf(
             "A1" to DictionaryRepository.getDailyWordsForLevel("A1"),
             "A2" to DictionaryRepository.getDailyWordsForLevel("A2"),
@@ -47,9 +50,17 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         )
 
         uiState = uiState.copy(
-            vocabularySets = dictionarySets,
             dailyWordsByLevel = dictionaryDailyWords
         )
+
+        viewModelScope.launch {
+            vocabularyRepository.initializeDatabase()
+            vocabularyRepository.getAllSetsFlow().collect { setsFromDb ->
+                if (setsFromDb.isNotEmpty()) {
+                    uiState = uiState.copy(vocabularySets = setsFromDb)
+                }
+            }
+        }
     }
 
     private val fsrsScheduler = FsrsScheduler()
@@ -118,6 +129,11 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         val studiedSetLevel = sets.firstOrNull { set ->
             set.words.any { item -> item.id == itemId }
         }?.level
+
+        viewModelScope.launch {
+            vocabularyRepository.updateWordFsrs(itemId, schedule, rating, nowMillis)
+        }
+
         uiState = uiState.copy(
             vocabularySets = sets.map { set ->
                 set.copy(
@@ -183,5 +199,18 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 sets + updatedSet
             }
         )
+
+        viewModelScope.launch {
+            vocabularyRepository.saveSet(updatedSet)
+        }
+    }
+
+    fun deleteSet(setId: String) {
+        uiState = uiState.copy(
+            vocabularySets = sets.filterNot { it.id == setId }
+        )
+        viewModelScope.launch {
+            vocabularyRepository.deleteSet(setId)
+        }
     }
 }
