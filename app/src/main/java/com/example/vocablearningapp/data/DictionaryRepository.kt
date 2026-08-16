@@ -116,8 +116,19 @@ object DictionaryRepository {
     }
 
     fun getDailyWordsForLevel(level: String): List<VocabularyItem> {
-        val matching = wordsList.filter { it.level.equals(level, ignoreCase = true) }
-        val selected = if (matching.size >= 10) matching.shuffled().take(10) else wordsList.shuffled().take(10)
+        val seeded = MockData.dailyWordsByLevel[level.uppercase()]
+        if (!seeded.isNullOrEmpty()) {
+            return seeded
+        }
+
+        val cleanMatching = wordsList.filter { dictWord ->
+            dictWord.level.equals(level, ignoreCase = true) &&
+            dictWord.word.all { it.isLetter() } &&
+            dictWord.word.length in 3..12 &&
+            dictWord.meanings.isNotEmpty()
+        }
+
+        val selected = if (cleanMatching.size >= 10) cleanMatching.shuffled().take(10) else wordsList.filter { it.word.all { c -> c.isLetter() } }.shuffled().take(10)
 
         return selected.map { dictWord ->
             dictWord.toVocabularyItem(setId = "daily-${level.lowercase()}")
