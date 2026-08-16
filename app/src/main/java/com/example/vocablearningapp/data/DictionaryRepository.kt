@@ -135,6 +135,20 @@ object DictionaryRepository {
         }
     }
 
+    fun searchWords(query: String, limit: Int = 6): List<DictionaryWord> {
+        val clean = query.trim().lowercase()
+        if (clean.isBlank()) return emptyList()
+
+        val prefixMatches = wordsList.filter { it.word.lowercase().startsWith(clean) }
+        val containsMatches = if (prefixMatches.size < limit) {
+            wordsList.filter { it.word.lowercase().contains(clean) && !it.word.lowercase().startsWith(clean) }
+        } else {
+            emptyList()
+        }
+
+        return (prefixMatches + containsMatches).take(limit)
+    }
+
     fun getSeedVocabularySets(): List<VocabularySet> {
         return MockData.vocabularySets
     }

@@ -42,6 +42,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.example.vocablearningapp.data.DictionaryRepository
+import com.example.vocablearningapp.data.DictionaryWord
 import com.example.vocablearningapp.domain.model.FsrsState
 import com.example.vocablearningapp.domain.model.PartOfSpeech
 import com.example.vocablearningapp.domain.model.VocabularyItem
@@ -53,6 +54,7 @@ import com.example.vocablearningapp.ui.component.SecondaryButton
 import com.example.vocablearningapp.ui.component.VocabDimens
 import com.example.vocablearningapp.ui.component.VocabTopBar
 import com.example.vocablearningapp.ui.theme.Accent
+import com.example.vocablearningapp.ui.theme.AccentDark
 import com.example.vocablearningapp.ui.theme.AccentSoft
 import com.example.vocablearningapp.ui.theme.Border
 import com.example.vocablearningapp.ui.theme.Canvas
@@ -60,6 +62,8 @@ import com.example.vocablearningapp.ui.theme.Ink
 import com.example.vocablearningapp.ui.theme.Muted
 import com.example.vocablearningapp.ui.theme.Surface
 import com.example.vocablearningapp.ui.theme.SurfaceMuted
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
 fun SetEditorScreen(
@@ -244,17 +248,75 @@ private fun WordEditorCard(
                 }
             }
 
-            EditorField(
-                value = draft.word,
-                onValueChange = { newWord ->
-                    draft.word = newWord
-                    if (draft.pronunciation.isBlank()) {
-                        draft.pronunciation = IpaGenerator.generateIpa(newWord)
+            val suggestions = remember(draft.word) {
+                if (draft.word.trim().length >= 1) {
+                    DictionaryRepository.searchWords(draft.word, limit = 4)
+                } else emptyList()
+            }
+            val hasExactMatch = suggestions.any { it.word.equals(draft.word.trim(), ignoreCase = true) && draft.meanings.any { m -> m.meaning.isNotBlank() } }
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                EditorField(
+                    value = draft.word,
+                    onValueChange = { newWord ->
+                        draft.word = newWord
+                        if (draft.pronunciation.isBlank()) {
+                            draft.pronunciation = IpaGenerator.generateIpa(newWord)
+                        }
+                    },
+                    label = "Word",
+                    placeholder = "e.g. key, money, commute..."
+                )
+
+                if (suggestions.isNotEmpty() && !hasExactMatch) {
+                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                        Text(
+                            text = "💡 Dictionary Suggestions (tap to auto-fill):",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Accent,
+                            fontWeight = FontWeight.Bold
+                        )
+                        suggestions.forEach { dictWord ->
+                            Surface(
+                                onClick = {
+                                    draft.applyDictionaryWord(dictWord)
+                                },
+                                shape = RoundedCornerShape(10.dp),
+                                color = AccentSoft,
+                                border = BorderStroke(1.dp, Color(0xFFC8E6C9)),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = dictWord.word,
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = AccentDark,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = dictWord.ipa,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Muted
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = "· ${dictWord.formattedMeaning}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Ink,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
+                        }
                     }
-                },
-                label = "Word",
-                placeholder = "e.g. key, money, commute..."
-            )
+                }
+            }
 
             IpaFieldWithHelper(
                 pronunciation = draft.pronunciation,
@@ -453,6 +515,25 @@ private class DraftWordState(
 
     val primaryPartOfSpeech: PartOfSpeech
         get() = meanings.firstOrNull()?.partOfSpeech ?: PartOfSpeech.NOUN
+
+    fun applyDictionaryWord(dictWord: DictionaryWord) {
+        word = dictWord.word
+        pronunciation = dictWord.ipa
+        meanings.clear()
+        if (dictWord.meanings.isEmpty()) {
+            meanings.add(DraftMeaningState())
+        } else {
+            dictWord.meanings.forEach { m ->
+                meanings.add(
+                    DraftMeaningState(
+                        initialPos = m.partOfSpeech,
+                        initialMeaning = m.meaning,
+                        initialExample = m.exampleSentence
+                    )
+                )
+            }
+        }
+    }
 
     val formattedMeaning: String
         get() {

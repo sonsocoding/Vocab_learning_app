@@ -24,8 +24,8 @@
 | **State Management** | Android ViewModel + Compose `mutableStateOf` / `mutableStateListOf` | Quản lý state tập trung tại `AppViewModel` |
 | **TTS (Text To Speech)** | `android.speech.tts.TextToSpeech` | Phát âm từ vựng và câu ví dụ (US English) |
 | **Thuật toán Spaced Repetition** | FSRS-6 (`FsrsScheduler.kt`) | Triển khai thuần Kotlin với 21 tham số FSRS-6, hỗ trợ fuzzing và retrievability |
-| **Lưu trữ dữ liệu** | `SharedPreferences` (Streak) + Assets JSON (`cefr_dictionary.json`) | Hiện tại dữ liệu học tập và các Set đang ở dạng In-Memory trong ViewModel |
-| **Hệ thống Build** | Gradle Kotlin DSL (`build.gradle.kts`) | Version Catalog (`libs.versions.toml`) |
+| **Lưu trữ dữ liệu** | `Room Database` (SQLite) + `SharedPreferences` (Streak) + Assets JSON (`cefr_dictionary.json`) | Dữ liệu các Set và tiến độ FSRS lưu bền vững tại Room DB |
+| **Hệ thống Build** | Gradle Kotlin DSL (`build.gradle.kts`) + KSP (`com.google.devtools.ksp`) | Version Catalog (`libs.versions.toml`) |
 
 ---
 
@@ -38,9 +38,19 @@ app/src/main/
 ├── java/com/example/vocablearningapp/
 │   ├── MainActivity.kt            # Single Activity khởi tạo theme, NavController và AppViewModel
 │   ├── data/                      # Tầng dữ liệu (Data Layer)
-│   │   ├── DictionaryRepository.kt# Đọc JSON từ assets, tra từ, sinh bộ từ Daily theo level
-│   │   ├── MockData.kt            # Dữ liệu mẫu khởi tạo cho các VocabularySet và DailyWords
-│   │   └── StreakManager.kt       # Quản lý chuỗi ngày học liên tục (Streak) qua SharedPreferences
+│   │   ├── DictionaryRepository.kt# Tra cứu từ điển, tìm kiếm gợi ý từ (searchWords), sinh bộ từ Daily
+│   │   ├── MockData.kt            # Dữ liệu mẫu khởi tạo ban đầu cho Room DB
+│   │   ├── StreakManager.kt       # Quản lý chuỗi ngày học liên tục (Streak) qua SharedPreferences
+│   │   ├── local/                 # Room Database (Local Persistence)
+│   │   │   ├── AppDatabase.kt     # RoomDatabase (tables: vocabulary_sets, vocabulary_items)
+│   │   │   ├── dao/
+│   │   │   │   └── VocabularyDao.kt # Truy vấn và cập nhật Set, Word, FSRS state
+│   │   │   └── entity/
+│   │   │       ├── VocabularySetEntity.kt
+│   │   │       ├── VocabularyItemEntity.kt
+│   │   │       └── SetWithWords.kt# Quan hệ 1-N giữa Set và Word, mapper sang Domain Model
+│   │   └── repository/
+│   │       └── VocabularyRepository.kt # Repository trung gian quản lý dữ liệu Room DB & Seeding
 │   ├── domain/                    # Tầng nghiệp vụ (Domain Layer)
 │   │   ├── model/
 │   │   │   └── VocabularyModels.kt# Entity: VocabularyItem, VocabularySet, FsrsState, FsrsRating, PartOfSpeech, StudyMode
@@ -73,7 +83,7 @@ app/src/main/
 │       │   └── set/
 │       │       ├── AllSetsScreen.kt           # Xem tất cả các bộ từ
 │       │       ├── SetDetailScreen.kt         # Chi tiết bộ từ, chọn chế độ học (Study Modes)
-│       │       └── SetEditorScreen.kt         # Tạo/Chỉnh sửa bộ từ, hỗ trợ Auto IPA, gán đa nghĩa/ví dụ
+│       │       └── SetEditorScreen.kt         # Tạo/Chỉnh sửa bộ từ, hỗ trợ Auto-suggest từ điển, Auto IPA, gán đa nghĩa/ví dụ
 │       └── theme/
 │           ├── Color.kt           # Bảng màu chủ đạo (Accent Forest Green, Ink, Canvas, Surface, FSRS States)
 │           ├── Theme.kt           # Cấu hình MaterialTheme
@@ -84,49 +94,48 @@ app/src/main/
 
 ## 4. Các tính năng cốt lõi hiện có (Implemented Features)
 
-1. **Thuật toán Spaced Repetition FSRS-6**:
+1. **Lưu trữ dữ liệu bền vững (Room Database)**:
+   - Toàn bộ các bộ từ vựng tạo mới/chỉnh sửa và lịch sử FSRS được lưu trữ trong SQLite cục bộ trên máy người dùng thông qua Room DB.
+   - Tự động seed dữ liệu mẫu trong lần khởi chạy đầu tiên.
+2. **Gợi ý từ vựng theo thời gian thực (Real-time Word Suggestions)**:
+   - Trong màn hình Soạn thảo bộ từ (`SetEditorScreen`), khi người dùng gõ từ vựng, hệ thống tự động tra cứu kho từ điển CEFR và hiển thị danh sách từ gợi ý phù hợp.
+   - Khi chọn từ gợi ý, hệ thống tự động điền: Từ, Phiên âm IPA, Từ loại, tất cả các nghĩa tiếng Việt và câu ví dụ tương ứng.
+3. **Thuật toán Spaced Repetition FSRS-6**:
    - 4 trạng thái thẻ: `New`, `Learning`, `Review`, `Relearning`.
    - 4 mức đánh giá khi ôn tập: `Again (1)`, `Hard (2)`, `Good (3)`, `Easy (4)`.
    - Tính toán chính xác độ ổn định (`stability`), độ khó (`difficulty`), khoảng cách ngày ôn (`scheduledDays`) và thời điểm tới hạn (`dueAtMillis`).
-2. **Theo dõi Streak & Thống kê tiến độ**:
+4. **Theo dõi Streak & Thống kê tiến độ**:
    - Tính chuỗi ngày học hiện tại (`currentStreak`), kỷ lục (`bestStreak`), và hiển thị các ngày hoạt động trong tuần (Thứ 2 - Chủ nhật).
    - Biểu đồ phân bổ trạng thái thẻ FSRS và tỉ lệ chính xác.
-3. **Từ vựng hàng ngày (Daily Words)**:
+5. **Từ vựng hàng ngày (Daily Words)**:
    - Tự động lấy danh sách 10 từ theo cấp độ người dùng đang học từ kho từ điển `cefr_dictionary.json`.
    - Hỗ trợ thao tác `Study` (đưa vào chu trình học) hoặc `Skip` (bỏ qua từ đã biết).
-4. **Đa dạng chế độ học tập (Study Modes)**:
+6. **Đa dạng chế độ học tập (Study Modes)**:
    - **Flashcards**: Lật thẻ 2 mặt, phát âm câu và từ bằng TTS, người học tự đánh giá theo 4 nút FSRS.
    - **Learn (Multiple Choice)**: Trắc nghiệm 4 lựa chọn nghĩa tiếng Việt, chấm điểm tức thì và đưa vào FSRS.
    - **Quiz (True/False)**: Phản xạ nhanh kiểm tra tính đúng/sai giữa từ và nghĩa.
    - **Match (Ghép cặp)**: Trò chơi ghép 4 từ tiếng Anh tương ứng 4 nghĩa tiếng Việt.
-5. **Trình soạn thảo bộ từ nâng cao (Set Editor)**:
-   - Thêm/sửa từ vựng, tự động sinh phiên âm IPA bằng rule-based kết hợp tra cứu từ điển (`Auto IPA`).
-   - Bàn phím ký hiệu ngữ âm IPA nhanh.
-   - Bóc tách đa nghĩa (`MeaningParser`) theo từ loại (`noun`, `verb`, `adj`) kèm ví dụ cho từng nghĩa.
 
 ---
 
 ## 5. Luồng dữ liệu & State (State & Data Flow)
 
-- `AppViewModel` đóng vai trò trung tâm chứa `AppUiState`:
-  - `vocabularySets`: Danh sách các bộ từ hiện có.
-  - `dailyWordsByLevel`: Bản đồ các từ gợi ý theo cấp độ A1 -> C2.
-  - `streakState`: Trạng thái chuỗi ngày học được cập nhật qua `StreakManager`.
-- Khi người dùng hoàn thành một lượt học/ôn tập, hàm `rateItem(itemId, rating)` được gọi:
-  1. `FsrsScheduler.review()` tính toán ra `FsrsSchedule` mới.
-  2. Trạng thái thẻ của từ trong danh sách được cập nhật (`fsrsState`, `stability`, `difficulty`, `dueAtMillis`).
+- `AppViewModel` sử dụng `VocabularyRepository` để quan sát Flow `getAllSetsFlow()` từ Room Database.
+- Khi người dùng tạo/sửa bộ từ (`saveSet`) hoặc đánh giá thẻ (`rateItem`):
+  1. Room DB được cập nhật ngay lập tức bất đồng bộ (Asynchronous qua Coroutine / IO Dispatcher).
+  2. `FsrsScheduler.review()` tính toán ra `FsrsSchedule` mới và lưu trạng thái vào Room.
   3. `StreakManager.recordActivityToday()` ghi nhận phiên học hôm nay vào `SharedPreferences`.
+  4. Giao diện nhận phản hồi tức thì và duy trì toàn bộ dữ liệu khi khởi động lại ứng dụng.
 
 ---
 
-## 6. Lộ trình phát triển đề xuất (Roadmap & Next Steps)
+## 6. Lộ trình phát triển đề xuất tiếp theo (Next Steps)
 
-- [ ] **Lưu trữ dữ liệu lâu dài (Persistence)**: Tích hợp **Room Database** để lưu trữ bộ từ, danh sách từ vựng và lịch sử ôn tập (tránh mất dữ liệu khi đóng app).
-- [ ] **Tra cứu từ điển nhanh (Dictionary Lookup Tab / Search)**: Thêm thanh tìm kiếm từ vựng từ `cefr_dictionary.json` và nút 1 chạm "Lưu vào Set".
 - [ ] **Chế độ Luyện viết & Nghe chính tả (Typing Test / Dictation)**:
   - `FILL_IN_BLANK`: Gõ lại từ bị ẩn trong câu ví dụ.
   - `LISTENING_PRACTICE`: Nghe âm thanh từ TTS và gõ lại đúng chính tả.
 - [ ] **Luyện phát âm qua giọng nói (Speech-to-Text / Speech Recognition)**: Sử dụng Android `SpeechRecognizer` để thu âm và chấm điểm độ tương đồng với từ vựng.
+- [ ] **Tra cứu từ điển nhanh (Dictionary Lookup Tab / Search)**: Thêm thanh tìm kiếm từ vựng từ `cefr_dictionary.json` và nút 1 chạm "Lưu vào Set".
 - [ ] **Nhắc nhở ôn tập thông minh (Notification via WorkManager)**: Lên lịch thông báo khi có từ đến hạn ôn tập FSRS trong ngày.
 - [ ] **Kiểm tra trình độ đầu vào (CEFR Placement Test)**: Bài kiểm tra 10-15 câu trắc nghiệm để gợi ý cấp độ khởi đầu phù hợp cho người học.
 - [ ] **Sổ tay từ khó / Hay sai (Weak Words / Mistake Bank)**: Danh sách tổng hợp các từ có `lapseCount > 0` hoặc rating nhiều lần là `Again`.
