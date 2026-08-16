@@ -47,6 +47,7 @@ import com.example.vocablearningapp.domain.model.FsrsState
 import com.example.vocablearningapp.domain.model.PartOfSpeech
 import com.example.vocablearningapp.domain.model.VocabularyItem
 import com.example.vocablearningapp.domain.model.VocabularySet
+import com.example.vocablearningapp.domain.util.ExampleSentenceGenerator
 import com.example.vocablearningapp.domain.util.IpaGenerator
 import com.example.vocablearningapp.domain.util.MeaningParser
 import com.example.vocablearningapp.ui.component.PrimaryButton
@@ -521,14 +522,20 @@ private class DraftWordState(
         pronunciation = dictWord.ipa
         meanings.clear()
         if (dictWord.meanings.isEmpty()) {
-            meanings.add(DraftMeaningState())
+            val naturalEx = ExampleSentenceGenerator.getNaturalExample(dictWord.word, PartOfSpeech.NOUN)
+            meanings.add(DraftMeaningState(initialExample = naturalEx))
         } else {
             dictWord.meanings.forEach { m ->
+                val naturalEx = ExampleSentenceGenerator.getNaturalExample(
+                    word = dictWord.word,
+                    partOfSpeech = m.partOfSpeech,
+                    existingSentence = m.exampleSentence
+                )
                 meanings.add(
                     DraftMeaningState(
                         initialPos = m.partOfSpeech,
                         initialMeaning = m.meaning,
-                        initialExample = m.exampleSentence
+                        initialExample = naturalEx
                     )
                 )
             }
@@ -554,15 +561,20 @@ private class DraftWordState(
     fun toVocabularyItem(setTitle: String, index: Int): VocabularyItem? {
         val finalMeaning = formattedMeaning
         if (word.isBlank() && finalMeaning.isBlank()) return null
+        val cleanWord = word.trim()
+        val finalExample = if (formattedExample.isNotBlank() && !ExampleSentenceGenerator.isPlaceholder(formattedExample)) {
+            formattedExample
+        } else {
+            ExampleSentenceGenerator.getNaturalExample(cleanWord, primaryPartOfSpeech)
+        }
+
         return VocabularyItem(
             id = id.ifBlank { "${setTitle.lowercase().replace(" ", "-")}-$index" },
-            word = word.trim(),
+            word = cleanWord,
             meaning = finalMeaning,
             pronunciation = pronunciation.trim(),
             partOfSpeech = primaryPartOfSpeech,
-            exampleSentence = formattedExample.ifBlank {
-                "This is an example sentence for ${word.trim()}."
-            },
+            exampleSentence = finalExample,
             fsrsState = fsrsState,
             fsrsStep = fsrsStep,
             stability = stability,
@@ -580,10 +592,12 @@ private class DraftWordState(
             val parsedEntries = MeaningParser.parse(
                 rawMeaning = item.meaning,
                 rawExample = item.exampleSentence,
-                fallbackPos = item.partOfSpeech
+                fallbackPos = item.partOfSpeech,
+                word = item.word
             )
             val draftMeanings = if (parsedEntries.isEmpty()) {
-                listOf(DraftMeaningState(initialPos = item.partOfSpeech, initialMeaning = item.meaning, initialExample = item.exampleSentence))
+                val naturalEx = ExampleSentenceGenerator.getNaturalExample(item.word, item.partOfSpeech, item.exampleSentence)
+                listOf(DraftMeaningState(initialPos = item.partOfSpeech, initialMeaning = item.meaning, initialExample = naturalEx))
             } else {
                 parsedEntries.map { entry ->
                     DraftMeaningState(initialPos = entry.partOfSpeech, initialMeaning = entry.meaning, initialExample = entry.exampleSentence)

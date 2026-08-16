@@ -101,7 +101,8 @@ private fun BackOfCard(item: VocabularyItem) {
         val meaningEntries = com.example.vocablearningapp.domain.util.MeaningParser.parse(
             rawMeaning = item.meaning,
             rawExample = item.exampleSentence,
-            fallbackPos = item.partOfSpeech
+            fallbackPos = item.partOfSpeech,
+            word = item.word
         )
 
         if (meaningEntries.size > 1) {
@@ -155,7 +156,12 @@ private fun BackOfCard(item: VocabularyItem) {
                 color = Ink,
                 textAlign = TextAlign.Center
             )
-            if (item.exampleSentence.isNotBlank()) {
+            val displayExample = com.example.vocablearningapp.domain.util.ExampleSentenceGenerator.getNaturalExample(
+                word = item.word,
+                partOfSpeech = item.partOfSpeech,
+                existingSentence = item.exampleSentence
+            )
+            if (displayExample.isNotBlank()) {
                 Spacer(modifier = Modifier.height(18.dp))
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
@@ -167,14 +173,14 @@ private fun BackOfCard(item: VocabularyItem) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "“${item.exampleSentence}”",
+                            text = "“$displayExample”",
                             modifier = Modifier.weight(1f),
                             style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic),
                             color = Ink,
                             textAlign = TextAlign.Center
                         )
                         SpeechButton(
-                            text = item.exampleSentence,
+                            text = displayExample,
                             contentDescription = "Play example sentence",
                             tint = Accent
                         )

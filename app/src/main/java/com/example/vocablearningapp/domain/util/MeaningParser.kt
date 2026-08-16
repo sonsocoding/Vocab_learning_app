@@ -12,7 +12,8 @@ object MeaningParser {
     fun parse(
         rawMeaning: String,
         rawExample: String = "",
-        fallbackPos: PartOfSpeech = PartOfSpeech.NOUN
+        fallbackPos: PartOfSpeech = PartOfSpeech.NOUN,
+        word: String = ""
     ): List<MeaningEntry> {
         val trimmedMeaning = rawMeaning.trim()
         if (trimmedMeaning.isBlank()) return emptyList()
@@ -23,30 +24,44 @@ object MeaningParser {
 
         lines.forEachIndexed { index, line ->
             val lower = line.lowercase()
-            val example = exampleLines.getOrNull(index)
+            val rawEx = exampleLines.getOrNull(index)
                 ?.replace(Regex("^(n\\.|v\\.|adj\\.|noun\\.|verb\\.|adjective\\.)"), "")
                 ?.trim()
                 .orEmpty()
 
-            when {
-                lower.startsWith("n.") || lower.startsWith("n:") || lower.startsWith("(n)") || lower.startsWith("noun") -> {
-                    val text = line.substringAfter(".").substringAfter(":").substringAfter(")").trim()
-                    if (text.isNotBlank()) entries.add(MeaningEntry(PartOfSpeech.NOUN, text, example))
-                }
-                lower.startsWith("v.") || lower.startsWith("v:") || lower.startsWith("(v)") || lower.startsWith("verb") -> {
-                    val text = line.substringAfter(".").substringAfter(":").substringAfter(")").trim()
-                    if (text.isNotBlank()) entries.add(MeaningEntry(PartOfSpeech.VERB, text, example))
-                }
+            val pos = when {
+                lower.startsWith("n.") || lower.startsWith("n:") || lower.startsWith("(n)") || lower.startsWith("noun") -> PartOfSpeech.NOUN
+                lower.startsWith("v.") || lower.startsWith("v:") || lower.startsWith("(v)") || lower.startsWith("verb") -> PartOfSpeech.VERB
+                lower.startsWith("adj.") || lower.startsWith("adj:") || lower.startsWith("(adj)") || lower.startsWith("adjective") -> PartOfSpeech.ADJECTIVE
+                else -> fallbackPos
+            }
+
+            val text = when {
+                lower.startsWith("n.") || lower.startsWith("n:") || lower.startsWith("(n)") || lower.startsWith("noun") ||
+                lower.startsWith("v.") || lower.startsWith("v:") || lower.startsWith("(v)") || lower.startsWith("verb") ||
                 lower.startsWith("adj.") || lower.startsWith("adj:") || lower.startsWith("(adj)") || lower.startsWith("adjective") -> {
-                    val text = line.substringAfter(".").substringAfter(":").substringAfter(")").trim()
-                    if (text.isNotBlank()) entries.add(MeaningEntry(PartOfSpeech.ADJECTIVE, text, example))
+                    line.substringAfter(".").substringAfter(":").substringAfter(")").trim()
                 }
-                else -> {
-                    entries.add(MeaningEntry(fallbackPos, line, example))
-                }
+                else -> line
+            }
+
+            val finalExample = if (word.isNotBlank()) {
+                ExampleSentenceGenerator.getNaturalExample(word, pos, rawEx)
+            } else {
+                if (ExampleSentenceGenerator.isPlaceholder(rawEx)) "" else rawEx
+            }
+
+            if (text.isNotBlank()) {
+                entries.add(MeaningEntry(pos, text, finalExample))
             }
         }
 
-        return entries.ifEmpty { listOf(MeaningEntry(fallbackPos, trimmedMeaning, rawExample.trim())) }
+        val fallbackEx = if (word.isNotBlank()) {
+            ExampleSentenceGenerator.getNaturalExample(word, fallbackPos, rawExample.trim())
+        } else {
+            if (ExampleSentenceGenerator.isPlaceholder(rawExample.trim())) "" else rawExample.trim()
+        }
+
+        return entries.ifEmpty { listOf(MeaningEntry(fallbackPos, trimmedMeaning, fallbackEx)) }
     }
 }

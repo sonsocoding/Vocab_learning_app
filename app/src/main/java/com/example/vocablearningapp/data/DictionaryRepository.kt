@@ -90,11 +90,17 @@ object DictionaryRepository {
                         "adj", "adjective" -> PartOfSpeech.ADJECTIVE
                         else -> PartOfSpeech.NOUN
                     }
+                    val rawExample = mObj.optString("exampleSentence", "")
+                    val naturalExample = com.example.vocablearningapp.domain.util.ExampleSentenceGenerator.getNaturalExample(
+                        word = word,
+                        partOfSpeech = pos,
+                        existingSentence = rawExample
+                    )
                     meanings.add(
                         DictionaryMeaning(
                             partOfSpeech = pos,
                             meaning = mObj.optString("meaning", ""),
-                            exampleSentence = mObj.optString("exampleSentence", "")
+                            exampleSentence = naturalExample
                         )
                     )
                 }
