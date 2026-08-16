@@ -77,12 +77,15 @@ app/src/main/
 │       │   ├── learn/LearnScreen.kt           # Tab Học: Bộ từ đang học, danh sách Set
 │       │   ├── learn/LearnModeScreen.kt       # Chế độ trắc nghiệm 4 đáp án (Multiple Choice)
 │       │   ├── match/MatchModeScreen.kt       # Chế độ ghép cặp Từ - Nghĩa (Matching Pairs)
+│       │   ├── practice/                      # Các chế độ luyện tập nâng cao (Active Recall & Syntax)
+│       │   │   ├── FillBlankModeScreen.kt     # Điền từ vào chỗ trống trong câu ví dụ + Hint + FSRS
+│       │   │   └── SentenceScrambleScreen.kt  # Sắp xếp từ xáo trộn thành câu hoàn chỉnh + FSRS
 │       │   ├── progress/ProgressScreen.kt     # Tab Thống kê: Biểu đồ FSRS state, Streak, tổng số từ
 │       │   ├── quiz/QuizModeScreen.kt         # Chế độ Đúng/Sai (True/False Quiz)
 │       │   ├── review/ReviewScreen.kt         # Tab Ôn tập: Hàng đợi ôn tập theo FSRS due date
 │       │   └── set/
 │       │       ├── AllSetsScreen.kt           # Xem tất cả các bộ từ
-│       │       ├── SetDetailScreen.kt         # Chi tiết bộ từ, chọn chế độ học (Study Modes)
+│       │       ├── SetDetailScreen.kt         # Chi tiết bộ từ, chọn 6 chế độ học (Study Modes)
 │       │       └── SetEditorScreen.kt         # Tạo/Chỉnh sửa bộ từ, hỗ trợ Auto-suggest từ điển, Auto IPA, gán đa nghĩa/ví dụ
 │       └── theme/
 │           ├── Color.kt           # Bảng màu chủ đạo (Accent Forest Green, Ink, Canvas, Surface, FSRS States)
@@ -100,21 +103,23 @@ app/src/main/
 2. **Gợi ý từ vựng theo thời gian thực (Real-time Word Suggestions)**:
    - Trong màn hình Soạn thảo bộ từ (`SetEditorScreen`), khi người dùng gõ từ vựng, hệ thống tự động tra cứu kho từ điển CEFR và hiển thị danh sách từ gợi ý phù hợp.
    - Khi chọn từ gợi ý, hệ thống tự động điền: Từ, Phiên âm IPA, Từ loại, tất cả các nghĩa tiếng Việt và câu ví dụ tương ứng.
-3. **Thuật toán Spaced Repetition FSRS-6**:
-   - 4 trạng thái thẻ: `New`, `Learning`, `Review`, `Relearning`.
-   - 4 mức đánh giá khi ôn tập: `Again (1)`, `Hard (2)`, `Good (3)`, `Easy (4)`.
-   - Tính toán chính xác độ ổn định (`stability`), độ khó (`difficulty`), khoảng cách ngày ôn (`scheduledDays`) và thời điểm tới hạn (`dueAtMillis`).
-4. **Theo dõi Streak & Thống kê tiến độ**:
-   - Tính chuỗi ngày học hiện tại (`currentStreak`), kỷ lục (`bestStreak`), và hiển thị các ngày hoạt động trong tuần (Thứ 2 - Chủ nhật).
-   - Biểu đồ phân bổ trạng thái thẻ FSRS và tỉ lệ chính xác.
-5. **Từ vựng hàng ngày (Daily Words)**:
-   - Tự động lấy danh sách 10 từ theo cấp độ người dùng đang học từ kho từ điển `cefr_dictionary.json`.
-   - Hỗ trợ thao tác `Study` (đưa vào chu trình học) hoặc `Skip` (bỏ qua từ đã biết).
-6. **Đa dạng chế độ học tập (Study Modes)**:
+3. **Thuật toán Spaced Repetition FSRS-6 & Smart Evaluator**:
+   - Triển khai 21 tham số FSRS-6, tính toán `stability`, `difficulty`, `retrievability`, `dueAtMillis`.
+   - Xem chi tiết tại tài liệu đặc tả: [`fsrs_system_spec.md`](file:///Users/macbookair/Documents/Huster/Source-Code/VocabLearningApp/fsrs_system_spec.md).
+   - Tự động chuyển đổi hành vi trong từng Game (Độ chính xác, Thời gian phản xạ, Số lần gợi ý Hint, Undo) thành 4 mức FSRS Rating (`Again`, `Hard`, `Good`, `Easy`).
+4. **Hệ thống 6 Chế độ Học tập Toàn diện (6 Study Modes)**:
    - **Flashcards**: Lật thẻ 2 mặt, phát âm câu và từ bằng TTS, người học tự đánh giá theo 4 nút FSRS.
    - **Learn (Multiple Choice)**: Trắc nghiệm 4 lựa chọn nghĩa tiếng Việt, chấm điểm tức thì và đưa vào FSRS.
    - **Quiz (True/False)**: Phản xạ nhanh kiểm tra tính đúng/sai giữa từ và nghĩa.
    - **Match (Ghép cặp)**: Trò chơi ghép 4 từ tiếng Anh tương ứng 4 nghĩa tiếng Việt.
+   - **Fill in the Blank (Điền từ khuyết)**: Ẩn từ vựng trong câu ví dụ, người học gõ phím hoặc mở gợi ý ký tự.
+   - **Sentence Scramble (Sắp xếp câu)**: Xáo trộn các mảnh ghép từ trong câu ví dụ, người học lắp ghép thành câu hoàn chỉnh theo đúng ngữ pháp.
+5. **Theo dõi Streak & Thống kê tiến độ**:
+   - Tính chuỗi ngày học hiện tại (`currentStreak`), kỷ lục (`bestStreak`), và hiển thị các ngày hoạt động trong tuần (Thứ 2 - Chủ nhật).
+   - Biểu đồ phân bổ trạng thái thẻ FSRS và tỉ lệ chính xác.
+6. **Từ vựng hàng ngày (Daily Words)**:
+   - Tự động lấy danh sách 10 từ theo cấp độ người dùng đang học từ kho từ điển `cefr_dictionary.json`.
+   - Hỗ trợ thao tác `Study` (đưa vào chu trình học) hoặc `Skip` (bỏ qua từ đã biết).
 
 ---
 
@@ -131,9 +136,6 @@ app/src/main/
 
 ## 6. Lộ trình phát triển đề xuất tiếp theo (Next Steps)
 
-- [ ] **Chế độ Luyện viết & Nghe chính tả (Typing Test / Dictation)**:
-  - `FILL_IN_BLANK`: Gõ lại từ bị ẩn trong câu ví dụ.
-  - `LISTENING_PRACTICE`: Nghe âm thanh từ TTS và gõ lại đúng chính tả.
 - [ ] **Luyện phát âm qua giọng nói (Speech-to-Text / Speech Recognition)**: Sử dụng Android `SpeechRecognizer` để thu âm và chấm điểm độ tương đồng với từ vựng.
 - [ ] **Tra cứu từ điển nhanh (Dictionary Lookup Tab / Search)**: Thêm thanh tìm kiếm từ vựng từ `cefr_dictionary.json` và nút 1 chạm "Lưu vào Set".
 - [ ] **Nhắc nhở ôn tập thông minh (Notification via WorkManager)**: Lên lịch thông báo khi có từ đến hạn ôn tập FSRS trong ngày.

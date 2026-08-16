@@ -60,6 +60,6 @@ enum class StudyMode(val title: String, val subtitle: String) {
     QUIZ("Quiz", "Test your knowledge"),
     MATCH("Match", "Pair words and meanings"),
     MULTIPLE_CHOICE("Multiple Choice", "Choose the right answer"),
-    FILL_IN_BLANK("Fill in the Blank", "Complete each sentence"),
-    SENTENCE_PRACTICE("Sentence Practice", "Use words in context")
+    FILL_IN_BLANK("Fill in Blank", "Spell words in context"),
+    SENTENCE_PRACTICE("Sentence Scramble", "Unscramble word order puzzle")
 }

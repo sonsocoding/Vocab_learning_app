@@ -162,6 +162,31 @@ fun SetDetailScreen(
                                 .fillMaxHeight()
                         )
                     }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Max),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        StudyModeCard(
+                            title = StudyMode.FILL_IN_BLANK.title,
+                            subtitle = StudyMode.FILL_IN_BLANK.subtitle,
+                            icon = Icons.Default.Edit,
+                            onClick = { onOpenMode(StudyMode.FILL_IN_BLANK) },
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                        )
+                        StudyModeCard(
+                            title = StudyMode.SENTENCE_PRACTICE.title,
+                            subtitle = StudyMode.SENTENCE_PRACTICE.subtitle,
+                            icon = Icons.Default.Add,
+                            onClick = { onOpenMode(StudyMode.SENTENCE_PRACTICE) },
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                        )
+                    }
                 }
 
                 PrimaryButton(

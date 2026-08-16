@@ -169,6 +169,22 @@ fun NavGraph(
                     onLearnDailyWord = appViewModel::learnDailyWord
                 )
 
+                StudyMode.FILL_IN_BLANK -> com.example.vocablearningapp.ui.screen.practice.FillBlankModeScreen(
+                    set = appViewModel.setById(setId),
+                    onBack = { navController.popBackStack() },
+                    onRate = appViewModel::rateItem,
+                    onSkipDailyWord = appViewModel::skipDailyWord,
+                    onLearnDailyWord = appViewModel::learnDailyWord
+                )
+
+                StudyMode.SENTENCE_PRACTICE -> com.example.vocablearningapp.ui.screen.practice.SentenceScrambleScreen(
+                    set = appViewModel.setById(setId),
+                    onBack = { navController.popBackStack() },
+                    onRate = appViewModel::rateItem,
+                    onSkipDailyWord = appViewModel::skipDailyWord,
+                    onLearnDailyWord = appViewModel::learnDailyWord
+                )
+
                 else -> PracticePlaceholderScreen(
                     mode = mode,
                     onBack = { navController.popBackStack() }
