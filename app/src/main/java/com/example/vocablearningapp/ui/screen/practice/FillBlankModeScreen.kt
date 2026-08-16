@@ -251,7 +251,7 @@ fun FillBlankModeScreen(
 
                             // Vietnamese Meaning prompt
                             Text(
-                                text = "Nghĩa: ${currentQuestion.item.meaning}",
+                                text = "Meaning: ${currentQuestion.item.meaning}",
                                 style = MaterialTheme.typography.titleMedium,
                                 color = Ink,
                                 fontWeight = FontWeight.SemiBold
@@ -353,14 +353,14 @@ fun FillBlankModeScreen(
                                         )
                                         Column {
                                             Text(
-                                                text = if (isCorrect) "Chính xác! Hoàn hảo." else "Chưa chính xác!",
+                                                text = if (isCorrect) "Correct! Well done." else "Incorrect!",
                                                 style = MaterialTheme.typography.labelLarge,
                                                 fontWeight = FontWeight.Bold,
                                                 color = if (isCorrect) Mastered else Forgot
                                             )
                                             if (!isCorrect) {
                                                 Text(
-                                                    text = "Đáp án đúng: $target (${currentQuestion.item.pronunciation})",
+                                                    text = "Correct answer: $target (${currentQuestion.item.pronunciation})",
                                                     style = MaterialTheme.typography.bodySmall,
                                                     color = Ink
                                                 )
@@ -379,7 +379,7 @@ fun FillBlankModeScreen(
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             SecondaryButton(
-                                text = if (hintRevealedCount == 0) "💡 Gợi ý (Hint)" else "Thêm chữ cái",
+                                text = if (hintRevealedCount == 0) "💡 Hint" else "Reveal Letter",
                                 onClick = {
                                     if (hintRevealedCount < target.length) {
                                         hintRevealedCount++
@@ -389,7 +389,7 @@ fun FillBlankModeScreen(
                             )
 
                             PrimaryButton(
-                                text = "Kiểm tra",
+                                text = "Check",
                                 onClick = {
                                     if (userInput.isNotBlank()) {
                                         val correct = userInput.trim().equals(target, ignoreCase = true)
@@ -432,11 +432,11 @@ fun FillBlankModeScreen(
                             },
                             modifier = Modifier.align(Alignment.CenterHorizontally)
                         ) {
-                            Text("Xem đáp án", color = Muted, style = MaterialTheme.typography.bodyMedium)
+                            Text("Show answer", color = Muted, style = MaterialTheme.typography.bodyMedium)
                         }
                     } else {
                         PrimaryButton(
-                            text = if (currentIndex < questions.size - 1) "Tiếp theo" else "Xem kết quả",
+                            text = if (currentIndex < questions.size - 1) "Next" else "See results",
                             onClick = {
                                 if (currentIndex < questions.size - 1) {
                                     currentIndex++

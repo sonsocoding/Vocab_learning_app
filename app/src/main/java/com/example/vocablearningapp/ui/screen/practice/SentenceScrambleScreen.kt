@@ -282,7 +282,7 @@ fun SentenceScrambleScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Ghép câu theo đúng ngữ pháp:",
+                                    text = "Arrange words into correct grammar:",
                                     style = MaterialTheme.typography.labelMedium,
                                     color = Muted,
                                     fontWeight = FontWeight.Medium
@@ -294,7 +294,7 @@ fun SentenceScrambleScreen(
                                     }) {
                                         Icon(Icons.Default.Refresh, contentDescription = "Reset", modifier = Modifier.size(16.dp))
                                         Spacer(modifier = Modifier.size(4.dp))
-                                        Text("Xóa hết", style = MaterialTheme.typography.labelSmall)
+                                        Text("Reset", style = MaterialTheme.typography.labelSmall)
                                     }
                                 }
                             }
@@ -307,7 +307,7 @@ fun SentenceScrambleScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = "Chạm vào các từ bên dưới để ghép câu...",
+                                        text = "Tap words below to assemble the sentence...",
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = Muted,
                                         textAlign = TextAlign.Center
@@ -358,7 +358,7 @@ fun SentenceScrambleScreen(
                                         modifier = Modifier.size(20.dp)
                                     )
                                     Text(
-                                        text = if (isCorrect) "Chính xác! Bạn đã đặt câu rất chuẩn." else "Chưa đúng thứ tự từ!",
+                                        text = if (isCorrect) "Correct! Perfect word order." else "Incorrect word order!",
                                         style = MaterialTheme.typography.labelLarge,
                                         fontWeight = FontWeight.Bold,
                                         color = if (isCorrect) Mastered else Forgot
@@ -366,7 +366,7 @@ fun SentenceScrambleScreen(
                                 }
                                 if (!isCorrect) {
                                     Text(
-                                        text = "Câu chuẩn: \"${currentQuestion.fullSentence}\"",
+                                        text = "Correct sentence: \"${currentQuestion.fullSentence}\"",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = Ink
                                     )
@@ -378,7 +378,7 @@ fun SentenceScrambleScreen(
                     // Word Bank (Available tokens to pick)
                     if (!isSubmitted && availableTokens.isNotEmpty()) {
                         Text(
-                            text = "Từ có sẵn:",
+                            text = "Available words:",
                             style = MaterialTheme.typography.labelMedium,
                             color = Muted,
                             fontWeight = FontWeight.SemiBold
@@ -422,7 +422,7 @@ fun SentenceScrambleScreen(
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             SecondaryButton(
-                                text = "💡 Gợi ý từ tiếp theo",
+                                text = "💡 Next Word Hint",
                                 onClick = {
                                     val nextIndex = placedTokens.size
                                     if (nextIndex < currentQuestion.originalTokens.size) {
@@ -439,7 +439,7 @@ fun SentenceScrambleScreen(
                             )
 
                             PrimaryButton(
-                                text = "Kiểm tra",
+                                text = "Check",
                                 onClick = {
                                     if (isAllPlaced) {
                                         val userSentence = placedTokens.joinToString(" ") { it.text }
@@ -484,11 +484,11 @@ fun SentenceScrambleScreen(
                             },
                             modifier = Modifier.align(Alignment.CenterHorizontally)
                         ) {
-                            Text("Xem câu mẫu", color = Muted, style = MaterialTheme.typography.bodyMedium)
+                            Text("Show solution", color = Muted, style = MaterialTheme.typography.bodyMedium)
                         }
                     } else {
                         PrimaryButton(
-                            text = if (currentIndex < questions.size - 1) "Tiếp theo" else "Xem kết quả",
+                            text = if (currentIndex < questions.size - 1) "Next" else "See results",
                             onClick = {
                                 if (currentIndex < questions.size - 1) {
                                     currentIndex++
