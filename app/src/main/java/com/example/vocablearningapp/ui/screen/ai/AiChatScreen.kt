@@ -102,6 +102,8 @@ fun AiChatScreen(
 
     var showApiKeyDialog by remember { mutableStateOf(false) }
     var apiKeyInput by remember { mutableStateOf(aiPreferences.apiKey) }
+    var selectedModel by remember { mutableStateOf(aiPreferences.model) }
+    var hasLiveKey by remember { mutableStateOf(aiPreferences.hasApiKey) }
 
     val messages = remember {
         mutableStateListOf(
@@ -158,7 +160,7 @@ fun AiChatScreen(
                 onBack = onBack,
                 actions = {
                     Surface(
-                        color = if (aiPreferences.hasApiKey) AccentSoft else SurfaceMuted,
+                        color = if (hasLiveKey) AccentSoft else SurfaceMuted,
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.padding(end = 4.dp)
                     ) {
@@ -169,14 +171,14 @@ fun AiChatScreen(
                             Icon(
                                 imageVector = Icons.Default.AutoAwesome,
                                 contentDescription = null,
-                                tint = if (aiPreferences.hasApiKey) AccentDark else Muted,
+                                tint = if (hasLiveKey) AccentDark else Muted,
                                 modifier = Modifier.size(14.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = if (aiPreferences.hasApiKey) "Gemini Live" else "Demo Mock",
+                                text = if (hasLiveKey) "Gemini Live" else "Demo Mock",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = if (aiPreferences.hasApiKey) AccentDark else Muted,
+                                color = if (hasLiveKey) AccentDark else Muted,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -184,6 +186,7 @@ fun AiChatScreen(
 
                     IconButton(onClick = {
                         apiKeyInput = aiPreferences.apiKey
+                        selectedModel = aiPreferences.model
                         showApiKeyDialog = true
                     }) {
                         Icon(
@@ -347,7 +350,7 @@ fun AiChatScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Key, contentDescription = null, tint = Accent)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Gemini API Key")
+                    Text("AI Engine Settings")
                 }
             },
             text = {
@@ -357,16 +360,50 @@ fun AiChatScreen(
                         style = MaterialTheme.typography.bodySmall,
                         color = Muted
                     )
+
                     OutlinedTextField(
                         value = apiKeyInput,
                         onValueChange = { apiKeyInput = it },
-                        label = { Text("API Key") },
+                        label = { Text("Gemini API Key") },
                         placeholder = { Text("AIzaSy...") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
+
                     Text(
-                        text = "💡 Get a free key at: aistudio.google.com",
+                        text = "Model:",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Ink
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        listOf("gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro").forEach { model ->
+                            val isSelected = selectedModel == model
+                            Surface(
+                                onClick = { selectedModel = model },
+                                shape = RoundedCornerShape(8.dp),
+                                color = if (isSelected) AccentSoft else SurfaceMuted,
+                                border = BorderStroke(1.dp, if (isSelected) Accent else Border),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = model.removePrefix("gemini-"),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (isSelected) AccentDark else Ink,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                    modifier = Modifier.padding(vertical = 6.dp, horizontal = 4.dp),
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                            }
+                        }
+                    }
+
+                    Text(
+                        text = "💡 Get a free API key at: aistudio.google.com",
                         style = MaterialTheme.typography.labelSmall,
                         color = AccentDark,
                         fontWeight = FontWeight.SemiBold
@@ -375,16 +412,30 @@ fun AiChatScreen(
             },
             confirmButton = {
                 PrimaryButton(
-                    text = "Save Key",
+                    text = "Save",
                     onClick = {
                         aiPreferences.apiKey = apiKeyInput
+                        aiPreferences.model = selectedModel
+                        hasLiveKey = aiPreferences.hasApiKey
                         showApiKeyDialog = false
                     }
                 )
             },
             dismissButton = {
-                TextButton(onClick = { showApiKeyDialog = false }) {
-                    Text("Cancel")
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    if (aiPreferences.hasApiKey) {
+                        TextButton(onClick = {
+                            apiKeyInput = ""
+                            aiPreferences.apiKey = ""
+                            hasLiveKey = false
+                            showApiKeyDialog = false
+                        }) {
+                            Text("Clear", color = com.example.vocablearningapp.ui.theme.Forgot)
+                        }
+                    }
+                    TextButton(onClick = { showApiKeyDialog = false }) {
+                        Text("Cancel")
+                    }
                 }
             }
         )

@@ -10,6 +10,7 @@ import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
+import java.nio.charset.StandardCharsets
 
 class GeminiApiClient(private val preferences: AiPreferences) {
 
@@ -49,59 +50,67 @@ class GeminiApiClient(private val preferences: AiPreferences) {
         Rules:
         - The `meaning` of each word must always be in Vietnamese.
         - The `exampleSentence` must be natural English demonstrating the word in clear context.
-        - Return strictly raw JSON with no wrapping markdown code blocks (no ```json).
+        - Return strictly valid raw JSON with no Markdown code block wrapping.
     """.trimIndent()
 
     suspend fun sendMessage(
         userPrompt: String,
         history: List<AiChatMessage> = emptyList()
     ): Result<AiChatMessage> = withContext(Dispatchers.IO) {
-        val apiKey = preferences.apiKey
+        val apiKey = preferences.apiKey.trim()
         if (apiKey.isBlank()) {
-            // Offline / Demo Mock Engine
+            // Offline / Demo Mock Engine when no API key is provided
             return@withContext Result.success(getMockResponse(userPrompt))
         }
 
         try {
-            val endpoint = "https://generativelanguage.googleapis.com/v1beta/models/${preferences.model}:generateContent?key=$apiKey"
+            val modelName = preferences.model.ifBlank { "gemini-1.5-flash" }
+            val endpoint = "https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey"
             val url = URL(endpoint)
-            val connection = url.openConnection() as HttpURLConnection
-            connection.requestMethod = "POST"
-            connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
-            connection.doOutput = true
-            connection.connectTimeout = 15000
-            connection.readTimeout = 20000
+            val connection = (url.openConnection() as HttpURLConnection).apply {
+                requestMethod = "POST"
+                setRequestProperty("Content-Type", "application/json; charset=UTF-8")
+                setRequestProperty("Accept", "application/json")
+                doOutput = true
+                connectTimeout = 15000
+                readTimeout = 25000
+            }
 
-            // Build request payload
-            val requestBody = JSONObject().apply {
-                val contentsArray = JSONArray()
+            // Build strictly valid alternating contents
+            val contentsArray = JSONArray()
+            var lastRole: String? = null
 
-                // Append recent history (up to last 6 messages)
-                val recentHistory = history.takeLast(6)
-                recentHistory.forEach { msg ->
-                    val contentObj = JSONObject().apply {
-                        put("role", if (msg.sender == MessageSender.USER) "user" else "model")
-                        val partsArray = JSONArray().apply {
-                            put(JSONObject().put("text", msg.text))
-                        }
-                        put("parts", partsArray)
+            // Take last few messages, ensuring first is "user" and they alternate
+            val sanitizedHistory = history.takeLast(8)
+            for (msg in sanitizedHistory) {
+                val role = if (msg.sender == MessageSender.USER) "user" else "model"
+                if (lastRole == null && role != "user") continue // First turn must be user
+                if (role == lastRole) continue // Must alternate
+                val contentObj = JSONObject().apply {
+                    put("role", role)
+                    val partsArray = JSONArray().apply {
+                        put(JSONObject().put("text", msg.text))
                     }
-                    contentsArray.put(contentObj)
+                    put("parts", partsArray)
                 }
+                contentsArray.put(contentObj)
+                lastRole = role
+            }
 
-                // Append current user prompt
-                contentsArray.put(
-                    JSONObject().apply {
-                        put("role", "user")
-                        put("parts", JSONArray().put(JSONObject().put("text", userPrompt)))
-                    }
-                )
+            // Append current user prompt
+            contentsArray.put(
+                JSONObject().apply {
+                    put("role", "user")
+                    put("parts", JSONArray().put(JSONObject().put("text", userPrompt)))
+                }
+            )
 
+            val requestBody = JSONObject().apply {
                 put("contents", contentsArray)
 
-                // System Instruction
+                // System Instruction (both standard formats)
                 put(
-                    "system_instruction",
+                    "systemInstruction",
                     JSONObject().apply {
                         put("parts", JSONArray().put(JSONObject().put("text", systemPrompt)))
                     }
@@ -112,41 +121,48 @@ class GeminiApiClient(private val preferences: AiPreferences) {
                     "generationConfig",
                     JSONObject().apply {
                         put("temperature", 0.7)
-                        put("response_mime_type", "application/json")
+                        put("responseMimeType", "application/json")
                     }
                 )
             }
 
-            OutputStreamWriter(connection.outputStream).use { writer ->
+            OutputStreamWriter(connection.outputStream, StandardCharsets.UTF_8).use { writer ->
                 writer.write(requestBody.toString())
                 writer.flush()
             }
 
             val responseCode = connection.responseCode
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                val responseText = BufferedReader(InputStreamReader(connection.inputStream)).use { it.readText() }
+            if (responseCode in 200..299) {
+                val responseText = BufferedReader(InputStreamReader(connection.inputStream, StandardCharsets.UTF_8)).use { it.readText() }
                 val parsedMessage = parseGeminiResponse(responseText)
                 Result.success(parsedMessage)
             } else {
                 val errorStream = connection.errorStream
                 val errorText = if (errorStream != null) {
-                    BufferedReader(InputStreamReader(errorStream)).use { it.readText() }
+                    BufferedReader(InputStreamReader(errorStream, StandardCharsets.UTF_8)).use { it.readText() }
                 } else "HTTP Error $responseCode"
-                // Fallback to mock on error but inform user
-                val mock = getMockResponse(userPrompt)
+
+                // Extract human-readable error from Google error JSON if present
+                val readableError = try {
+                    val errJson = JSONObject(errorText)
+                    errJson.optJSONObject("error")?.optString("message", errorText) ?: errorText
+                } catch (e: Exception) {
+                    errorText
+                }
+
                 Result.success(
-                    mock.copy(
-                        text = "*(Note: API Error $responseCode, showing demo response)*\n\n" + mock.text
+                    AiChatMessage(
+                        sender = MessageSender.AI,
+                        text = "⚠️ **Gemini API Error ($responseCode)**:\n$readableError\n\n*(Please check your API key in Settings 🔑 or ensure your Google AI Studio project is active)*"
                     )
                 )
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            // Fallback gracefully to Mock Response so user experience is smooth
-            val mock = getMockResponse(userPrompt)
             Result.success(
-                mock.copy(
-                    text = "*(Offline demo mode)*\n\n" + mock.text
+                AiChatMessage(
+                    sender = MessageSender.AI,
+                    text = "⚠️ **Connection Error**: ${e.localizedMessage ?: "Could not connect to Gemini API"}\n\n*(Please check your internet connection or API Key)*"
                 )
             )
         }
@@ -160,9 +176,20 @@ class GeminiApiClient(private val preferences: AiPreferences) {
         val parts = content?.optJSONArray("parts")
         val rawText = parts?.optJSONObject(0)?.optString("text", "{}") ?: "{}"
 
+        var cleanedText = rawText.trim()
+        if (cleanedText.startsWith("```json")) {
+            cleanedText = cleanedText.removePrefix("```json").trim()
+        }
+        if (cleanedText.startsWith("```")) {
+            cleanedText = cleanedText.removePrefix("```").trim()
+        }
+        if (cleanedText.endsWith("```")) {
+            cleanedText = cleanedText.removeSuffix("```").trim()
+        }
+
         return try {
-            val jsonObject = JSONObject(rawText.trim())
-            val messageText = jsonObject.optString("message", "Here is the response:")
+            val jsonObject = JSONObject(cleanedText)
+            val messageText = jsonObject.optString("message", "Here is the result:")
             val action = jsonObject.optString("action", "NONE")
 
             var actionPayload: AiActionPayload? = null
