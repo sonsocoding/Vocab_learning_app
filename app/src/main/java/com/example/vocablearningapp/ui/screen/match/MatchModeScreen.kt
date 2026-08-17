@@ -3,9 +3,13 @@ package com.example.vocablearningapp.ui.screen.match
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,7 +26,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.vocablearningapp.domain.model.FsrsRating
 import com.example.vocablearningapp.domain.model.VocabularyItem
@@ -142,38 +150,58 @@ fun MatchModeScreen(
                         color = if (hasMistake) Forgot else Muted
                     )
 
-                    Row(
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Text(text = "English", style = MaterialTheme.typography.labelMedium, color = Muted)
-                            sessionWords.forEach { item ->
-                                MatchCard(
-                                    text = item.word,
-                                    selected = selectedWordId == item.id,
-                                    matched = item.id in matchedIds,
-                                    failed = false,
-                                    onClick = { selectWord(item) }
-                                )
-                            }
+                            Text(
+                                text = "English",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = Muted,
+                                modifier = Modifier.weight(1f),
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = "Meaning",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = Muted,
+                                modifier = Modifier.weight(1f),
+                                textAlign = TextAlign.Center
+                            )
                         }
-                        Spacer(modifier = Modifier.width(2.dp))
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Text(text = "Meaning", style = MaterialTheme.typography.labelMedium, color = Muted)
-                            meaningWords.forEach { item ->
+
+                        sessionWords.indices.forEach { index ->
+                            val wordItem = sessionWords[index]
+                            val meaningItem = meaningWords[index]
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(IntrinsicSize.Min),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
                                 MatchCard(
-                                    text = item.meaning,
-                                    selected = selectedMeaningId == item.id,
-                                    matched = item.id in matchedIds,
-                                    failed = hasMistake && selectedMeaningId == item.id,
-                                    onClick = { selectMeaning(item) }
+                                    text = wordItem.word,
+                                    selected = selectedWordId == wordItem.id,
+                                    matched = wordItem.id in matchedIds,
+                                    failed = false,
+                                    onClick = { selectWord(wordItem) },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .fillMaxHeight()
+                                )
+                                MatchCard(
+                                    text = meaningItem.meaning,
+                                    selected = selectedMeaningId == meaningItem.id,
+                                    matched = meaningItem.id in matchedIds,
+                                    failed = hasMistake && selectedMeaningId == meaningItem.id,
+                                    onClick = { selectMeaning(meaningItem) },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .fillMaxHeight()
                                 )
                             }
                         }
@@ -190,7 +218,8 @@ private fun MatchCard(
     selected: Boolean,
     matched: Boolean,
     failed: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val containerColor = when {
         matched -> MasteredSoft
@@ -204,20 +233,37 @@ private fun MatchCard(
         selected -> Accent
         else -> Ink
     }
+    val borderColor = when {
+        matched -> Mastered
+        failed -> Forgot
+        selected -> Accent
+        else -> Border
+    }
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
+            .defaultMinSize(minHeight = 68.dp)
             .clickable(enabled = !matched, onClick = onClick),
         shape = RoundedCornerShape(15.dp),
         colors = CardDefaults.cardColors(containerColor = containerColor),
-        border = BorderStroke(1.dp, if (matched || selected || failed) containerColor else Border)
+        border = BorderStroke(if (matched || selected || failed) 1.5.dp else 1.dp, borderColor)
     ) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 16.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            color = contentColor
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
+                ),
+                color = contentColor,
+                textAlign = TextAlign.Center,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
 
