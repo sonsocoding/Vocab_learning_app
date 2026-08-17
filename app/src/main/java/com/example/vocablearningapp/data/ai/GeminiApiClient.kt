@@ -9,7 +9,6 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.IOException
 import java.net.UnknownHostException
 import java.util.concurrent.TimeUnit
 
@@ -74,31 +73,51 @@ class GeminiApiClient(private val preferences: AiPreferences) {
         }
 
         try {
-            val modelName = preferences.model.ifBlank { "gemini-1.5-flash" }
-            val endpoint = "https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey"
+            val modelName = preferences.model.ifBlank { "gemini-2.5-flash" }
 
-            // Build strictly valid alternating contents
+            // 1. First, attempt with modern Interactions API (Google's standard in 2026)
+            val interactionsEndpoint = "https://generativelanguage.googleapis.com/v1beta/interactions"
+            val interactionsPayload = JSONObject().apply {
+                put("model", modelName)
+                put("system_instruction", systemPrompt)
+                put("input", userPrompt)
+                put("store", false)
+            }
+
+            val interactionsRequest = Request.Builder()
+                .url(interactionsEndpoint)
+                .post(interactionsPayload.toString().toRequestBody(jsonMediaType))
+                .addHeader("x-goog-api-key", apiKey)
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json")
+                .build()
+
+            val interactionsResponse = httpClient.newCall(interactionsRequest).execute()
+            val interactionsBody = interactionsResponse.body?.string().orEmpty()
+
+            if (interactionsResponse.isSuccessful) {
+                val parsedMessage = parseAnyGeminiResponse(interactionsBody)
+                return@withContext Result.success(parsedMessage)
+            }
+
+            // 2. Fallback to generateContent API
+            val fallbackEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey"
             val contentsArray = JSONArray()
             var lastRole: String? = null
 
-            // Take last few messages, ensuring first is "user" and they alternate
-            val sanitizedHistory = history.takeLast(8)
+            val sanitizedHistory = history.takeLast(6)
             for (msg in sanitizedHistory) {
                 val role = if (msg.sender == MessageSender.USER) "user" else "model"
-                if (lastRole == null && role != "user") continue // First turn must be user
-                if (role == lastRole) continue // Must alternate
-                val contentObj = JSONObject().apply {
+                if (lastRole == null && role != "user") continue
+                if (role == lastRole) continue
+                val partObj = JSONObject().put("text", msg.text)
+                contentsArray.put(JSONObject().apply {
                     put("role", role)
-                    val partsArray = JSONArray().apply {
-                        put(JSONObject().put("text", msg.text))
-                    }
-                    put("parts", partsArray)
-                }
-                contentsArray.put(contentObj)
+                    put("parts", JSONArray().put(partObj))
+                })
                 lastRole = role
             }
 
-            // Append current user prompt
             contentsArray.put(
                 JSONObject().apply {
                     put("role", "user")
@@ -106,52 +125,40 @@ class GeminiApiClient(private val preferences: AiPreferences) {
                 }
             )
 
-            val requestJson = JSONObject().apply {
+            val fallbackPayload = JSONObject().apply {
                 put("contents", contentsArray)
-
-                // System Instruction
-                put(
-                    "systemInstruction",
-                    JSONObject().apply {
-                        put("parts", JSONArray().put(JSONObject().put("text", systemPrompt)))
-                    }
-                )
-
-                // Generation Config
-                put(
-                    "generationConfig",
-                    JSONObject().apply {
-                        put("temperature", 0.7)
-                        put("responseMimeType", "application/json")
-                    }
-                )
+                put("systemInstruction", JSONObject().put("parts", JSONArray().put(JSONObject().put("text", systemPrompt))))
+                put("generationConfig", JSONObject().apply {
+                    put("temperature", 0.7)
+                    put("responseMimeType", "application/json")
+                })
             }
 
-            val requestBody = requestJson.toString().toRequestBody(jsonMediaType)
-            val request = Request.Builder()
-                .url(endpoint)
-                .post(requestBody)
+            val fallbackRequest = Request.Builder()
+                .url(fallbackEndpoint)
+                .post(fallbackPayload.toString().toRequestBody(jsonMediaType))
+                .addHeader("x-goog-api-key", apiKey)
                 .addHeader("Accept", "application/json")
                 .build()
 
-            val response = httpClient.newCall(request).execute()
-            val responseBody = response.body?.string().orEmpty()
+            val fallbackResponse = httpClient.newCall(fallbackRequest).execute()
+            val fallbackBody = fallbackResponse.body?.string().orEmpty()
 
-            if (response.isSuccessful) {
-                val parsedMessage = parseGeminiResponse(responseBody)
+            if (fallbackResponse.isSuccessful) {
+                val parsedMessage = parseAnyGeminiResponse(fallbackBody)
                 Result.success(parsedMessage)
             } else {
-                val readableError = try {
-                    val errJson = JSONObject(responseBody)
-                    errJson.optJSONObject("error")?.optString("message", responseBody) ?: responseBody
+                val errorToDisplay = try {
+                    val errJson = JSONObject(if (fallbackBody.isNotBlank()) fallbackBody else interactionsBody)
+                    errJson.optJSONObject("error")?.optString("message", fallbackBody) ?: fallbackBody
                 } catch (e: Exception) {
-                    responseBody
+                    fallbackBody.ifBlank { interactionsBody }
                 }
 
                 Result.success(
                     AiChatMessage(
                         sender = MessageSender.AI,
-                        text = "⚠️ **Gemini API Error (${response.code})**:\n$readableError\n\n*(Please check your API key in Settings 🔑 or switch model to gemini-2.0-flash)*"
+                        text = "⚠️ **Gemini API Error (${fallbackResponse.code})**:\n$errorToDisplay\n\n*(Vui lòng kiểm tra lại API key hoặc đổi model trong Cài đặt 🔑)*"
                     )
                 )
             }
@@ -160,7 +167,7 @@ class GeminiApiClient(private val preferences: AiPreferences) {
             Result.success(
                 AiChatMessage(
                     sender = MessageSender.AI,
-                    text = "⚠️ **No Internet on Emulator/Device**:\nUnable to resolve `generativelanguage.googleapis.com`.\n\n💡 **Cách khắc phục:**\n1. Kiểm tra Wifi máy tính và mạng của máy ảo Android (mở thử Chrome trên máy ảo).\n2. Khởi động lại máy ảo (Cold Boot) hoặc chọn DNS 8.8.8.8 trong Settings Wifi máy ảo."
+                    text = "⚠️ **Không có Internet trên máy ảo (No Internet)**:\nKhông thể kết nối đến máy chủ Google Gemini.\n\n💡 **Cách khắc phục nhanh:**\n1. Trong Android Studio: Vào **Device Manager** -> bấm dấu 3 chấm `⋮` cạnh máy ảo -> chọn **Cold Boot Now**.\n2. Hoặc vào Settings máy ảo -> Network & internet -> Internet -> AndroidWifi -> Đổi DNS sang `8.8.8.8`."
                 )
             )
         } catch (e: Exception) {
@@ -168,19 +175,14 @@ class GeminiApiClient(private val preferences: AiPreferences) {
             Result.success(
                 AiChatMessage(
                     sender = MessageSender.AI,
-                    text = "⚠️ **Connection Error**: ${e.javaClass.simpleName}: ${e.localizedMessage ?: "Could not connect to Gemini API"}\n\n*(Vui lòng kiểm tra kết nối mạng của máy ảo hoặc API key)*"
+                    text = "⚠️ **Lỗi kết nối**: ${e.javaClass.simpleName}: ${e.localizedMessage ?: "Không thể kết nối API"}\n\n*(Vui lòng kiểm tra mạng máy ảo hoặc API key)*"
                 )
             )
         }
     }
 
-    private fun parseGeminiResponse(rawJson: String): AiChatMessage {
-        val root = JSONObject(rawJson)
-        val candidates = root.optJSONArray("candidates")
-        val firstCandidate = candidates?.optJSONObject(0)
-        val content = firstCandidate?.optJSONObject("content")
-        val parts = content?.optJSONArray("parts")
-        val rawText = parts?.optJSONObject(0)?.optString("text", "{}") ?: "{}"
+    private fun parseAnyGeminiResponse(rawJson: String): AiChatMessage {
+        val rawText = extractTextFromAnyResponse(rawJson)
 
         var cleanedText = rawText.trim()
         if (cleanedText.startsWith("```json")) {
@@ -243,6 +245,47 @@ class GeminiApiClient(private val preferences: AiPreferences) {
                 sender = MessageSender.AI,
                 text = rawText
             )
+        }
+    }
+
+    private fun extractTextFromAnyResponse(rawJson: String): String {
+        return try {
+            val root = JSONObject(rawJson)
+
+            // 1. Try Interactions API 'outputs'
+            val outputs = root.optJSONArray("outputs")
+            if (outputs != null && outputs.length() > 0) {
+                val lastOutput = outputs.optJSONObject(outputs.length() - 1)
+                val text = lastOutput?.optString("text")
+                if (!text.isNullOrBlank()) return text
+            }
+
+            // 2. Try Interactions API 'steps'
+            val steps = root.optJSONArray("steps")
+            if (steps != null && steps.length() > 0) {
+                for (i in (steps.length() - 1) downTo 0) {
+                    val step = steps.optJSONObject(i) ?: continue
+                    val output = step.optJSONObject("output")
+                    val text = output?.optString("text")
+                    if (!text.isNullOrBlank()) return text
+                }
+            }
+
+            // 3. Try legacy 'candidates' -> 'content' -> 'parts'
+            val candidates = root.optJSONArray("candidates")
+            val firstCandidate = candidates?.optJSONObject(0)
+            val content = firstCandidate?.optJSONObject("content")
+            val parts = content?.optJSONArray("parts")
+            val candText = parts?.optJSONObject(0)?.optString("text")
+            if (!candText.isNullOrBlank()) return candText
+
+            // 4. Try root 'text' or 'output'
+            val rootText = root.optString("text")
+            if (rootText.isNotBlank()) return rootText
+
+            rawJson
+        } catch (e: Exception) {
+            rawJson
         }
     }
 

@@ -10,7 +10,7 @@ class AiPreferences(context: Context) {
     companion object {
         private const val KEY_GEMINI_API_KEY = "gemini_api_key"
         private const val KEY_SELECTED_MODEL = "selected_model"
-        const val DEFAULT_MODEL = "gemini-1.5-flash"
+        const val DEFAULT_MODEL = "gemini-2.5-flash"
     }
 
     var apiKey: String
@@ -18,7 +18,12 @@ class AiPreferences(context: Context) {
         set(value) = prefs.edit().putString(KEY_GEMINI_API_KEY, value.trim()).apply()
 
     var model: String
-        get() = prefs.getString(KEY_SELECTED_MODEL, DEFAULT_MODEL).orEmpty()
+        get() {
+            val m = prefs.getString(KEY_SELECTED_MODEL, DEFAULT_MODEL).orEmpty()
+            return if (m == "gemini-1.5-flash" || m == "gemini-1.5-pro") {
+                DEFAULT_MODEL
+            } else m
+        }
         set(value) = prefs.edit().putString(KEY_SELECTED_MODEL, value.trim()).apply()
 
     val hasApiKey: Boolean

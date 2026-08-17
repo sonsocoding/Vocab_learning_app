@@ -381,7 +381,7 @@ fun AiChatScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        listOf("gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro").forEach { model ->
+                        listOf("gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-latest").forEach { model ->
                             val isSelected = selectedModel == model
                             Surface(
                                 onClick = { selectedModel = model },
