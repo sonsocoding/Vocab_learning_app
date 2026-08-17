@@ -1,5 +1,6 @@
 package com.example.vocablearningapp.data.ai
 
+import android.util.Log
 import com.example.vocablearningapp.domain.model.PartOfSpeech
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -68,106 +69,55 @@ class GeminiApiClient(private val preferences: AiPreferences) {
     ): Result<AiChatMessage> = withContext(Dispatchers.IO) {
         val apiKey = preferences.apiKey.trim()
         if (apiKey.isBlank()) {
-            // Offline / Demo Mock Engine when no API key is provided
             return@withContext Result.success(getMockResponse(userPrompt))
         }
 
         try {
-            val modelName = preferences.model.ifBlank { "gemini-2.5-flash" }
+            // Step 1: Determine list of candidate models to try
+            val candidateModels = getCandidateModels(apiKey)
 
-            // 1. First, attempt with modern Interactions API (Google's standard in 2026)
-            val interactionsEndpoint = "https://generativelanguage.googleapis.com/v1beta/interactions"
-            val interactionsPayload = JSONObject().apply {
-                put("model", modelName)
-                put("system_instruction", systemPrompt)
-                put("input", userPrompt)
-                put("store", false)
-            }
+            var lastErrorMessage: String? = null
+            var lastErrorCode: Int = 0
 
-            val interactionsRequest = Request.Builder()
-                .url(interactionsEndpoint)
-                .post(interactionsPayload.toString().toRequestBody(jsonMediaType))
-                .addHeader("x-goog-api-key", apiKey)
-                .addHeader("Content-Type", "application/json")
-                .addHeader("Accept", "application/json")
-                .build()
+            for (model in candidateModels) {
+                val cleanModel = model.removePrefix("models/")
+                val responseResult = tryModel(cleanModel, apiKey, userPrompt, history)
 
-            val interactionsResponse = httpClient.newCall(interactionsRequest).execute()
-            val interactionsBody = interactionsResponse.body?.string().orEmpty()
-
-            if (interactionsResponse.isSuccessful) {
-                val parsedMessage = parseAnyGeminiResponse(interactionsBody)
-                return@withContext Result.success(parsedMessage)
-            }
-
-            // 2. Fallback to generateContent API
-            val fallbackEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey"
-            val contentsArray = JSONArray()
-            var lastRole: String? = null
-
-            val sanitizedHistory = history.takeLast(6)
-            for (msg in sanitizedHistory) {
-                val role = if (msg.sender == MessageSender.USER) "user" else "model"
-                if (lastRole == null && role != "user") continue
-                if (role == lastRole) continue
-                val partObj = JSONObject().put("text", msg.text)
-                contentsArray.put(JSONObject().apply {
-                    put("role", role)
-                    put("parts", JSONArray().put(partObj))
-                })
-                lastRole = role
-            }
-
-            contentsArray.put(
-                JSONObject().apply {
-                    put("role", "user")
-                    put("parts", JSONArray().put(JSONObject().put("text", userPrompt)))
+                if (responseResult.isSuccess) {
+                    // Cache the successful model
+                    preferences.model = cleanModel
+                    return@withContext Result.success(responseResult.getOrThrow())
+                } else {
+                    val err = responseResult.exceptionOrNull()
+                    lastErrorMessage = err?.message ?: "Unknown error"
+                    if (lastErrorMessage.contains("HTTP 404") || lastErrorMessage.contains("not found") || lastErrorMessage.contains("not supported")) {
+                        Log.w("GeminiApiClient", "Model $cleanModel failed (404/not supported). Trying next candidate...")
+                        continue
+                    } else if (lastErrorMessage.contains("API_KEY_INVALID") || lastErrorMessage.contains("HTTP 400") && lastErrorMessage.contains("API key not valid")) {
+                        // Immediate exit if key is invalid
+                        return@withContext Result.success(
+                            AiChatMessage(
+                                sender = MessageSender.AI,
+                                text = "⚠️ **API Key Invalid (400/403)**:\nGoogle Gemini báo API Key không hợp lệ. Vui lòng kiểm tra lại Key trên aistudio.google.com và dán lại vào Cài đặt 🔑."
+                            )
+                        )
+                    }
                 }
-            )
-
-            val fallbackPayload = JSONObject().apply {
-                put("contents", contentsArray)
-                put("systemInstruction", JSONObject().put("parts", JSONArray().put(JSONObject().put("text", systemPrompt))))
-                put("generationConfig", JSONObject().apply {
-                    put("temperature", 0.7)
-                    put("responseMimeType", "application/json")
-                })
             }
 
-            val fallbackRequest = Request.Builder()
-                .url(fallbackEndpoint)
-                .post(fallbackPayload.toString().toRequestBody(jsonMediaType))
-                .addHeader("x-goog-api-key", apiKey)
-                .addHeader("Accept", "application/json")
-                .build()
-
-            val fallbackResponse = httpClient.newCall(fallbackRequest).execute()
-            val fallbackBody = fallbackResponse.body?.string().orEmpty()
-
-            if (fallbackResponse.isSuccessful) {
-                val parsedMessage = parseAnyGeminiResponse(fallbackBody)
-                Result.success(parsedMessage)
-            } else {
-                val errorToDisplay = try {
-                    val errJson = JSONObject(if (fallbackBody.isNotBlank()) fallbackBody else interactionsBody)
-                    errJson.optJSONObject("error")?.optString("message", fallbackBody) ?: fallbackBody
-                } catch (e: Exception) {
-                    fallbackBody.ifBlank { interactionsBody }
-                }
-
-                Result.success(
-                    AiChatMessage(
-                        sender = MessageSender.AI,
-                        text = "⚠️ **Gemini API Error (${fallbackResponse.code})**:\n$errorToDisplay\n\n*(Vui lòng kiểm tra lại API key hoặc đổi model trong Cài đặt 🔑)*"
-                    )
+            // If all candidate models failed
+            Result.success(
+                AiChatMessage(
+                    sender = MessageSender.AI,
+                    text = "⚠️ **Không tìm thấy Model Gemini khả dụng trên API Key này**:\n${lastErrorMessage ?: "Vui lòng kiểm tra lại quyền của API Key"}\n\n💡 Bạn hãy kiểm tra xem API key đã được kích hoạt dịch vụ Gemini API tại aistudio.google.com chưa nhé."
                 )
-            }
+            )
         } catch (e: UnknownHostException) {
             e.printStackTrace()
             Result.success(
                 AiChatMessage(
                     sender = MessageSender.AI,
-                    text = "⚠️ **Không có Internet trên máy ảo (No Internet)**:\nKhông thể kết nối đến máy chủ Google Gemini.\n\n💡 **Cách khắc phục nhanh:**\n1. Trong Android Studio: Vào **Device Manager** -> bấm dấu 3 chấm `⋮` cạnh máy ảo -> chọn **Cold Boot Now**.\n2. Hoặc vào Settings máy ảo -> Network & internet -> Internet -> AndroidWifi -> Đổi DNS sang `8.8.8.8`."
+                    text = "⚠️ **Không có Internet trên máy ảo (No Internet)**:\nKhông thể kết nối đến máy chủ Google Gemini.\n\n💡 **Cách khắc phục nhanh:**\n1. Trong Android Studio: Mở tab **Device Manager** -> bấm dấu 3 chấm `⋮` cạnh máy ảo -> chọn **Cold Boot Now**.\n2. Hoặc vào Settings máy ảo -> Network & internet -> Internet -> AndroidWifi -> Đổi DNS sang `8.8.8.8`."
                 )
             )
         } catch (e: Exception) {
@@ -178,6 +128,154 @@ class GeminiApiClient(private val preferences: AiPreferences) {
                     text = "⚠️ **Lỗi kết nối**: ${e.javaClass.simpleName}: ${e.localizedMessage ?: "Không thể kết nối API"}\n\n*(Vui lòng kiểm tra mạng máy ảo hoặc API key)*"
                 )
             )
+        }
+    }
+
+    private suspend fun getCandidateModels(apiKey: String): List<String> = withContext(Dispatchers.IO) {
+        val defaultFallbackList = listOf(
+            "gemini-2.5-flash",
+            "gemini-2.0-flash",
+            "gemini-2.0-flash-exp",
+            "gemini-1.5-flash-8b",
+            "gemini-1.5-flash",
+            "gemini-1.5-flash-002",
+            "gemini-1.5-flash-001",
+            "gemini-1.5-pro",
+            "gemini-pro"
+        )
+
+        // If user already selected a valid model preference, put it first
+        val selected = preferences.model.trim().removePrefix("models/")
+        val orderedList = mutableListOf<String>()
+        if (selected.isNotBlank() && !defaultFallbackList.contains(selected)) {
+            orderedList.add(selected)
+        }
+
+        // Try dynamically querying Google Gemini models.list endpoint
+        try {
+            val listUrl = "https://generativelanguage.googleapis.com/v1beta/models?key=$apiKey"
+            val request = Request.Builder()
+                .url(listUrl)
+                .get()
+                .addHeader("Accept", "application/json")
+                .build()
+
+            val response = httpClient.newCall(request).execute()
+            val body = response.body?.string().orEmpty()
+
+            if (response.isSuccessful && body.isNotBlank()) {
+                val json = JSONObject(body)
+                val modelsArray = json.optJSONArray("models")
+                if (modelsArray != null && modelsArray.length() > 0) {
+                    val availableSupported = mutableListOf<String>()
+                    for (i in 0 until modelsArray.length()) {
+                        val mObj = modelsArray.optJSONObject(i) ?: continue
+                        val name = mObj.optString("name", "").removePrefix("models/")
+                        val supportedMethods = mObj.optJSONArray("supportedGenerationMethods")
+                        var supportsGenerate = false
+                        if (supportedMethods != null) {
+                            for (j in 0 until supportedMethods.length()) {
+                                if (supportedMethods.optString(j) == "generateContent") {
+                                    supportsGenerate = true
+                                    break
+                                }
+                            }
+                        }
+                        if (supportsGenerate && name.isNotBlank()) {
+                            availableSupported.add(name)
+                        }
+                    }
+
+                    if (availableSupported.isNotEmpty()) {
+                        // Sort: prefer flash models over pro/experimental
+                        val prioritized = availableSupported.sortedWith(compareByDescending<String> {
+                            when {
+                                it.contains("2.5-flash") -> 100
+                                it.contains("2.0-flash") -> 90
+                                it.contains("1.5-flash") -> 80
+                                it.contains("flash") -> 70
+                                it.contains("pro") -> 60
+                                else -> 50
+                            }
+                        })
+                        return@withContext (orderedList + prioritized).distinct()
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.w("GeminiApiClient", "Failed to query dynamic models list: ${e.localizedMessage}")
+        }
+
+        return@withContext (orderedList + defaultFallbackList).distinct()
+    }
+
+    private fun tryModel(
+        modelName: String,
+        apiKey: String,
+        userPrompt: String,
+        history: List<AiChatMessage>
+    ): Result<AiChatMessage> {
+        val endpoint = "https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey"
+
+        val contentsArray = JSONArray()
+        var lastRole: String? = null
+
+        val sanitizedHistory = history.takeLast(6)
+        for (msg in sanitizedHistory) {
+            val role = if (msg.sender == MessageSender.USER) "user" else "model"
+            if (lastRole == null && role != "user") continue
+            if (role == lastRole) continue
+            val partObj = JSONObject().put("text", msg.text)
+            contentsArray.put(JSONObject().apply {
+                put("role", role)
+                put("parts", JSONArray().put(partObj))
+            })
+            lastRole = role
+        }
+
+        contentsArray.put(
+            JSONObject().apply {
+                put("role", "user")
+                put("parts", JSONArray().put(JSONObject().put("text", userPrompt)))
+            }
+        )
+
+        val requestPayload = JSONObject().apply {
+            put("contents", contentsArray)
+            put(
+                "systemInstruction",
+                JSONObject().put("parts", JSONArray().put(JSONObject().put("text", systemPrompt)))
+            )
+            put(
+                "generationConfig",
+                JSONObject().apply {
+                    put("temperature", 0.7)
+                    put("responseMimeType", "application/json")
+                }
+            )
+        }
+
+        val request = Request.Builder()
+            .url(endpoint)
+            .post(requestPayload.toString().toRequestBody(jsonMediaType))
+            .addHeader("Content-Type", "application/json")
+            .addHeader("Accept", "application/json")
+            .build()
+
+        val response = httpClient.newCall(request).execute()
+        val responseBody = response.body?.string().orEmpty()
+
+        return if (response.isSuccessful && responseBody.isNotBlank()) {
+            val parsedMessage = parseAnyGeminiResponse(responseBody)
+            Result.success(parsedMessage)
+        } else {
+            val errorMsg = try {
+                val errJson = JSONObject(responseBody)
+                errJson.optJSONObject("error")?.optString("message") ?: "HTTP ${response.code}: $responseBody"
+            } catch (e: Exception) {
+                "HTTP ${response.code}: $responseBody"
+            }
+            Result.failure(Exception(errorMsg))
         }
     }
 
