@@ -3,16 +3,26 @@ package com.example.vocablearningapp.data.ai
 import com.example.vocablearningapp.domain.model.PartOfSpeech
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.io.OutputStreamWriter
-import java.net.HttpURLConnection
-import java.net.URL
-import java.nio.charset.StandardCharsets
+import java.io.IOException
+import java.net.UnknownHostException
+import java.util.concurrent.TimeUnit
 
 class GeminiApiClient(private val preferences: AiPreferences) {
+
+    private val httpClient: OkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(20, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(20, TimeUnit.SECONDS)
+        .retryOnConnectionFailure(true)
+        .build()
+
+    private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
 
     private val systemPrompt = """
         You are "VocabAI Coach", an expert English learning AI Tutor inside VocabLearningApp.
@@ -66,15 +76,6 @@ class GeminiApiClient(private val preferences: AiPreferences) {
         try {
             val modelName = preferences.model.ifBlank { "gemini-1.5-flash" }
             val endpoint = "https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey"
-            val url = URL(endpoint)
-            val connection = (url.openConnection() as HttpURLConnection).apply {
-                requestMethod = "POST"
-                setRequestProperty("Content-Type", "application/json; charset=UTF-8")
-                setRequestProperty("Accept", "application/json")
-                doOutput = true
-                connectTimeout = 15000
-                readTimeout = 25000
-            }
 
             // Build strictly valid alternating contents
             val contentsArray = JSONArray()
@@ -105,10 +106,10 @@ class GeminiApiClient(private val preferences: AiPreferences) {
                 }
             )
 
-            val requestBody = JSONObject().apply {
+            val requestJson = JSONObject().apply {
                 put("contents", contentsArray)
 
-                // System Instruction (both standard formats)
+                // System Instruction
                 put(
                     "systemInstruction",
                     JSONObject().apply {
@@ -126,43 +127,48 @@ class GeminiApiClient(private val preferences: AiPreferences) {
                 )
             }
 
-            OutputStreamWriter(connection.outputStream, StandardCharsets.UTF_8).use { writer ->
-                writer.write(requestBody.toString())
-                writer.flush()
-            }
+            val requestBody = requestJson.toString().toRequestBody(jsonMediaType)
+            val request = Request.Builder()
+                .url(endpoint)
+                .post(requestBody)
+                .addHeader("Accept", "application/json")
+                .build()
 
-            val responseCode = connection.responseCode
-            if (responseCode in 200..299) {
-                val responseText = BufferedReader(InputStreamReader(connection.inputStream, StandardCharsets.UTF_8)).use { it.readText() }
-                val parsedMessage = parseGeminiResponse(responseText)
+            val response = httpClient.newCall(request).execute()
+            val responseBody = response.body?.string().orEmpty()
+
+            if (response.isSuccessful) {
+                val parsedMessage = parseGeminiResponse(responseBody)
                 Result.success(parsedMessage)
             } else {
-                val errorStream = connection.errorStream
-                val errorText = if (errorStream != null) {
-                    BufferedReader(InputStreamReader(errorStream, StandardCharsets.UTF_8)).use { it.readText() }
-                } else "HTTP Error $responseCode"
-
-                // Extract human-readable error from Google error JSON if present
                 val readableError = try {
-                    val errJson = JSONObject(errorText)
-                    errJson.optJSONObject("error")?.optString("message", errorText) ?: errorText
+                    val errJson = JSONObject(responseBody)
+                    errJson.optJSONObject("error")?.optString("message", responseBody) ?: responseBody
                 } catch (e: Exception) {
-                    errorText
+                    responseBody
                 }
 
                 Result.success(
                     AiChatMessage(
                         sender = MessageSender.AI,
-                        text = "⚠️ **Gemini API Error ($responseCode)**:\n$readableError\n\n*(Please check your API key in Settings 🔑 or ensure your Google AI Studio project is active)*"
+                        text = "⚠️ **Gemini API Error (${response.code})**:\n$readableError\n\n*(Please check your API key in Settings 🔑 or switch model to gemini-2.0-flash)*"
                     )
                 )
             }
+        } catch (e: UnknownHostException) {
+            e.printStackTrace()
+            Result.success(
+                AiChatMessage(
+                    sender = MessageSender.AI,
+                    text = "⚠️ **No Internet on Emulator/Device**:\nUnable to resolve `generativelanguage.googleapis.com`.\n\n💡 **Cách khắc phục:**\n1. Kiểm tra Wifi máy tính và mạng của máy ảo Android (mở thử Chrome trên máy ảo).\n2. Khởi động lại máy ảo (Cold Boot) hoặc chọn DNS 8.8.8.8 trong Settings Wifi máy ảo."
+                )
+            )
         } catch (e: Exception) {
             e.printStackTrace()
             Result.success(
                 AiChatMessage(
                     sender = MessageSender.AI,
-                    text = "⚠️ **Connection Error**: ${e.localizedMessage ?: "Could not connect to Gemini API"}\n\n*(Please check your internet connection or API Key)*"
+                    text = "⚠️ **Connection Error**: ${e.javaClass.simpleName}: ${e.localizedMessage ?: "Could not connect to Gemini API"}\n\n*(Vui lòng kiểm tra kết nối mạng của máy ảo hoặc API key)*"
                 )
             )
         }
