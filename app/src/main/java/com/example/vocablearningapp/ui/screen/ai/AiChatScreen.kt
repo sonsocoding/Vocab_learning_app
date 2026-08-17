@@ -32,6 +32,8 @@ import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -62,6 +64,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.vocablearningapp.data.ai.AiActionPayload
@@ -101,6 +106,7 @@ fun AiChatScreen(
     val coroutineScope = rememberCoroutineScope()
 
     var showApiKeyDialog by remember { mutableStateOf(false) }
+    var isApiKeyVisible by remember { mutableStateOf(false) }
     var apiKeyInput by remember { mutableStateOf(aiPreferences.apiKey) }
     var selectedModel by remember { mutableStateOf(aiPreferences.model) }
     var hasLiveKey by remember { mutableStateOf(aiPreferences.hasApiKey) }
@@ -187,6 +193,7 @@ fun AiChatScreen(
                     IconButton(onClick = {
                         apiKeyInput = aiPreferences.apiKey
                         selectedModel = aiPreferences.model
+                        isApiKeyVisible = false
                         showApiKeyDialog = true
                     }) {
                         Icon(
@@ -367,6 +374,20 @@ fun AiChatScreen(
                         label = { Text("Gemini API Key") },
                         placeholder = { Text("AIzaSy...") },
                         singleLine = true,
+                        visualTransformation = if (isApiKeyVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Done
+                        ),
+                        trailingIcon = {
+                            IconButton(onClick = { isApiKeyVisible = !isApiKeyVisible }) {
+                                Icon(
+                                    imageVector = if (isApiKeyVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                                    contentDescription = if (isApiKeyVisible) "Hide API Key" else "Show API Key",
+                                    tint = Muted
+                                )
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth()
                     )
 
