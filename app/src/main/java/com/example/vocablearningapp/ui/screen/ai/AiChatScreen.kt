@@ -35,10 +35,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Key
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -68,7 +64,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.vocablearningapp.data.ai.AiActionPayload
@@ -94,6 +89,7 @@ import com.example.vocablearningapp.ui.theme.MasteredSoft
 import com.example.vocablearningapp.ui.theme.Muted
 import com.example.vocablearningapp.ui.theme.Surface
 import com.example.vocablearningapp.ui.theme.SurfaceMuted
+import androidx.compose.material.icons.filled.Key
 import kotlinx.coroutines.launch
 
 @Composable
@@ -109,10 +105,19 @@ fun AiChatScreen(
 
     var selectedTab by remember { mutableIntStateOf(initialTab.coerceIn(0, 1)) }
     var showApiKeyDialog by remember { mutableStateOf(false) }
-    var isApiKeyVisible by remember { mutableStateOf(false) }
+    var showDiscardWarningDialog by remember { mutableStateOf(false) }
     var apiKeyInput by remember { mutableStateOf(aiPreferences.apiKey) }
     var selectedModel by remember { mutableStateOf(aiPreferences.model) }
     var hasLiveKey by remember { mutableStateOf(aiPreferences.hasApiKey) }
+
+    fun handleDismissSettings() {
+        val hasChanges = apiKeyInput.trim() != aiPreferences.apiKey.trim() || selectedModel != aiPreferences.model
+        if (hasChanges) {
+            showDiscardWarningDialog = true
+        } else {
+            showApiKeyDialog = false
+        }
+    }
 
     Scaffold(
         containerColor = Canvas,
@@ -150,7 +155,6 @@ fun AiChatScreen(
                         IconButton(onClick = {
                             apiKeyInput = aiPreferences.apiKey
                             selectedModel = aiPreferences.model
-                            isApiKeyVisible = false
                             showApiKeyDialog = true
                         }) {
                             Icon(
@@ -257,7 +261,7 @@ fun AiChatScreen(
     // API Key Settings Dialog
     if (showApiKeyDialog) {
         AlertDialog(
-            onDismissRequest = { showApiKeyDialog = false },
+            onDismissRequest = { handleDismissSettings() },
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Key, contentDescription = null, tint = Accent)
@@ -277,22 +281,13 @@ fun AiChatScreen(
                         value = apiKeyInput,
                         onValueChange = { apiKeyInput = it },
                         label = { Text("Gemini API Key") },
-                        placeholder = { Text("AIzaSy...") },
+                        placeholder = { Text("••••••••••••••••••••") },
                         singleLine = true,
-                        visualTransformation = if (isApiKeyVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        visualTransformation = PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password,
                             imeAction = ImeAction.Done
                         ),
-                        trailingIcon = {
-                            IconButton(onClick = { isApiKeyVisible = !isApiKeyVisible }) {
-                                Icon(
-                                    imageVector = if (isApiKeyVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                                    contentDescription = if (isApiKeyVisible) "Hide API Key" else "Show API Key",
-                                    tint = Muted
-                                )
-                            }
-                        },
                         modifier = Modifier.fillMaxWidth()
                     )
 
@@ -340,7 +335,7 @@ fun AiChatScreen(
                 PrimaryButton(
                     text = "Save",
                     onClick = {
-                        aiPreferences.apiKey = apiKeyInput
+                        aiPreferences.apiKey = apiKeyInput.trim()
                         aiPreferences.model = selectedModel
                         hasLiveKey = aiPreferences.hasApiKey
                         showApiKeyDialog = false
@@ -348,20 +343,45 @@ fun AiChatScreen(
                 )
             },
             dismissButton = {
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    if (aiPreferences.hasApiKey) {
-                        TextButton(onClick = {
-                            apiKeyInput = ""
-                            aiPreferences.apiKey = ""
-                            hasLiveKey = false
-                            showApiKeyDialog = false
-                        }) {
-                            Text("Clear", color = com.example.vocablearningapp.ui.theme.Forgot)
-                        }
+                TextButton(onClick = { handleDismissSettings() }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    // Warning Dialog when discarding unsaved API key changes
+    if (showDiscardWarningDialog) {
+        AlertDialog(
+            onDismissRequest = { showDiscardWarningDialog = false },
+            title = {
+                Text(
+                    text = "Discard Unsaved Changes?",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = "You have unsaved changes to your API key or model settings. Do you want to discard them without saving?",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Muted
+                )
+            },
+            confirmButton = {
+                PrimaryButton(
+                    text = "Discard",
+                    onClick = {
+                        apiKeyInput = aiPreferences.apiKey
+                        selectedModel = aiPreferences.model
+                        showDiscardWarningDialog = false
+                        showApiKeyDialog = false
                     }
-                    TextButton(onClick = { showApiKeyDialog = false }) {
-                        Text("Cancel")
-                    }
+                )
+            },
+            dismissButton = {
+                TextButton(onClick = { showDiscardWarningDialog = false }) {
+                    Text("Keep Editing")
                 }
             }
         )
