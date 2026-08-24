@@ -299,7 +299,7 @@ private fun AiTutorBanner(onOpenAiChat: () -> Unit) {
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "VocabAI Coach",
+                        text = "AI Tutor",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Ink
@@ -310,7 +310,7 @@ private fun AiTutorBanner(onOpenAiChat: () -> Unit) {
                         shape = RoundedCornerShape(6.dp)
                     ) {
                         Text(
-                            text = "AI TUTOR",
+                            text = "ASSISTANT",
                             style = MaterialTheme.typography.labelSmall,
                             color = AccentDark,
                             fontWeight = FontWeight.Bold,
@@ -320,7 +320,7 @@ private fun AiTutorBanner(onOpenAiChat: () -> Unit) {
                 }
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "Generate custom sets & ask any English questions",
+                    text = "Chat & Q&A · Auto-create tailored study sets",
                     style = MaterialTheme.typography.bodySmall,
                     color = Muted
                 )

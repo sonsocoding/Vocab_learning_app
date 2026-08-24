@@ -78,10 +78,10 @@ app/src/main/
 │       │   └── Screen.kt          # Định nghĩa danh sách các Route (Home, Learn, Review, Progress, Practice, SetEditor, AiChat...)
 │       ├── screen/
 │       │   ├── ai/
-│       │   │   └── AiChatScreen.kt# Màn hình Gia sư AI (VocabAI Coach): Chat, tạo bộ từ 1-chạm vào Room DB
+│       │   │   └── AiChatScreen.kt# Màn hình Gia sư AI (AI Tutor) với 2 Tab chuyên biệt: Chat Tutor & AI Set Studio
 │       │   ├── flashcard/FlashcardScreen.kt   # Màn hình học Flashcard tự đánh giá FSRS
 │       │   ├── home/HomeScreen.kt             # Trang chủ: Streak, AI Tutor Banner, Daily Words, Danh sách Set gần đây
-│       │   ├── learn/LearnScreen.kt           # Tab Học: Bộ từ đang học, danh sách Set
+│       │   ├── learn/LearnScreen.kt           # Tab Học: Bộ từ đang học, nút New Set và AI Studio
 │       │   ├── learn/LearnModeScreen.kt       # Chế độ trắc nghiệm 4 đáp án (Multiple Choice)
 │       │   ├── match/MatchModeScreen.kt       # Chế độ ghép cặp Từ - Nghĩa (Matching Pairs)
 │       │   ├── practice/                      # Các chế độ luyện tập nâng cao (Active Recall & Syntax)
@@ -91,7 +91,7 @@ app/src/main/
 │       │   ├── quiz/QuizModeScreen.kt         # Chế độ Đúng/Sai (True/False Quiz)
 │       │   ├── review/ReviewScreen.kt         # Tab Ôn tập: Hàng đợi ôn tập theo FSRS due date
 │       │   └── set/
-│       │       ├── AllSetsScreen.kt           # Xem tất cả các bộ từ
+│       │       ├── AllSetsScreen.kt           # Xem tất cả các bộ từ, nút New Set và AI Studio
 │       │       ├── SetDetailScreen.kt         # Chi tiết bộ từ, chọn 6 chế độ học (Study Modes)
 │       │       └── SetEditorScreen.kt         # Tạo/Chỉnh sửa bộ từ, hỗ trợ Auto-suggest từ điển, Auto IPA, gán đa nghĩa/ví dụ
 │       └── theme/
@@ -104,10 +104,12 @@ app/src/main/
 
 ## 4. Các tính năng cốt lõi hiện có (Implemented Features)
 
-1. **Gia sư AI Trực tuyến & Tạo bộ từ 1-chạm (VocabAI Coach LLM)**:
-   - Tích hợp Google Gemini 1.5 Flash thông qua Structured JSON Action (`CREATE_VOCAB_SET`).
-   - Tự động sinh từ vựng theo chủ đề (Job Interview, Travel, Technology...), đầy đủ IPA, nghĩa tiếng Việt và câu ví dụ.
-   - Thẻ xem trước tương tác (Interactive Set Card) cho phép bấm **`[💾 Save to My Sets]`** lưu thẳng vào Room Database.
+1. **Gia sư AI Trực tuyến & Tạo bộ từ chuyên biệt (AI Tutor & AI Set Studio)**:
+   - **Tab 1 - Chat Tutor**: Trò chuyện trực tiếp với AI Tutor về ngữ pháp, phát âm, dịch thuật, giải thích từ vựng và đàm thoại tiếng Anh.
+   - **Tab 2 - AI Set Studio**: Studio thiết kế bộ từ vựng thông minh cho phép người dùng tùy chọn chủ đề (nhập tự do hoặc chọn gợi ý), mức độ CEFR (A1 - C2), số lượng từ (5, 10, 15, 20 hoặc tùy chỉnh), danh mục, trọng tâm từ loại và ghi chú hướng dẫn riêng cho AI.
+   - Tự động sinh từ vựng chuẩn xác kèm phiên âm IPA, Text-to-Speech, nghĩa tiếng Việt và câu ví dụ theo ngữ cảnh.
+   - Lưu 1-chạm **`[💾 Save to My Sets]`** trực tiếp vào Room DB và nút mở học ngay.
+   - Tự động fallback đa model (Gemini 2.5 Flash, 2.0 Flash, 1.5 Flash) và Demo Mock Engine ngoại tuyến khi chưa có API key.
    - Hỗ trợ **Dual-Engine**: Live Gemini API qua API Key hoặc Offline Smart Mock Engine khi không có mạng.
    - Tài liệu đặc tả: [`llm_ai_tutor_spec.md`](file:///Users/macbookair/Documents/Huster/Source-Code/VocabLearningApp/llm_ai_tutor_spec.md).
 2. **Lưu trữ dữ liệu bền vững (Room Database)**:

@@ -32,12 +32,17 @@ import com.example.vocablearningapp.ui.theme.Ink
 import com.example.vocablearningapp.ui.theme.Muted
 import com.example.vocablearningapp.ui.theme.Surface
 
+import com.example.vocablearningapp.ui.component.SecondaryButton
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.filled.AutoAwesome
+
 @Composable
 fun LearnScreen(
     onTabSelected: (MainTab) -> Unit,
     sets: List<VocabularySet>,
     onOpenSet: (String) -> Unit,
-    onCreateSet: () -> Unit
+    onCreateSet: () -> Unit,
+    onGenerateAiSet: () -> Unit = {}
 ) {
     AppScaffold(selectedTab = MainTab.LEARN, onTabSelected = onTabSelected) { innerPadding ->
         Column(
@@ -58,12 +63,23 @@ fun LearnScreen(
                 )
             }
 
-            PrimaryButton(
-                text = "Create a new set",
-                onClick = onCreateSet,
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                icon = Icons.Default.Add
-            )
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                PrimaryButton(
+                    text = "New Set",
+                    onClick = onCreateSet,
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.Add
+                )
+                SecondaryButton(
+                    text = "AI Studio",
+                    onClick = onGenerateAiSet,
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.AutoAwesome
+                )
+            }
 
             sets.firstOrNull()?.let { set ->
                 ContinueLearningCard(set = set, onOpen = { onOpenSet(set.id) })

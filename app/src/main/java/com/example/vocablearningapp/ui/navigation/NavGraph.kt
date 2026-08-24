@@ -53,7 +53,7 @@ fun NavGraph(
                     )
                 },
                 onOpenAiChat = {
-                    navController.navigate(Screen.AiChat.route)
+                    navController.navigate(Screen.AiChat.createRoute(0))
                 },
                 streakState = appViewModel.uiState.streakState
             )
@@ -64,7 +64,8 @@ fun NavGraph(
                 onTabSelected = ::navigateToTab,
                 sets = appViewModel.sets,
                 onOpenSet = { id -> navController.navigate(Screen.SetDetail.createRoute(id)) },
-                onCreateSet = { navController.navigate(Screen.SetEditor.createRoute("new")) }
+                onCreateSet = { navController.navigate(Screen.SetEditor.createRoute("new")) },
+                onGenerateAiSet = { navController.navigate(Screen.AiChat.createRoute(1)) }
             )
         }
 
@@ -97,7 +98,8 @@ fun NavGraph(
                 sets = appViewModel.sets,
                 onBack = { navController.popBackStack() },
                 onOpenSet = { id -> navController.navigate(Screen.SetDetail.createRoute(id)) },
-                onCreateSet = { navController.navigate(Screen.SetEditor.createRoute("new")) }
+                onCreateSet = { navController.navigate(Screen.SetEditor.createRoute("new")) },
+                onGenerateAiSet = { navController.navigate(Screen.AiChat.createRoute(1)) }
             )
         }
 
@@ -210,8 +212,18 @@ fun NavGraph(
             )
         }
 
-        composable(Screen.AiChat.route) {
+        composable(
+            route = Screen.AiChat.route,
+            arguments = listOf(
+                navArgument("tab") {
+                    type = NavType.IntType
+                    defaultValue = 0
+                }
+            )
+        ) { backStackEntry ->
+            val initialTab = backStackEntry.arguments?.getInt("tab") ?: 0
             com.example.vocablearningapp.ui.screen.ai.AiChatScreen(
+                initialTab = initialTab,
                 onBack = { navController.popBackStack() },
                 onSaveSet = { set ->
                     appViewModel.saveSet(

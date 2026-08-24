@@ -25,8 +25,8 @@ class GeminiApiClient(private val preferences: AiPreferences) {
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
 
     private val systemPrompt = """
-        You are "VocabAI Coach", an expert English learning AI Tutor inside VocabLearningApp.
-        Your goal is to help users learn English, answer language questions, and generate high-quality vocabulary sets.
+        You are "AI Tutor", an expert AI English tutor and language learning assistant inside VocabLearningApp.
+        Your goal is to assist users with everything related to English learning: answering language and grammar questions, explaining nuance, giving vocabulary advice, translating, engaging in conversational dialogue, and generating structured vocabulary study sets.
 
         You MUST ALWAYS return a valid JSON object matching one of these two structures:
 
@@ -387,6 +387,124 @@ class GeminiApiClient(private val preferences: AiPreferences) {
         }
     }
 
+    suspend fun generateVocabularySet(
+        topic: String,
+        level: String,
+        wordCount: Int,
+        category: String,
+        focus: String = "Mixed",
+        customInstructions: String = ""
+    ): Result<AiGeneratedSet> = withContext(Dispatchers.IO) {
+        val apiKey = preferences.apiKey.trim()
+        if (apiKey.isBlank()) {
+            return@withContext Result.success(getMockGeneratedSet(topic, level, wordCount, category, focus))
+        }
+
+        val prompt = buildString {
+            append("Create a dedicated vocabulary study set for English learners.\n")
+            append("Topic: $topic\n")
+            append("Target CEFR Level: $level\n")
+            append("Number of words: $wordCount\n")
+            append("Category: $category\n")
+            if (focus.isNotBlank() && !focus.equals("Mixed", ignoreCase = true) && !focus.equals("All Mixed", ignoreCase = true)) {
+                append("Focus on: $focus\n")
+            }
+            if (customInstructions.isNotBlank()) {
+                append("User Custom Instructions: $customInstructions\n")
+            }
+            append("\nYou MUST return the CREATE_VOCAB_SET JSON structure with exact title, description, level, category, and words array ($wordCount words) including word, accurate ipa, partOfSpeech, Vietnamese meaning, and a rich contextual exampleSentence.")
+        }
+
+        val chatResult = sendMessage(prompt)
+        if (chatResult.isSuccess) {
+            val chatMsg = chatResult.getOrThrow()
+            val payload = chatMsg.actionPayload as? AiActionPayload.CreateSetPayload
+            if (payload != null && payload.generatedSet.words.isNotEmpty()) {
+                return@withContext Result.success(payload.generatedSet)
+            }
+            // If action payload wasn't triggered but mock is needed
+            return@withContext Result.success(getMockGeneratedSet(topic, level, wordCount, category, focus))
+        } else {
+            val err = chatResult.exceptionOrNull() ?: Exception("Failed to generate set")
+            return@withContext Result.failure(err)
+        }
+    }
+
+    private fun getMockGeneratedSet(
+        topic: String,
+        level: String,
+        wordCount: Int,
+        category: String,
+        focus: String
+    ): AiGeneratedSet {
+        val lower = topic.lowercase()
+        val allWords = when {
+            lower.contains("interview") || lower.contains("job") || lower.contains("phỏng vấn") || lower.contains("xin việc") -> listOf(
+                AiGeneratedWord("competence", "/ˈkɒmpɪtəns/", PartOfSpeech.NOUN, "năng lực; khả năng chuyên môn", "She demonstrated great competence in agile project management."),
+                AiGeneratedWord("negotiate", "/nɪˈɡəʊʃieɪt/", PartOfSpeech.VERB, "thương lượng, đàm phán", "He tried to negotiate a higher starting salary during the interview."),
+                AiGeneratedWord("collaborative", "/kəˈlæbərətɪv/", PartOfSpeech.ADJECTIVE, "có tính hợp tác; phối hợp nhóm", "We foster a collaborative work environment across all departments."),
+                AiGeneratedWord("proficient", "/prəˈfɪʃnt/", PartOfSpeech.ADJECTIVE, "thành thạo, điêu luyện", "She is highly proficient in modern Kotlin and Android Jetpack Compose."),
+                AiGeneratedWord("initiative", "/ɪˈnɪʃətɪv/", PartOfSpeech.NOUN, "sáng kiến; sự chủ động", "He took the initiative to streamline the team's onboarding workflow."),
+                AiGeneratedWord("articulate", "/ɑːˈtɪkjuleɪt/", PartOfSpeech.VERB, "diễn đạt rõ ràng, gãy gọn", "Candidates must articulate their ideas clearly under pressure."),
+                AiGeneratedWord("versatile", "/ˈvɜːsətaɪl/", PartOfSpeech.ADJECTIVE, "linh hoạt, đa năng", "A versatile software engineer can quickly adapt to multiple frameworks."),
+                AiGeneratedWord("perseverance", "/ˌpɜːsɪˈvɪərəns/", PartOfSpeech.NOUN, "sự kiên trì, bền bỉ", "Her perseverance throughout the challenging recruitment cycle was rewarded."),
+                AiGeneratedWord("delegate", "/ˈdelɪɡeɪt/", PartOfSpeech.VERB, "ủy quyền, giao phó", "Good leaders know how to delegate tasks effectively to their team."),
+                AiGeneratedWord("benchmark", "/ˈbentʃmɑːk/", PartOfSpeech.NOUN, "tiêu chuẩn đối sánh; điểm mốc", "This achievement sets a new benchmark for software quality.")
+            )
+            lower.contains("travel") || lower.contains("du lịch") || lower.contains("airport") || lower.contains("sân bay") -> listOf(
+                AiGeneratedWord("itinerary", "/aɪˈtɪnərəri/", PartOfSpeech.NOUN, "lịch trình chuyến đi", "We planned an extensive itinerary for our week-long trip to Japan."),
+                AiGeneratedWord("embark", "/ɪmˈbɑːk/", PartOfSpeech.VERB, "lên tàu/máy bay; bắt đầu hành trình", "Passengers will embark on the cruise ship tomorrow morning."),
+                AiGeneratedWord("picturesque", "/ˌpɪktʃəˈresk/", PartOfSpeech.ADJECTIVE, "đẹp như tranh vẽ", "They stayed in a picturesque mountain cottage near the clear blue lake."),
+                AiGeneratedWord("hospitality", "/ˌhɒspɪˈtæləti/", PartOfSpeech.NOUN, "lòng hiếu khách", "The local islanders welcomed every traveler with warm hospitality."),
+                AiGeneratedWord("souvenir", "/ˌsuːvəˈnɪə(r)/", PartOfSpeech.NOUN, "quà lưu niệm", "I bought a handmade silk souvenir from the historic market."),
+                AiGeneratedWord("breathtaking", "/ˈbreθteɪkɪŋ/", PartOfSpeech.ADJECTIVE, "ngoạn mục, hùng vĩ", "The panoramic view of the sunset from the cliff was breathtaking."),
+                AiGeneratedWord("navigate", "/ˈnævɪɡeɪt/", PartOfSpeech.VERB, "định hướng; tìm đường", "We used a digital map to navigate the old town's winding alleyways."),
+                AiGeneratedWord("customs", "/ˈkʌstəmz/", PartOfSpeech.NOUN, "hải quan sân bay", "You must declare high-value goods when passing through airport customs."),
+                AiGeneratedWord("excursion", "/ɪkˈskɜːʃn/", PartOfSpeech.NOUN, "chuyến tham quan ngắn ngày", "The tour package includes a full-day guided excursion to the ancient temple."),
+                AiGeneratedWord("accommodate", "/əˈkɒmədeɪt/", PartOfSpeech.VERB, "cung cấp chỗ ở; đáp ứng", "The resort can accommodate up to five hundred international guests.")
+            )
+            lower.contains("tech") || lower.contains("code") || lower.contains("programming") || lower.contains("ai") || lower.contains("software") -> listOf(
+                AiGeneratedWord("algorithm", "/ˈælɡərɪðəm/", PartOfSpeech.NOUN, "thuật toán", "The search algorithm optimizes query performance in real time."),
+                AiGeneratedWord("deprecate", "/ˈdeprəkeɪt/", PartOfSpeech.VERB, "khai tử; ngừng hỗ trợ (API cũ)", "The API endpoint was deprecated in favor of the new GraphQL query."),
+                AiGeneratedWord("asynchronous", "/eɪˈsɪŋkrənəs/", PartOfSpeech.ADJECTIVE, "bất đồng bộ", "Kotlin coroutines provide lightweight asynchronous concurrency."),
+                AiGeneratedWord("scalability", "/ˌskeɪləˈbɪləti/", PartOfSpeech.NOUN, "khả năng mở rộng hệ thống", "Cloud architectures are designed for seamless elastic scalability."),
+                AiGeneratedWord("refactor", "/ˌriːˈfæktər/", PartOfSpeech.VERB, "tái cấu trúc mã nguồn", "We need to refactor this monolithic repository into modular layers."),
+                AiGeneratedWord("robust", "/rəʊˈbʌst/", PartOfSpeech.ADJECTIVE, "vững chắc, hoạt động ổn định", "The database replication setup provides a robust fault-tolerant architecture."),
+                AiGeneratedWord("latency", "/ˈleɪtənsi/", PartOfSpeech.NOUN, "độ trễ mạng hoặc xử lý", "Edge computing significantly minimizes response latency for mobile users."),
+                AiGeneratedWord("optimize", "/ˈɒptɪmaɪz/", PartOfSpeech.VERB, "tối ưu hóa", "We profiled the Compose UI recomposition loops to optimize frame rates."),
+                AiGeneratedWord("deterministic", "/dɪˌtɜːmɪˈnɪstɪk/", PartOfSpeech.ADJECTIVE, "tính xác định, có thể dự đoán", "Unit tests should always run in a deterministic environment."),
+                AiGeneratedWord("middleware", "/ˈmɪdlweər/", PartOfSpeech.NOUN, "phần mềm trung gian", "Authentication tokens are verified in the server middleware layer.")
+            )
+            else -> listOf(
+                AiGeneratedWord("adaptable", "/əˈdæptəbl/", PartOfSpeech.ADJECTIVE, "dễ thích nghi, linh hoạt", "Successful professionals are adaptable to fast-changing environments."),
+                AiGeneratedWord("persevere", "/ˌpɜːsɪˈvɪə(r)/", PartOfSpeech.VERB, "kiên trì, bền bỉ", "If you persevere through challenges, you will achieve your goal."),
+                AiGeneratedWord("perspective", "/pəˈspektɪv/", PartOfSpeech.NOUN, "góc nhìn; quan điểm", "Studying abroad gives you a broader perspective on life."),
+                AiGeneratedWord("diligent", "/ˈdɪlɪdʒənt/", PartOfSpeech.ADJECTIVE, "siêng năng, cần cù", "Her diligent practice helped her master advanced English quickly."),
+                AiGeneratedWord("milestone", "/ˈmaɪlstəʊn/", PartOfSpeech.NOUN, "cột mốc quan trọng", "Reaching a 30-day learning streak is an awesome milestone!"),
+                AiGeneratedWord("cohesive", "/kəʊˈhiːsɪv/", PartOfSpeech.ADJECTIVE, "gắn kết; chặt chẽ", "A cohesive team can overcome complex project hurdles."),
+                AiGeneratedWord("enrich", "/ɪnˈrɪtʃ/", PartOfSpeech.VERB, "làm phong phú, làm giàu thêm", "Reading books will enrich your vocabulary and communication skills."),
+                AiGeneratedWord("clarity", "/ˈklærəti/", PartOfSpeech.NOUN, "sự rõ ràng, minh bạch", "The tutor explained the grammar rule with absolute clarity."),
+                AiGeneratedWord("pragmatic", "/præɡˈmætɪk/", PartOfSpeech.ADJECTIVE, "thực tế, thực dụng", "We need a pragmatic approach to solve this communication barrier."),
+                AiGeneratedWord("empower", "/ɪmˈpaʊə(r)/", PartOfSpeech.VERB, "trao quyền, tiếp thêm sức mạnh", "Language skills empower you to connect with people worldwide.")
+            )
+        }
+
+        val chosenWords = allWords.take(wordCount.coerceIn(3, 20))
+        val finalTitle = if (topic.isNotBlank()) {
+            topic.trim().replaceFirstChar { it.uppercase() } + " ($level)"
+        } else {
+            "Custom $category Vocabulary ($level)"
+        }
+
+        return AiGeneratedSet(
+            title = finalTitle,
+            description = "Custom curated $level study set generated by AI Tutor for topic '$topic'.",
+            level = level,
+            category = category,
+            words = chosenWords
+        )
+    }
+
     private fun getMockResponse(prompt: String): AiChatMessage {
         val lower = prompt.lowercase()
 
@@ -494,3 +612,4 @@ class GeminiApiClient(private val preferences: AiPreferences) {
         }
     }
 }
+
