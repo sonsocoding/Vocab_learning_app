@@ -74,6 +74,7 @@ import com.example.vocablearningapp.data.ai.AiPreferences
 import com.example.vocablearningapp.data.ai.GeminiApiClient
 import com.example.vocablearningapp.data.ai.MessageSender
 import com.example.vocablearningapp.domain.model.VocabularySet
+import com.example.vocablearningapp.ui.component.MarkdownText
 import com.example.vocablearningapp.ui.component.PrimaryButton
 import com.example.vocablearningapp.ui.component.SpeechButton
 import com.example.vocablearningapp.ui.component.VocabDimens
@@ -1310,12 +1311,13 @@ private fun ChatMessageItem(
                 border = if (isUser) null else BorderStroke(1.dp, Border),
                 shadowElevation = 1.dp
             ) {
-                Text(
-                    text = message.text,
-                    style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
-                    color = if (isUser) Surface else Ink,
-                    modifier = Modifier.padding(14.dp)
-                )
+                Box(modifier = Modifier.padding(14.dp)) {
+                    MarkdownText(
+                        markdown = message.text,
+                        color = if (isUser) Surface else Ink,
+                        isUser = isUser
+                    )
+                }
             }
 
             // Embedded Action Card (if AI generated a Vocabulary Set during chat)
